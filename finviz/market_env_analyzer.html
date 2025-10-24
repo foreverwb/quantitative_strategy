@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Macro Market Assessment</title>
+    <link rel="shortcut icon" href="./macro.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+            border-radius: 0%;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .index-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .index-group {
+            flex: 1;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        select, input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .clear-btn {
+            background: white;
+            color: #e53e3e;
+            border: 2px solid #e53e3e;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            align-self: flex-end;
+        }
+        
+        .clear-btn:hover {
+            background: #e53e3e;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+        }
+        
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            align-items: start;
+        }
+        
+        .left-column {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        
+        .right-column {
+            position: sticky;
+            top: 20px;
+        }
+        
+        .section {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .section-title {
+            color: #2d3748;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-number {
+            background: #667eea;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .result-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result-label {
+            font-size: 12px;
+            color: #718096;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .result-value {
+            font-size: 16px;
+            color: #2d3748;
+            font-weight: 700;
+        }
+        
+        .env-label {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            min-height: 400px;
+        }
+        
+        .env-label h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .env-label .tag {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .env-label .main-tag {
+            background: white;
+            color: #667eea;
+            font-size: 18px;
+            padding: 12px 24px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        
+        .interpretation {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .score-positive {
+            color: #48bb78;
+            font-weight: 700;
+        }
+        
+        .score-negative {
+            color: #f56565;
+            font-weight: 700;
+        }
+        
+        .score-neutral {
+            color: #ed8936;
+            font-weight: 700;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .right-column {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Macro Market Assessment</h1>
+            
+            <div class="index-section">
+                <div class="index-group">
+                    <label for="indexSelect">选择指数 Index</label>
+                    <select id="indexSelect">
+                        <option value="500">S&P 500</option>
+                        <option value="100">NASDAQ 100</option>
+                    </select>
+                </div>
+                <button class="clear-btn" onclick="clearAll()">清空</button>
+            </div>
+        </div>
+        
+        <div class="main-layout">
+            <div class="left-column">
+                <!-- 1. 广度 -->
+                <div class="section">
+                    <div class="section-title">
+                        <span class="section-number">1</span>
+                        广度分析
+                    </div>
+                    <div class="input-group">
+                        <div>
+                            <label for="above50dma">Price above SMA50 (数量)</label>
+                            <input type="number" id="above50dma" min="0" step="1">
+                        </div>
+                        <div>
+                            <label for="above200dma">Price above SMA200 (数量)</label>
+                            <input type="number" id="above200dma" min="0" step="1">
+                        </div>
+                    </div>
+                    <div class="result-box" id="breadthResult">
+                        <div class="result-label">广度评估</div>
+                        <div class="result-value">等待输入数据...</div>
+                    </div>
+                </div>
+                
+                <!-- 2. 新高新低 -->
+                <div class="section">
+                    <div class="section-title">
+                        <span class="section-number">2</span>
+                        新高/新低扩散（温度计）
+                    </div>
+                    <div class="input-group">
+                        <div>
+                            <label for="newHigh">New High (数量)</label>
+                            <input type="number" id="newHigh" min="0" step="1">
+                        </div>
+                        <div>
+                            <label for="newLow">New Low (数量)</label>
+                            <input type="number" id="newLow" min="0" step="1">
+                        </div>
+                    </div>
+                    <div class="result-box" id="hlResult">
+                        <div class="result-label">新高新低分析</div>
+                        <div class="result-value">等待输入数据...</div>
+                    </div>
+                </div>
+                
+                <!-- 3. 成交量/波动 -->
+                <div class="section">
+                    <div class="section-title">
+                        <span class="section-number">3</span>
+                        成交量/波动温度
+                    </div>
+                    <div class="input-group">
+                        <div>
+                            <label for="relativeVol">Relative Volume (数量 Nrv)</label>
+                            <input type="number" id="relativeVol" min="0" step="1">
+                        </div>
+                        <div>
+                            <label for="over2pct">Volatility Over 2% (数量)</label>
+                            <input type="number" id="over2pct" min="0" step="1">
+                        </div>
+                        <div>
+                            <label for="over3pct">Volatility Over 3% (数量)</label>
+                            <input type="number" id="over3pct" min="0" step="1">
+                        </div>
+                        <div>
+                            <label for="over4pct">Volatility Over 4% (数量)</label>
+                            <input type="number" id="over4pct" min="0" step="1">
+                        </div>
+                    </div>
+                    <div class="result-box" id="volResult">
+                        <div class="result-label">成交量/波动分析</div>
+                        <div class="result-value">等待输入数据...</div>
+                    </div>
+                </div>
+                
+                <!-- 4. 板块旋转 -->
+                <div class="section">
+                    <div class="section-title">
+                        <span class="section-number">4</span>
+                        行业/板块相对强弱
+                    </div>
+                    <div class="input-group">
+                        <div>
+                            <label for="sectorRotation">板块分化程度</label>
+                            <select id="sectorRotation">
+                                <option value="">请选择...</option>
+                                <option value="concentrated">强板块集中（趋势明显）</option>
+                                <option value="moderate">板块分化温和（涨跌温和）</option>
+                                <option value="dispersed">板块高度分化（旋转市）</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="result-box" id="sectorResult">
+                        <div class="result-label">板块分析</div>
+                        <div class="result-value">等待选择...</div>
+                    </div>
+                </div>
+                
+                <!-- 5. 财报密度 -->
+                <div class="section">
+                    <div class="section-title">
+                        <span class="section-number">5</span>
+                        事件浓度（财报周密度）
+                    </div>
+                    <div class="input-group">
+                        <div>
+                            <label for="earningsNext5">Earnings Next 5 Days (数量)</label>
+                            <input type="number" id="earningsNext5" min="0" step="1">
+                        </div>
+                        <div>
+                            <label for="earningsPrev5">Earnings Previous 5 Days (数量)</label>
+                            <input type="number" id="earningsPrev5" min="0" step="1">
+                        </div>
+                    </div>
+                    <div class="result-box" id="earningsResult">
+                        <div class="result-label">财报密度分析</div>
+                        <div class="result-value">等待输入数据...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-column">
+                <!-- 环境标签 -->
+                <div class="env-label" id="envLabel">
+                    <h2>🎯 环境标签</h2>
+                    <div class="main-tag">等待数据输入...</div>
+                    <div class="interpretation">
+                        请填写左侧各项指标数据，系统将自动计算并显示当前市场环境标签。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function getT() {
+            return parseInt(document.getElementById('indexSelect').value);
+        }
+        
+        function clearAll() {
+            document.getElementById('above50dma').value = '';
+            document.getElementById('above200dma').value = '';
+            document.getElementById('newHigh').value = '';
+            document.getElementById('newLow').value = '';
+            document.getElementById('relativeVol').value = '';
+            document.getElementById('over2pct').value = '';
+            document.getElementById('over3pct').value = '';
+            document.getElementById('over4pct').value = '';
+            document.getElementById('sectorRotation').value = '';
+            document.getElementById('earningsNext5').value = '';
+            document.getElementById('earningsPrev5').value = '';
+            updateAll();
+        }
+        
+        function analyzeBreadth() {
+            const T = getT();
+            const count50 = parseInt(document.getElementById('above50dma').value);
+            const count200 = parseInt(document.getElementById('above200dma').value);
+            
+            if (isNaN(count50) || isNaN(count200)) {
+                return {
+                    html: '等待输入数据...',
+                    score: 0,
+                    type: 'neutral'
+                };
+            }
+            
+            const above50 = (count50 / T * 100).toFixed(1);
+            const above200 = (count200 / T * 100).toFixed(1);
+            
+            let result = '';
+            let score = 0;
+            let type = 'neutral';
+            
+            if (above50 > 60 || above200 > 60) {
+                result = `<span class="score-positive">广度好 ✓</span><br>%>50DMA: ${above50}% (${count50}/${T})<br>%>200DMA: ${above200}% (${count200}/${T})<br>偏"正Gamma/区间/钉住"环境`;
+                score = 1;
+                type = 'positive';
+            } else if (above50 < 40 || above200 < 40) {
+                result = `<span class="score-negative">广度差 ✗</span><br>%>50DMA: ${above50}% (${count50}/${T})<br>%>200DMA: ${above200}% (${count200}/${T})<br>偏"负Gamma/趋势/尾部"环境`;
+                score = -1;
+                type = 'negative';
+            } else {
+                result = `<span class="score-neutral">广度中性 ~</span><br>%>50DMA: ${above50}% (${count50}/${T})<br>%>200DMA: ${above200}% (${count200}/${T})<br>介于好坏之间`;
+                score = 0;
+                type = 'neutral';
+            }
+            
+            return { html: result, score, type };
+        }
+        
+        function analyzeHL() {
+            const T = getT();
+            const NH = parseInt(document.getElementById('newHigh').value);
+            const NL = parseInt(document.getElementById('newLow').value);
+            
+            if (isNaN(NH) || isNaN(NL)) {
+                return {
+                    html: '等待输入数据...',
+                    score: 0,
+                    type: 'neutral'
+                };
+            }
+            
+            const S = NH + NL;
+            const r = S > 0 ? (NH / S).toFixed(2) : 0;
+            const d = NH - NL;
+            const pH = ((NH / T) * 100).toFixed(1);
+            const pL = ((NL / T) * 100).toFixed(1);
+            
+            let label = '';
+            let interpretation = '';
+            let score = 0;
+            let type = 'neutral';
+            
+            if (NH >= 40 && NH >= 2 * NL) {
+                label = '<span class="score-positive">强多 ↑↑</span>';
+                interpretation = '新高显著占优，上行动量强';
+                score = 2;
+                type = 'positive';
+            } else if (NL >= 40 && NL >= 2 * NH) {
+                label = '<span class="score-negative">强空 ↓↓</span>';
+                interpretation = '新低显著占优，下行风险高';
+                score = -2;
+                type = 'negative';
+            } else if (NH >= 25 && NH <= 39 && d >= 10) {
+                label = '<span class="score-positive">轻多 ↑</span>';
+                interpretation = '偏多但不极端，顺势更容易但谨慎追';
+                score = 1;
+                type = 'positive';
+            } else if (NL >= 25 && NL <= 39 && (NL - NH) >= 10) {
+                label = '<span class="score-negative">轻空 ↓</span>';
+                interpretation = '偏空，下行压力存在';
+                score = -1;
+                type = 'negative';
+            } else if ((NH <= 10 && NL <= 10) || S <= 20) {
+                label = '<span class="score-positive">区间 ─</span>';
+                interpretation = '新高新低都少，区间/缩波概率↑（卖波友好）';
+                score = 1;
+                type = 'positive';
+            } else if (S >= 50 && Math.abs(d) < 10) {
+                label = '<span class="score-neutral">旋转 ⟲</span>';
+                interpretation = '两头都多，市场分化，选股难度↑';
+                score = 0;
+                type = 'neutral';
+            } else {
+                label = '<span class="score-neutral">中性</span>';
+                interpretation = '无明显特征';
+                score = 0;
+                type = 'neutral';
+            }
+            
+            const result = `${label}<br>NH=${NH}, NL=${NL}, S=${S}, r=${r}, d=${d}<br>NH占比=${pH}%, NL占比=${pL}%<br>${interpretation}`;
+            
+            return { html: result, score, type };
+        }
+        
+        function analyzeVolatility() {
+            const T = getT();
+            const Nrv = parseInt(document.getElementById('relativeVol').value);
+            const C2 = parseInt(document.getElementById('over2pct').value);
+            const C3 = parseInt(document.getElementById('over3pct').value);
+            const C4 = parseInt(document.getElementById('over4pct').value);
+            
+            if (isNaN(Nrv) || isNaN(C2) || isNaN(C3) || isNaN(C4)) {
+                return {
+                    html: '等待输入数据...',
+                    score: 0,
+                    type: 'neutral'
+                };
+            }
+            
+            const volRatio = ((Nrv / T) * 100).toFixed(1);
+            const under2 = ((T - C2) / T * 100).toFixed(1);
+            const v2to3 = ((C2 - C3) / T * 100).toFixed(1);
+            const v3to4 = ((C3 - C4) / T * 100).toFixed(1);
+            const over4 = ((C4 / T) * 100).toFixed(1);
+            
+            const sumMidHigh = parseFloat(v2to3) + parseFloat(v3to4) + parseFloat(over4);
+            
+            let label = '';
+            let score = 0;
+            let type = 'neutral';
+            
+            // 区间/钉住倾向：≤2% ≥ 45–55%，且 ≥4% ≤ 20%，同时放量占比 ≤ 10%
+            const isRange = parseFloat(under2) >= 45 && parseFloat(under2) <= 55 && 
+                           parseFloat(over4) <= 20 && 
+                           parseFloat(volRatio) <= 10;
+            
+            // 趋势/尾部倾向：≥4% ≥ 25–30%，或 (2–3% + 3–4% + ≥4%) 合计 ≥ 60%，同时放量占比 ≥ 20–25%
+            const isTrend = (parseFloat(over4) >= 25 && parseFloat(over4) <= 30) ||
+                           (sumMidHigh >= 60 && parseFloat(volRatio) >= 20 && parseFloat(volRatio) <= 25);
+            
+            if (isRange) {
+                label = '<span class="score-positive">区间/钉住倾向 ✓</span>';
+                score = 1;
+                type = 'positive';
+            } else if (isTrend) {
+                label = '<span class="score-negative">趋势/尾部倾向 ✗</span>';
+                score = -1;
+                type = 'negative';
+            } else {
+                label = '<span class="score-neutral">临界 ~</span>';
+                score = 0;
+                type = 'neutral';
+            }
+            
+            const result = `${label}<br>放量占比: ${volRatio}% (${Nrv}/${T})<br>波动分布: ≤2%=${under2}%, 2-3%=${v2to3}%, 3-4%=${v3to4}%, ≥4%=${over4}%<br>中高波动合计: ${sumMidHigh.toFixed(1)}%`;
+            
+            return { html: result, score, type };
+        }
+        
+        function analyzeSector() {
+            const sector = document.getElementById('sectorRotation').value;
+            
+            if (!sector) {
+                return {
+                    html: '等待选择...',
+                    score: 0,
+                    type: 'neutral'
+                };
+            }
+            
+            let result = '';
+            let score = 0;
+            let type = 'neutral';
+            
+            if (sector === 'concentrated') {
+                result = '<span class="score-negative">强板块集中 →</span><br>趋势票更易延续，顺势机会';
+                score = -1;
+                type = 'negative';
+            } else if (sector === 'moderate') {
+                result = '<span class="score-positive">板块分化温和 ─</span><br>区间/卖波更占优';
+                score = 1;
+                type = 'positive';
+            } else {
+                result = '<span class="score-neutral">板块高度分化 ⟲</span><br>旋转市，选择难度高';
+                score = 0;
+                type = 'neutral';
+            }
+            
+            return { html: result, score, type };
+        }
+        
+        function analyzeEarnings() {
+            const T = getT();
+            const next5 = parseInt(document.getElementById('earningsNext5').value);
+            const prev5 = parseInt(document.getElementById('earningsPrev5').value);
+            
+            if (isNaN(next5) || isNaN(prev5)) {
+                return {
+                    html: '等待输入数据...',
+                    score: 0,
+                    type: 'neutral'
+                };
+            }
+            
+            const nextRatio = ((next5 / T) * 100).toFixed(1);
+            const prevRatio = ((prev5 / T) * 100).toFixed(1);
+            
+            let result = '';
+            let score = 0;
+            let type = 'neutral';
+            
+            if (parseFloat(nextRatio) >= 15) {
+                result = `<span class="score-neutral">财报密集期将至 📊</span><br>Next 5天: ${next5} (${nextRatio}%)<br>做多波动（Long Vol）机会多`;
+                score = 0;
+                type = 'neutral';
+            } else if (parseFloat(prevRatio) >= 20) {
+                result = `<span class="score-positive">财报刚过 ✓</span><br>Previous 5天: ${prev5} (${prevRatio}%)<br>偏Short Vol/卖IV Crush后的区间回归`;
+                score = 0.5;
+                type = 'positive';
+            } else if (parseFloat(nextRatio) < 5 && parseFloat(prevRatio) < 5) {
+                result = `<span class="score-positive">事件空窗期 ✓</span><br>Next: ${next5}, Prev: ${prev5}<br>有利于区间策略`;
+                score = 0.5;
+                type = 'positive';
+            } else {
+                result = `<span class="score-neutral">财报常规期</span><br>Next 5天: ${next5} (${nextRatio}%), Prev 5天: ${prev5} (${prevRatio}%)`;
+                score = 0;
+                type = 'neutral';
+            }
+            
+            return { html: result, score, type };
+        }
+        
+        function calculateEnvironment() {
+            const breadth = analyzeBreadth();
+            const hl = analyzeHL();
+            const vol = analyzeVolatility();
+            const sector = analyzeSector();
+            const earnings = analyzeEarnings();
+            
+            const totalScore = breadth.score + hl.score + vol.score + sector.score + earnings.score;
+            const positiveCount = [breadth, hl, vol, sector, earnings].filter(x => x.type === 'positive').length;
+            const negativeCount = [breadth, hl, vol, sector, earnings].filter(x => x.type === 'negative').length;
+            
+            let envLabel = '';
+            let envColor = '';
+            let interpretation = '';
+            
+            if (totalScore >= 2.5 && breadth.type === 'positive') {
+                envLabel = '正Gamma / 区间倾向（卖波友好）';
+                envColor = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
+                interpretation = '✓ 广度好，新高新低都低<br>✓ 成交量温和，波动收敛<br>✓ 板块分化小，事件空窗<br><strong>策略建议：</strong>卖出波动率、铁鹰/铁秃鹰、区间策略';
+            } else if (totalScore <= -2 && breadth.type === 'negative') {
+                envLabel = '负Gamma / 趋势倾向（顺势友好）';
+                envColor = 'linear-gradient(135deg, #f56565 0%, #e53e3e 100%)';
+                interpretation = '✗ 广度差，趋势明显<br>✗ 新低>新高或放量显著<br>✗ 强板块集中领涨/领跌<br><strong>策略建议：</strong>顺势交易、方向性期权、做多波动';
+            } else {
+                envLabel = '临界 / 混合信号';
+                envColor = 'linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)';
+                interpretation = '⚠ 指标分化，市场处于转折或不确定期<br>⚠ 不做强方向判断<br><strong>策略建议：</strong>缩小候选范围，等待明确触发信号，降低仓位';
+            }
+            
+            return { label: envLabel, color: envColor, interpretation, totalScore };
+        }
+        
+        function updateAll() {
+            const breadth = analyzeBreadth();
+            document.getElementById('breadthResult').querySelector('.result-value').innerHTML = breadth.html;
+            
+            const hl = analyzeHL();
+            document.getElementById('hlResult').querySelector('.result-value').innerHTML = hl.html;
+            
+            const vol = analyzeVolatility();
+            document.getElementById('volResult').querySelector('.result-value').innerHTML = vol.html;
+            
+            const sector = analyzeSector();
+            document.getElementById('sectorResult').querySelector('.result-value').innerHTML = sector.html;
+            
+            const earnings = analyzeEarnings();
+            document.getElementById('earningsResult').querySelector('.result-value').innerHTML = earnings.html;
+            
+            const env = calculateEnvironment();
+            const envLabelDiv = document.getElementById('envLabel');
+            envLabelDiv.style.background = env.color;
+            envLabelDiv.innerHTML = `
+                <h2>🎯 环境标签</h2>
+                <div class="main-tag">${env.label}</div>
+                <div class="tag">综合评分: ${env.totalScore.toFixed(1)}</div>
+                <div class="interpretation">${env.interpretation}</div>
+            `;
+        }
+        
+        document.getElementById('indexSelect').addEventListener('change', updateAll);
+        document.getElementById('above50dma').addEventListener('input', updateAll);
+        document.getElementById('above200dma').addEventListener('input', updateAll);
+        document.getElementById('newHigh').addEventListener('input', updateAll);
+        document.getElementById('newLow').addEventListener('input', updateAll);
+        document.getElementById('relativeVol').addEventListener('input', updateAll);
+        document.getElementById('over2pct').addEventListener('input', updateAll);
+        document.getElementById('over3pct').addEventListener('input', updateAll);
+        document.getElementById('over4pct').addEventListener('input', updateAll);
+        document.getElementById('sectorRotation').addEventListener('change', updateAll);
+        document.getElementById('earningsNext5').addEventListener('input', updateAll);
+        document.getElementById('earningsPrev5').addEventListener('input', updateAll);
+    </script>
+</body>
+</html>
