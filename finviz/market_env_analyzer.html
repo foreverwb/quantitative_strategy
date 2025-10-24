@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Macro Market Assessment</title>
+    <title>Macro</title>
     <link rel="shortcut icon" href="./macro.ico">
     <style>
         * {
@@ -17,7 +17,6 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px;
             min-height: 100vh;
-            border-radius: 0%;
         }
         
         .container {
@@ -247,8 +246,6 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Macro Market Assessment</h1>
-            
             <div class="index-section">
                 <div class="index-group">
                     <label for="indexSelect">选择指数 Index</label>
@@ -273,10 +270,16 @@
                         <div>
                             <label for="above50dma">Price above SMA50 (数量)</label>
                             <input type="number" id="above50dma" min="0" step="1">
+                            <div id="above50dma_pct" style="font-size: 12px; color: #667eea; font-weight: 600; margin-top: 4px; min-height: 18px;"></div>
                         </div>
                         <div>
                             <label for="above200dma">Price above SMA200 (数量)</label>
                             <input type="number" id="above200dma" min="0" step="1">
+                            <div id="above200dma_pct" style="font-size: 12px; color: #667eea; font-weight: 600; margin-top: 4px; min-height: 18px;"></div>
+                        </div>
+                        <div>
+                            <label for="b50_5d_ago">B50 5天前 (%)</label>
+                            <input type="number" id="b50_5d_ago" min="0" max="100" step="0.1">
                         </div>
                     </div>
                     <div class="result-box" id="breadthResult">
@@ -404,6 +407,7 @@
         function clearAll() {
             document.getElementById('above50dma').value = '';
             document.getElementById('above200dma').value = '';
+            document.getElementById('b50_5d_ago').value = '';
             document.getElementById('newHigh').value = '';
             document.getElementById('newLow').value = '';
             document.getElementById('relativeVol').value = '';
@@ -416,41 +420,78 @@
             updateAll();
         }
         
+        function updateBreadthPercentages() {
+            const T = getT();
+            const count50 = parseInt(document.getElementById('above50dma').value);
+            const count200 = parseInt(document.getElementById('above200dma').value);
+            
+            const pct50Div = document.getElementById('above50dma_pct');
+            const pct200Div = document.getElementById('above200dma_pct');
+            
+            if (!isNaN(count50) && count50 >= 0) {
+                const pct50 = (count50 / T * 100).toFixed(1);
+                pct50Div.textContent = '= ' + pct50 + '%';
+            } else {
+                pct50Div.textContent = '';
+            }
+            
+            if (!isNaN(count200) && count200 >= 0) {
+                const pct200 = (count200 / T * 100).toFixed(1);
+                pct200Div.textContent = '= ' + pct200 + '%';
+            } else {
+                pct200Div.textContent = '';
+            }
+        }
+        
         function analyzeBreadth() {
             const T = getT();
             const count50 = parseInt(document.getElementById('above50dma').value);
             const count200 = parseInt(document.getElementById('above200dma').value);
+            const b50_5d_ago = parseFloat(document.getElementById('b50_5d_ago').value);
             
             if (isNaN(count50) || isNaN(count200)) {
                 return {
                     html: '等待输入数据...',
                     score: 0,
-                    type: 'neutral'
+                    type: 'neutral',
+                    B50: null,
+                    B200: null,
+                    S: null,
+                    delta50: null
                 };
             }
             
-            const above50 = (count50 / T * 100).toFixed(1);
-            const above200 = (count200 / T * 100).toFixed(1);
+            const B50 = parseFloat((count50 / T * 100).toFixed(1));
+            const B200 = parseFloat((count200 / T * 100).toFixed(1));
+            const S = parseFloat((B50 - B200).toFixed(1));
+            const delta50 = !isNaN(b50_5d_ago) ? parseFloat((B50 - b50_5d_ago).toFixed(1)) : null;
             
             let result = '';
             let score = 0;
             let type = 'neutral';
             
-            if (above50 > 60 || above200 > 60) {
-                result = `<span class="score-positive">广度好 ✓</span><br>%>50DMA: ${above50}% (${count50}/${T})<br>%>200DMA: ${above200}% (${count200}/${T})<br>偏"正Gamma/区间/钉住"环境`;
+            let indicators = '<div style="font-size: 13px; color: #4a5568; margin-top: 8px; padding: 8px; background: #edf2f7; border-radius: 4px;">';
+            indicators += '<strong>衍生指标：</strong> S (价差) = ' + S + 'pp';
+            if (delta50 !== null) {
+                indicators += ' | Δ50 (变化率) = ' + (delta50 > 0 ? '+' : '') + delta50 + 'pp';
+            }
+            indicators += '</div>';
+            
+            if (B50 > 60 || B200 > 60) {
+                result = '<span class="score-positive">广度好 ✓</span><br>%>50DMA: ' + B50 + '% (' + count50 + '/' + T + ')<br>%>200DMA: ' + B200 + '% (' + count200 + '/' + T + ')<br>偏"正Gamma/区间/钉住"环境' + indicators;
                 score = 1;
                 type = 'positive';
-            } else if (above50 < 40 || above200 < 40) {
-                result = `<span class="score-negative">广度差 ✗</span><br>%>50DMA: ${above50}% (${count50}/${T})<br>%>200DMA: ${above200}% (${count200}/${T})<br>偏"负Gamma/趋势/尾部"环境`;
+            } else if (B50 < 40 || B200 < 40) {
+                result = '<span class="score-negative">广度差 ✗</span><br>%>50DMA: ' + B50 + '% (' + count50 + '/' + T + ')<br>%>200DMA: ' + B200 + '% (' + count200 + '/' + T + ')<br>偏"负Gamma/趋势/尾部"环境' + indicators;
                 score = -1;
                 type = 'negative';
             } else {
-                result = `<span class="score-neutral">广度中性 ~</span><br>%>50DMA: ${above50}% (${count50}/${T})<br>%>200DMA: ${above200}% (${count200}/${T})<br>介于好坏之间`;
+                result = '<span class="score-neutral">广度临界 ~</span><br>%>50DMA: ' + B50 + '% (' + count50 + '/' + T + ')<br>%>200DMA: ' + B200 + '% (' + count200 + '/' + T + ')<br>处于40-60%真空区' + indicators;
                 score = 0;
-                type = 'neutral';
+                type = 'critical';
             }
             
-            return { html: result, score, type };
+            return { html: result, score: score, type: type, B50: B50, B200: B200, S: S, delta50: delta50 };
         }
         
         function analyzeHL() {
@@ -462,12 +503,16 @@
                 return {
                     html: '等待输入数据...',
                     score: 0,
-                    type: 'neutral'
+                    type: 'neutral',
+                    NH: null,
+                    NL: null,
+                    r: null,
+                    S_NHNL: null
                 };
             }
             
-            const S = NH + NL;
-            const r = S > 0 ? (NH / S).toFixed(2) : 0;
+            const S_NHNL = NH + NL;
+            const r = S_NHNL > 0 ? parseFloat((NH / S_NHNL).toFixed(2)) : 0;
             const d = NH - NL;
             const pH = ((NH / T) * 100).toFixed(1);
             const pL = ((NL / T) * 100).toFixed(1);
@@ -476,6 +521,10 @@
             let interpretation = '';
             let score = 0;
             let type = 'neutral';
+            
+            let indicators = '<div style="font-size: 13px; color: #4a5568; margin-top: 8px; padding: 8px; background: #edf2f7; border-radius: 4px;">';
+            indicators += '<strong>衍生指标：</strong> r (失衡比) = ' + r + ' | S_NHNL (活跃度) = ' + S_NHNL;
+            indicators += '</div>';
             
             if (NH >= 40 && NH >= 2 * NL) {
                 label = '<span class="score-positive">强多 ↑↑</span>';
@@ -497,12 +546,12 @@
                 interpretation = '偏空，下行压力存在';
                 score = -1;
                 type = 'negative';
-            } else if ((NH <= 10 && NL <= 10) || S <= 20) {
+            } else if ((NH <= 10 && NL <= 10) || S_NHNL <= 20) {
                 label = '<span class="score-positive">区间 ─</span>';
                 interpretation = '新高新低都少，区间/缩波概率↑（卖波友好）';
                 score = 1;
                 type = 'positive';
-            } else if (S >= 50 && Math.abs(d) < 10) {
+            } else if (S_NHNL >= 50 && Math.abs(d) < 10) {
                 label = '<span class="score-neutral">旋转 ⟲</span>';
                 interpretation = '两头都多，市场分化，选股难度↑';
                 score = 0;
@@ -514,9 +563,9 @@
                 type = 'neutral';
             }
             
-            const result = `${label}<br>NH=${NH}, NL=${NL}, S=${S}, r=${r}, d=${d}<br>NH占比=${pH}%, NL占比=${pL}%<br>${interpretation}`;
+            const result = label + '<br>NH=' + NH + ', NL=' + NL + ', d=' + d + '<br>NH占比=' + pH + '%, NL占比=' + pL + '%<br>' + interpretation + indicators;
             
-            return { html: result, score, type };
+            return { html: result, score: score, type: type, NH: NH, NL: NL, r: r, S_NHNL: S_NHNL };
         }
         
         function analyzeVolatility() {
@@ -530,30 +579,30 @@
                 return {
                     html: '等待输入数据...',
                     score: 0,
-                    type: 'neutral'
+                    type: 'neutral',
+                    L2: null,
+                    H4: null
                 };
             }
             
             const volRatio = ((Nrv / T) * 100).toFixed(1);
-            const under2 = ((T - C2) / T * 100).toFixed(1);
+            const L2 = parseFloat(((T - C2) / T * 100).toFixed(1));
             const v2to3 = ((C2 - C3) / T * 100).toFixed(1);
             const v3to4 = ((C3 - C4) / T * 100).toFixed(1);
-            const over4 = ((C4 / T) * 100).toFixed(1);
+            const H4 = parseFloat(((C4 / T) * 100).toFixed(1));
             
-            const sumMidHigh = parseFloat(v2to3) + parseFloat(v3to4) + parseFloat(over4);
+            const sumMidHigh = parseFloat(v2to3) + parseFloat(v3to4) + H4;
+            
+            let indicators = '<div style="font-size: 13px; color: #4a5568; margin-top: 8px; padding: 8px; background: #edf2f7; border-radius: 4px;">';
+            indicators += '<strong>衍生指标：</strong> L2 (低波占比) = ' + L2 + '% | H4 (高波占比) = ' + H4 + '%';
+            indicators += '</div>';
             
             let label = '';
             let score = 0;
             let type = 'neutral';
             
-            // 区间/钉住倾向：≤2% ≥ 45–55%，且 ≥4% ≤ 20%，同时放量占比 ≤ 10%
-            const isRange = parseFloat(under2) >= 45 && parseFloat(under2) <= 55 && 
-                           parseFloat(over4) <= 20 && 
-                           parseFloat(volRatio) <= 10;
-            
-            // 趋势/尾部倾向：≥4% ≥ 25–30%，或 (2–3% + 3–4% + ≥4%) 合计 ≥ 60%，同时放量占比 ≥ 20–25%
-            const isTrend = (parseFloat(over4) >= 25 && parseFloat(over4) <= 30) ||
-                           (sumMidHigh >= 60 && parseFloat(volRatio) >= 20 && parseFloat(volRatio) <= 25);
+            const isRange = L2 >= 45 && L2 <= 55 && H4 <= 20 && parseFloat(volRatio) <= 10;
+            const isTrend = (H4 >= 25 && H4 <= 30) || (sumMidHigh >= 60 && parseFloat(volRatio) >= 20 && parseFloat(volRatio) <= 25);
             
             if (isRange) {
                 label = '<span class="score-positive">区间/钉住倾向 ✓</span>';
@@ -569,9 +618,9 @@
                 type = 'neutral';
             }
             
-            const result = `${label}<br>放量占比: ${volRatio}% (${Nrv}/${T})<br>波动分布: ≤2%=${under2}%, 2-3%=${v2to3}%, 3-4%=${v3to4}%, ≥4%=${over4}%<br>中高波动合计: ${sumMidHigh.toFixed(1)}%`;
+            const result = label + '<br>放量占比: ' + volRatio + '% (' + Nrv + '/' + T + ')<br>波动分布: ≤2%=' + L2 + '%, 2-3%=' + v2to3 + '%, 3-4%=' + v3to4 + '%, ≥4%=' + H4 + '%<br>中高波动合计: ' + sumMidHigh.toFixed(1) + '%' + indicators;
             
-            return { html: result, score, type };
+            return { html: result, score: score, type: type, L2: L2, H4: H4 };
         }
         
         function analyzeSector() {
@@ -603,7 +652,7 @@
                 type = 'neutral';
             }
             
-            return { html: result, score, type };
+            return { html: result, score: score, type: type };
         }
         
         function analyzeEarnings() {
@@ -627,24 +676,102 @@
             let type = 'neutral';
             
             if (parseFloat(nextRatio) >= 15) {
-                result = `<span class="score-neutral">财报密集期将至 📊</span><br>Next 5天: ${next5} (${nextRatio}%)<br>做多波动（Long Vol）机会多`;
+                result = '<span class="score-neutral">财报密集期将至 📊</span><br>Next 5天: ' + next5 + ' (' + nextRatio + '%)<br>做多波动（Long Vol）机会多';
                 score = 0;
                 type = 'neutral';
             } else if (parseFloat(prevRatio) >= 20) {
-                result = `<span class="score-positive">财报刚过 ✓</span><br>Previous 5天: ${prev5} (${prevRatio}%)<br>偏Short Vol/卖IV Crush后的区间回归`;
+                result = '<span class="score-positive">财报刚过 ✓</span><br>Previous 5天: ' + prev5 + ' (' + prevRatio + '%)<br>偏Short Vol/卖IV Crush后的区间回归';
                 score = 0.5;
                 type = 'positive';
             } else if (parseFloat(nextRatio) < 5 && parseFloat(prevRatio) < 5) {
-                result = `<span class="score-positive">事件空窗期 ✓</span><br>Next: ${next5}, Prev: ${prev5}<br>有利于区间策略`;
+                result = '<span class="score-positive">事件空窗期 ✓</span><br>Next: ' + next5 + ', Prev: ' + prev5 + '<br>有利于区间策略';
                 score = 0.5;
                 type = 'positive';
             } else {
-                result = `<span class="score-neutral">财报常规期</span><br>Next 5天: ${next5} (${nextRatio}%), Prev 5天: ${prev5} (${prevRatio}%)`;
+                result = '<span class="score-neutral">财报常规期</span><br>Next 5天: ' + next5 + ' (' + nextRatio + '%), Prev 5天: ' + prev5 + ' (' + prevRatio + '%)';
                 score = 0;
                 type = 'neutral';
             }
             
-            return { html: result, score, type };
+            return { html: result, score: score, type: type };
+        }
+        
+        function calculateCriticalBias(breadth, hl, vol, sector) {
+            if (breadth.type !== 'critical') {
+                return null;
+            }
+            
+            const S = breadth.S;
+            const delta50 = breadth.delta50;
+            const NH = hl.NH;
+            const NL = hl.NL;
+            const r = hl.r;
+            const S_NHNL = hl.S_NHNL;
+            const L2 = vol.L2;
+            const H4 = vol.H4;
+            const sectorValue = document.getElementById('sectorRotation').value;
+            
+            if (S === null || NH === null || NL === null || r === null || S_NHNL === null || L2 === null || H4 === null) {
+                return { label: '数据不完整', type: 'incomplete', reasoning: ['请完善所有必要数据'] };
+            }
+            
+            let biasLabel = '';
+            let biasType = '';
+            let reasoning = [];
+            
+            const bullish1 = S >= 10;
+            const bullish2 = delta50 !== null && delta50 >= 5 && r >= 0.60 && NH >= 20 && H4 <= 20;
+            
+            if (bullish1 || bullish2) {
+                biasLabel = '偏多（风险偏好改善）';
+                biasType = 'bullish';
+                if (bullish1) reasoning.push('S=' + S + 'pp ≥ +10');
+                if (bullish2) reasoning.push('Δ50=' + delta50 + 'pp ≥ +5 且 r=' + r + ' ≥ 0.60 且 NH=' + NH + ' ≥ 20 且 H4=' + H4 + '% ≤ 20%');
+            }
+            
+            const bearish1 = S <= -10;
+            const bearish2 = delta50 !== null && delta50 <= -5 && r <= 0.40 && NL >= 20;
+            const bearish3 = H4 >= 25 && H4 <= 30;
+            
+            if (bearish1 || bearish2 || bearish3) {
+                biasLabel = '偏空（风险偏好走弱）';
+                biasType = 'bearish';
+                if (bearish1) reasoning.push('S=' + S + 'pp ≤ -10');
+                if (bearish2) reasoning.push('Δ50=' + delta50 + 'pp ≤ -5 且 r=' + r + ' ≤ 0.40 且 NL=' + NL + ' ≥ 20');
+                if (bearish3) reasoning.push('H4=' + H4 + '% 在 25-30% 范围');
+            }
+            
+            const pinned = L2 >= 50 && H4 <= 20 && S_NHNL <= 20 && Math.abs(S) < 10;
+            
+            if (pinned && !biasLabel) {
+                biasLabel = '偏钉住（区间/正Gamma）';
+                biasType = 'pinned';
+                reasoning.push('L2=' + L2 + '% ≥ 50% 且 H4=' + H4 + '% ≤ 20%');
+                reasoning.push('S_NHNL=' + S_NHNL + ' ≤ 20（新高新低都少）');
+                reasoning.push('|S|=' + Math.abs(S) + ' < 10pp');
+            }
+            
+            const rotation1 = S_NHNL >= 50 && r >= 0.40 && r <= 0.60;
+            const rotation2 = sectorValue === 'dispersed';
+            
+            if ((rotation1 || rotation2) && !biasLabel) {
+                biasLabel = '旋转/分化（重选股）';
+                biasType = 'rotation';
+                if (rotation1) reasoning.push('S_NHNL=' + S_NHNL + ' ≥ 50 且 r=' + r + ' 在 0.40-0.60（两边都多但不失衡）');
+                if (rotation2) reasoning.push('板块高度分化');
+            }
+            
+            if (!biasLabel) {
+                biasLabel = '临界（无明显倾向）';
+                biasType = 'neutral';
+                reasoning.push('未满足任何细分条件，保持中性观望');
+            }
+            
+            return {
+                label: biasLabel,
+                type: biasType,
+                reasoning: reasoning
+            };
         }
         
         function calculateEnvironment() {
@@ -655,14 +782,42 @@
             const earnings = analyzeEarnings();
             
             const totalScore = breadth.score + hl.score + vol.score + sector.score + earnings.score;
-            const positiveCount = [breadth, hl, vol, sector, earnings].filter(x => x.type === 'positive').length;
-            const negativeCount = [breadth, hl, vol, sector, earnings].filter(x => x.type === 'negative').length;
             
             let envLabel = '';
             let envColor = '';
             let interpretation = '';
+            let subLabel = '';
             
-            if (totalScore >= 2.5 && breadth.type === 'positive') {
+            if (breadth.type === 'critical') {
+                const criticalBias = calculateCriticalBias(breadth, hl, vol, sector);
+                
+                if (criticalBias) {
+                    envLabel = '临界 / 混合信号';
+                    
+                    if (criticalBias.type === 'bullish') {
+                        envColor = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
+                        subLabel = '→ ' + criticalBias.label;
+                        interpretation = '⚡ ' + criticalBias.reasoning.join('<br>⚡ ') + '<br><br><strong>策略建议：</strong>顺势延续/强回撤吸纳，但仍需控制仓位';
+                    } else if (criticalBias.type === 'bearish') {
+                        envColor = 'linear-gradient(135deg, #f56565 0%, #e53e3e 100%)';
+                        subLabel = '→ ' + criticalBias.label;
+                        interpretation = '⚡ ' + criticalBias.reasoning.join('<br>⚡ ') + '<br><br><strong>策略建议：</strong>逢高转弱做空/防守，谨慎追多';
+                    } else if (criticalBias.type === 'pinned') {
+                        envColor = 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)';
+                        subLabel = '→ ' + criticalBias.label;
+                        interpretation = '⚡ ' + criticalBias.reasoning.join('<br>⚡ ') + '<br><br><strong>策略建议：</strong>区间/卖波、均值回归策略更友好';
+                    } else if (criticalBias.type === 'rotation') {
+                        envColor = 'linear-gradient(135deg, #ed8936 0%, #dd6b20 100%)';
+                        subLabel = '→ ' + criticalBias.label;
+                        interpretation = '⚡ ' + criticalBias.reasoning.join('<br>⚡ ') + '<br><br><strong>策略建议：</strong>板块轮动，择强汰弱，趋势与突破成功率一般';
+                    } else {
+                        envColor = 'linear-gradient(135deg, #a0aec0 0%, #718096 100%)';
+                        subLabel = '→ ' + criticalBias.label;
+                        interpretation = '⚡ ' + criticalBias.reasoning.join('<br>⚡ ') + '<br><br><strong>策略建议：</strong>保持观望，等待明确信号';
+                    }
+                }
+                
+            } else if (totalScore >= 2.5 && breadth.type === 'positive') {
                 envLabel = '正Gamma / 区间倾向（卖波友好）';
                 envColor = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
                 interpretation = '✓ 广度好，新高新低都低<br>✓ 成交量温和，波动收敛<br>✓ 板块分化小，事件空窗<br><strong>策略建议：</strong>卖出波动率、铁鹰/铁秃鹰、区间策略';
@@ -676,10 +831,12 @@
                 interpretation = '⚠ 指标分化，市场处于转折或不确定期<br>⚠ 不做强方向判断<br><strong>策略建议：</strong>缩小候选范围，等待明确触发信号，降低仓位';
             }
             
-            return { label: envLabel, color: envColor, interpretation, totalScore };
+            return { label: envLabel, color: envColor, interpretation: interpretation, totalScore: totalScore, subLabel: subLabel };
         }
         
         function updateAll() {
+            updateBreadthPercentages();
+            
             const breadth = analyzeBreadth();
             document.getElementById('breadthResult').querySelector('.result-value').innerHTML = breadth.html;
             
@@ -698,17 +855,22 @@
             const env = calculateEnvironment();
             const envLabelDiv = document.getElementById('envLabel');
             envLabelDiv.style.background = env.color;
-            envLabelDiv.innerHTML = `
-                <h2>🎯 环境标签</h2>
-                <div class="main-tag">${env.label}</div>
-                <div class="tag">综合评分: ${env.totalScore.toFixed(1)}</div>
-                <div class="interpretation">${env.interpretation}</div>
-            `;
+            
+            let labelHTML = '<h2>🎯 环境标签</h2><div class="main-tag">' + env.label + '</div>';
+            
+            if (env.subLabel) {
+                labelHTML += '<div class="tag" style="background: white; color: #667eea; font-size: 16px; padding: 10px 20px;">' + env.subLabel + '</div>';
+            }
+            
+            labelHTML += '<div class="tag">综合评分: ' + env.totalScore.toFixed(1) + '</div><div class="interpretation">' + env.interpretation + '</div>';
+            
+            envLabelDiv.innerHTML = labelHTML;
         }
         
         document.getElementById('indexSelect').addEventListener('change', updateAll);
         document.getElementById('above50dma').addEventListener('input', updateAll);
         document.getElementById('above200dma').addEventListener('input', updateAll);
+        document.getElementById('b50_5d_ago').addEventListener('input', updateAll);
         document.getElementById('newHigh').addEventListener('input', updateAll);
         document.getElementById('newLow').addEventListener('input', updateAll);
         document.getElementById('relativeVol').addEventListener('input', updateAll);
