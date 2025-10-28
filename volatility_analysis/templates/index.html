@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>期权策略分析系统</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>期权策略分析系统</h1>
+        
+        <div id="message" class="message"></div>
+        
+        <!-- 主内容区 -->
+        <div class="content-wrapper">
+            <!-- 左侧区域 (65%) -->
+            <div class="left-section">
+                <!-- 数据输入区 -->
+                <div class="input-section">
+                    <h2>数据输入</h2>
+                    <textarea id="dataInput" placeholder='请输入JSON格式数据，例如:
+[
+  {
+    "symbol": "AAPL",
+    "PriceChgPct": "2.5%",
+    "IV30": 35.2,
+    "HV20": 28.5
+  }
+]'></textarea>
+                    <div class="button-group">
+                        <button class="btn-primary" onclick="analyzeData()">分析数据</button>
+                    </div>
+                </div>
+                
+                <!-- 四象限图区 -->
+                <div class="quadrant-section">
+                    <div class="quadrant-chart">
+                        <canvas id="quadrantCanvas" class="quadrant-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧区域 (35%) -->
+            <div class="right-section">
+                <div class="date-filter">
+                    <select id="dateFilterSelect" onchange="filterByDate()">
+                        <option value="">全部日期</option>
+                    </select>
+                </div>
+                
+                <div class="records-list" id="recordsList">
+                    <div class="empty-state">暂无数据,请先提交分析</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Drawer 详情面板 -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+    <div class="drawer" id="drawer">
+        <div class="drawer-header">
+            <div class="drawer-title" id="drawerTitle">详细信息</div>
+            <button class="drawer-close" onclick="closeDrawer()">&times;</button>
+        </div>
+        <div class="drawer-content" id="drawerContent"></div>
+    </div>
+    
+    <script>
+        let allRecords = [];
+        let canvas, ctx;
+        let currentFilter = '';
+        let expandedDates = new Set();
+        
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+            msg.style.display = 'block';
+            setTimeout(() => {
+                msg.style.display = 'none';
+            }, 3000);
+        }
+        
+        async function analyzeData() {
+            let input = document.getElementById('dataInput').value.trim();
+            
+            if (!input) {
+                showMessage('请输入数据', 'error');
+                return;
+            }
+            
+            try {
+                input = input.replace(/^\s*\w+\s*=\s*/, '').replace(/;\s*$/, '');
+                const records = JSON.parse(input);
+                
+                if (!Array.isArray(records)) {
+                    showMessage('数据必须是数组格式(用 [ ] 包裹)', 'error');
+                    return;
+                }
+                
+                if (records.length === 0) {
+                    showMessage('数据数组不能为空', 'error');
+                    return;
+                }
+                
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ records })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showMessage(result.message, 'success');
+                    document.getElementById('dataInput').value = '';
+                    
+                    const newDates = new Set();
+                    if (result.results && Array.isArray(result.results)) {
+                        result.results.forEach(r => {
+                            const date = r.timestamp.split(' ')[0];
+                            newDates.add(date);
+                        });
+                    }
+                    
+                    await loadRecords();
+                    await loadDates();
+                    
+                    newDates.forEach(date => {
+                        expandedDates.add(date);
+                        const content = document.getElementById(`content-${date}`);
+                        const toggle = document.getElementById(`toggle-${date}`);
+                        if (content && toggle) {
+                            content.classList.add('expanded');
+                            toggle.classList.add('expanded');
+                        }
+                    });
+                } else {
+                    showMessage(result.error || '分析失败', 'error');
+                }
+            } catch (e) {
+                if (e instanceof SyntaxError) {
+                    showMessage('JSON 格式错误: ' + e.message, 'error');
+                } else {
+                    showMessage('数据格式错误: ' + e.message, 'error');
+                }
+            }
+        }
+        
+        async function loadRecords() {
+            try {
+                const response = await fetch('/api/records');
+                if (!response.ok) {
+                    allRecords = [];
+                    renderRecordsList();
+                    drawQuadrant();
+                    return;
+                }
+                
+                const data = await response.json();
+                allRecords = Array.isArray(data) ? data : [];
+                renderRecordsList();
+                drawQuadrant();
+            } catch (e) {
+                console.error('加载数据异常:', e);
+                allRecords = [];
+                renderRecordsList();
+                drawQuadrant();
+            }
+        }
+        
+        function filterByDate() {
+            currentFilter = document.getElementById('dateFilterSelect').value;
+            renderRecordsList();
+            drawQuadrant();
+        }
+        
+        function renderRecordsList() {
+            const container = document.getElementById('recordsList');
+            
+            if (!allRecords || allRecords.length === 0) {
+                container.innerHTML = '<div class="empty-state">暂无数据,请先提交分析</div>';
+                return;
+            }
+            
+            const groupedByDate = {};
+            allRecords.forEach(record => {
+                const date = record.timestamp.split(' ')[0];
+                if (!currentFilter || date === currentFilter) {
+                    if (!groupedByDate[date]) {
+                        groupedByDate[date] = [];
+                    }
+                    groupedByDate[date].push(record);
+                }
+            });
+            
+            const sortedDates = Object.keys(groupedByDate).sort().reverse();
+            
+            if (sortedDates.length === 0) {
+                container.innerHTML = '<div class="empty-state">没有符合条件的数据</div>';
+                return;
+            }
+            
+            let html = '';
+            sortedDates.forEach(date => {
+                const records = groupedByDate[date];
+                const count = records.length;
+                const isExpanded = expandedDates.has(date);
+                
+                html += `
+                    <div class="date-group">
+                        <div class="date-header" onclick="toggleDateGroup('${date}')">
+                            <div class="date-title">
+                                <span class="date-toggle ${isExpanded ? 'expanded' : ''}" id="toggle-${date}">▼</span>
+                                <span>${date} (${count}条)</span>
+                            </div>
+                            <button class="btn-delete-all" onclick="deleteAllByDate(event, '${date}')">全部删除</button>
+                        </div>
+                        <div class="date-content ${isExpanded ? 'expanded' : ''}" id="content-${date}">
+                            ${records.map(record => `
+                                <div class="record-item" onclick="showDrawer('${record.timestamp}', '${record.symbol}')">
+                                    <div class="record-info">
+                                        <div class="record-symbol">${record.symbol}</div>
+                                        <div class="record-meta">
+                                            <span>${record.quadrant}</span>
+                                            <span class="badge ${getBadgeClass(record.confidence)}">${record.confidence}</span>
+                                            <span>流动性: ${record.liquidity}</span>
+                                        </div>
+                                    </div>
+                                    <button class="btn-delete-item" onclick="deleteRecord(event, '${record.timestamp}', '${record.symbol}')">&times;</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function getBadgeClass(confidence) {
+            if (confidence === '高') return 'badge-high';
+            if (confidence === '中') return 'badge-medium';
+            return 'badge-low';
+        }
+        
+        function toggleDateGroup(date) {
+            const content = document.getElementById(`content-${date}`);
+            const toggle = document.getElementById(`toggle-${date}`);
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                toggle.classList.remove('expanded');
+                expandedDates.delete(date);
+            } else {
+                content.classList.add('expanded');
+                toggle.classList.add('expanded');
+                expandedDates.add(date);
+            }
+        }
+        
+        async function deleteAllByDate(event, date) {
+            event.stopPropagation();
+            
+            try {
+                const response = await fetch(`/api/records/date/${date}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showMessage(`已删除 ${date} 的所有记录`, 'success');
+                    await loadRecords();
+                    await loadDates();
+                } else {
+                    showMessage('删除失败', 'error');
+                }
+            } catch (e) {
+                showMessage('删除失败: ' + e.message, 'error');
+            }
+        }
+        
+        async function deleteRecord(event, timestamp, symbol) {
+            event.stopPropagation();
+            
+            const date = timestamp.split(' ')[0];
+            const wasExpanded = expandedDates.has(date);
+            
+            try {
+                const response = await fetch(`/api/records/${encodeURIComponent(timestamp)}/${encodeURIComponent(symbol)}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showMessage('删除成功', 'success');
+                    
+                    if (wasExpanded) {
+                        expandedDates.add(date);
+                    }
+                    
+                    await loadRecords();
+                } else {
+                    showMessage('删除失败', 'error');
+                }
+            } catch (e) {
+                showMessage('删除失败: ' + e.message, 'error');
+            }
+        }
+        
+        function showDrawer(timestamp, symbol) {
+            const record = allRecords.find(r => r.timestamp === timestamp && r.symbol === symbol);
+            if (!record) return;
+            
+            document.getElementById('drawerTitle').textContent = `${record.symbol} - 详细分析`;
+            
+            const confidenceBadge = getBadgeClass(record.confidence);
+            
+            document.getElementById('drawerContent').innerHTML = `
+                <p style="color: #666; margin-bottom: 20px;">${record.timestamp}</p>
+                
+                <div class="detail-section">
+                    <h3>核心结论</h3>
+                    <div class="detail-row">
+                        <div class="detail-label">四象限定位:</div>
+                        <div class="detail-value"><strong>${record.quadrant}</strong></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">置信度:</div>
+                        <div class="detail-value"><span class="badge ${confidenceBadge}">${record.confidence}</span></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">流动性:</div>
+                        <div class="detail-value">${record.liquidity}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">方向评分:</div>
+                        <div class="detail-value">${record.direction_score} (${record.direction_bias})</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">波动评分:</div>
+                        <div class="detail-value">${record.vol_score} (${record.vol_bias})</div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>派生指标</h3>
+                    <div class="detail-row">
+                        <div class="detail-label">IVRV 比值:</div>
+                        <div class="detail-value">${record.derived_metrics.ivrv_ratio}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">IVRV 差值:</div>
+                        <div class="detail-value">${record.derived_metrics.ivrv_diff}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Regime 比值:</div>
+                        <div class="detail-value">${record.derived_metrics.regime_ratio}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Call/Put 比值:</div>
+                        <div class="detail-value">${record.derived_metrics.cp_ratio}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">距财报天数:</div>
+                        <div class="detail-value">${record.derived_metrics.days_to_earnings !== null ? record.derived_metrics.days_to_earnings + ' 天' : '无财报'}</div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>方向驱动因素</h3>
+                    <ul class="factor-list">
+                        ${record.direction_factors.map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>波动驱动因素</h3>
+                    <ul class="factor-list">
+                        ${record.vol_factors.map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>策略建议</h3>
+                    <div class="detail-row">
+                        <div class="detail-value">${record.strategy}</div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>风险提示</h3>
+                    <div class="detail-row">
+                        <div class="detail-value" style="color: #e74c3c;">${record.risk}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('drawerOverlay').classList.add('open');
+            document.getElementById('drawer').classList.add('open');
+        }
+        
+        function closeDrawer() {
+            document.getElementById('drawerOverlay').classList.remove('open');
+            document.getElementById('drawer').classList.remove('open');
+        }
+        
+        function drawQuadrant() {
+            if (!canvas) {
+                canvas = document.getElementById('quadrantCanvas');
+                ctx = canvas.getContext('2d');
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+                canvas.addEventListener('click', handleCanvasClick);
+            }
+            
+            const width = canvas.width;
+            const height = canvas.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const padding = 80;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制背景四象限 - 增加透明度
+            ctx.globalAlpha = 0.08;
+            ctx.fillStyle = '#4caf50';
+            ctx.fillRect(padding, padding, centerX - padding, centerY - padding);
+            
+            ctx.fillStyle = '#ff9800';
+            ctx.fillRect(centerX, padding, width - centerX - padding, centerY - padding);
+            
+            ctx.fillStyle = '#f44336';
+            ctx.fillRect(padding, centerY, centerX - padding, height - centerY - padding);
+            
+            ctx.fillStyle = '#ffc107';
+            ctx.fillRect(centerX, centerY, width - centerX - padding, height - centerY - padding);
+            
+            ctx.globalAlpha = 1.0;
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding, centerY);
+            ctx.lineTo(width - padding, centerY);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, padding);
+            ctx.lineTo(centerX, height - padding);
+            ctx.stroke();
+            
+            // 绘制刻度线
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            
+            for (let i = 1; i <= 3; i++) {
+                const xRight = centerX + (i * (width - centerX - padding) / 4);
+                ctx.beginPath();
+                ctx.moveTo(xRight, padding);
+                ctx.lineTo(xRight, height - padding);
+                ctx.stroke();
+                
+                const xLeft = centerX - (i * (centerX - padding) / 4);
+                ctx.beginPath();
+                ctx.moveTo(xLeft, padding);
+                ctx.lineTo(xLeft, height - padding);
+                ctx.stroke();
+                
+                const yDown = centerY + (i * (height - centerY - padding) / 4);
+                ctx.beginPath();
+                ctx.moveTo(padding, yDown);
+                ctx.lineTo(width - padding, yDown);
+                ctx.stroke();
+                
+                const yUp = centerY - (i * (centerY - padding) / 4);
+                ctx.beginPath();
+                ctx.moveTo(padding, yUp);
+                ctx.lineTo(width - padding, yUp);
+                ctx.stroke();
+            }
+            
+            ctx.setLineDash([]);
+            
+            // 绘制轴标签
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('买波', centerX, padding - 15);
+            ctx.fillText('卖波', centerX, height - padding + 30);
+            
+            ctx.textAlign = 'left';
+            ctx.fillText('偏空', padding + 5, centerY - 10);
+            ctx.textAlign = 'right';
+            ctx.fillText('偏多', width - padding - 5, centerY - 10);
+            
+            // 绘制象限标签
+            ctx.font = 'bold 13px Arial';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'center';
+            ctx.fillText('偏空—买波', padding + (centerX - padding) / 2, padding + 25);
+            ctx.fillText('偏多—买波', centerX + (width - centerX - padding) / 2, padding + 25);
+            ctx.fillText('偏空—卖波', padding + (centerX - padding) / 2, height - padding - 15);
+            ctx.fillText('偏多—卖波', centerX + (width - centerX - padding) / 2, height - padding - 15);
+            
+            // 筛选数据
+            const filteredRecords = currentFilter 
+                ? allRecords.filter(r => r.timestamp.startsWith(currentFilter))
+                : allRecords;
+            
+            if (!Array.isArray(filteredRecords) || filteredRecords.length === 0) {
+                ctx.fillStyle = '#999';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('暂无数据', centerX, centerY);
+                return;
+            }
+            
+            // 计算点位置
+            const points = filteredRecords.map(record => {
+                const xRange = record.direction_score >= 0 
+                    ? (width - centerX - padding) 
+                    : (centerX - padding);
+                const yRange = record.vol_score >= 0 
+                    ? (centerY - padding) 
+                    : (height - centerY - padding);
+                
+                const x = record.direction_score >= 0
+                    ? centerX + (record.direction_score / 5) * xRange
+                    : centerX + (record.direction_score / 5) * xRange;
+                    
+                const y = record.vol_score >= 0
+                    ? centerY - (record.vol_score / 5) * yRange
+                    : centerY - (record.vol_score / 5) * yRange;
+                
+                return { record, x, y };
+            });
+            
+            // 防重叠
+            const minDistance = 30;
+            for (let i = 0; i < points.length; i++) {
+                for (let j = i + 1; j < points.length; j++) {
+                    const dx = points[j].x - points[i].x;
+                    const dy = points[j].y - points[i].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < minDistance && dist > 0) {
+                        const angle = Math.atan2(dy, dx);
+                        const offset = (minDistance - dist) / 2;
+                        points[j].x += Math.cos(angle) * offset;
+                        points[j].y += Math.sin(angle) * offset;
+                        points[i].x -= Math.cos(angle) * offset;
+                        points[i].y -= Math.sin(angle) * offset;
+                    }
+                }
+            }
+            
+            // 绘制数据点
+            points.forEach(({record, x, y}) => {
+                let color;
+                if (record.confidence === '高') {
+                    color = '#27ae60';
+                } else if (record.confidence === '中') {
+                    color = '#f39c12';
+                } else {
+                    color = '#e74c3c';
+                }
+                
+                // 直接用symbol文字代替圆点，使用Comic Sans MS字体
+                ctx.fillStyle = color;
+                ctx.font = 'bold 14px "Comic Sans MS", cursive, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // 绘制symbol文字(无背景)
+                ctx.fillText(record.symbol, x, y);
+                
+                // 存储点击区域信息(扩大点击范围)
+                const textWidth = ctx.measureText(record.symbol).width;
+                record._canvasX = x;
+                record._canvasY = y;
+                record._clickRadius = Math.max(textWidth/2 + 5, 15);
+            });
+        }
+        
+        function handleCanvasClick(event) {
+            if (!Array.isArray(allRecords) || allRecords.length === 0) {
+                return;
+            }
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            const filteredRecords = currentFilter 
+                ? allRecords.filter(r => r.timestamp.startsWith(currentFilter))
+                : allRecords;
+            
+            for (let record of filteredRecords) {
+                if (!record._canvasX || !record._canvasY) {
+                    continue;
+                }
+                
+                const dx = x - record._canvasX;
+                const dy = y - record._canvasY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // 使用动态计算的点击半径
+                const clickRadius = record._clickRadius || 15;
+                if (distance <= clickRadius) {
+                    showDrawer(record.timestamp, record.symbol);
+                    return;
+                }
+            }
+        }
+        
+        async function loadDates() {
+            try {
+                const response = await fetch('/api/dates');
+                
+                if (!response.ok) {
+                    return;
+                }
+                
+                const dates = await response.json();
+                
+                const select = document.getElementById('dateFilterSelect');
+                const currentValue = select.value;
+                select.innerHTML = '<option value="">全部日期</option>';
+                
+                dates.forEach(date => {
+                    const option = document.createElement('option');
+                    option.value = date;
+                    option.textContent = date;
+                    select.appendChild(option);
+                });
+                
+                select.value = currentValue;
+            } catch (e) {
+                console.error('加载日期异常:', e);
+            }
+        }
+        
+        window.addEventListener('resize', () => {
+            if (canvas) {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+                drawQuadrant();
+            }
+        });
+        
+        window.onload = function() {
+            loadRecords();
+            loadDates();
+        };
+    </script>
+</body>
+</html>
