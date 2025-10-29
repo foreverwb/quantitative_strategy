@@ -97,8 +97,22 @@ async function loadRecords() {
         var data = await response.json();
         allRecords = Array.isArray(data) ? data : [];
         
-        if (canvasRecords.length === 0) {
-            canvasRecords = allRecords.slice();
+        // Bug Fix: 避免重复加载,只在第一次加载或重置后才初始化画布
+        // 使用标志位判断是否是首次加载
+        if (!window.hasInitializedCanvas) {
+            window.hasInitializedCanvas = true;
+            
+            // 只显示当天数据
+            var today = new Date();
+            var todayStr = today.getFullYear() + '-' + 
+                          String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                          String(today.getDate()).padStart(2, '0');
+            
+            var todayRecords = allRecords.filter(function(r) {
+                return r.timestamp.startsWith(todayStr);
+            });
+            
+            canvasRecords = todayRecords;
         }
         
         renderRecordsList();
@@ -196,16 +210,25 @@ function renderRecordsList() {
             return;
         }
         
-        if (!selectedQuadrants.includes('全部') && 
-            !selectedQuadrants.includes(record.quadrant)) {
-            return;
-        }
-        
         if (!groupedByDate[date]) {
             groupedByDate[date] = [];
         }
         groupedByDate[date].push(record);
     });
+    
+    // Bug Fix: 先完成分组,再应用方向筛选
+    // 如果方向筛选不是"全部",则过滤记录
+    if (!selectedQuadrants.includes('全部')) {
+        for (var date in groupedByDate) {
+            groupedByDate[date] = groupedByDate[date].filter(function(record) {
+                return selectedQuadrants.includes(record.quadrant);
+            });
+            // 如果该日期下没有符合条件的记录,删除该日期
+            if (groupedByDate[date].length === 0) {
+                delete groupedByDate[date];
+            }
+        }
+    }
     
     var sortedDates = Object.keys(groupedByDate).sort().reverse();
     
@@ -252,47 +275,50 @@ function renderRecordsList() {
     container.innerHTML = html;
     
     // 使用事件委托绑定事件
-    container.addEventListener('click', function(e) {
-        var target = e.target;
-        
-        // 日期标题点击
-        var dateHeader = target.closest('.date-header');
-        if (dateHeader) {
-            var date = dateHeader.getAttribute('data-date');
-            if (date && !target.closest('.date-actions')) {
-                toggleDateGroup(date);
-                return;
-            }
-        }
-        
-        // 重绘按钮
-        if (target.classList.contains('btn-redraw')) {
-            e.stopPropagation();
-            redrawDate(e, target.getAttribute('data-date'));
+    container.addEventListener('click', handleRecordsListClick);
+}
+
+// 新增: 独立的事件处理函数,避免重复绑定
+function handleRecordsListClick(e) {
+    var target = e.target;
+    
+    // 日期标题点击
+    var dateHeader = target.closest('.date-header');
+    if (dateHeader) {
+        var date = dateHeader.getAttribute('data-date');
+        if (date && !target.closest('.date-actions')) {
+            toggleDateGroup(date);
             return;
         }
-        
-        // 删除全部按钮
-        if (target.classList.contains('btn-delete-all')) {
-            e.stopPropagation();
-            deleteAllByDate(e, target.getAttribute('data-date'));
-            return;
-        }
-        
-        // 记录项点击
-        var recordItem = target.closest('.record-item');
-        if (recordItem && !target.classList.contains('btn-delete-item')) {
-            showDrawer(recordItem.getAttribute('data-timestamp'), recordItem.getAttribute('data-symbol'));
-            return;
-        }
-        
-        // 删除单条
-        if (target.classList.contains('btn-delete-item')) {
-            e.stopPropagation();
-            deleteRecord(e, target.getAttribute('data-timestamp'), target.getAttribute('data-symbol'));
-            return;
-        }
-    });
+    }
+    
+    // 重绘按钮
+    if (target.classList.contains('btn-redraw')) {
+        e.stopPropagation();
+        redrawDate(e, target.getAttribute('data-date'));
+        return;
+    }
+    
+    // 删除全部按钮
+    if (target.classList.contains('btn-delete-all')) {
+        e.stopPropagation();
+        deleteAllByDate(e, target.getAttribute('data-date'));
+        return;
+    }
+    
+    // 记录项点击
+    var recordItem = target.closest('.record-item');
+    if (recordItem && !target.classList.contains('btn-delete-item')) {
+        showDrawer(recordItem.getAttribute('data-timestamp'), recordItem.getAttribute('data-symbol'));
+        return;
+    }
+    
+    // 删除单条
+    if (target.classList.contains('btn-delete-item')) {
+        e.stopPropagation();
+        deleteRecord(e, target.getAttribute('data-timestamp'), target.getAttribute('data-symbol'));
+        return;
+    }
 }
 
 // 获取徽章样式
