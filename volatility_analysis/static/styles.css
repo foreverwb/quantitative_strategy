@@ -149,12 +149,132 @@ button {
     flex-shrink: 0;
 }
 
+.filter-row {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+.filter-group {
+    flex: 1;
+}
+
+.filter-label {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+    display: block;
+}
+
 .date-filter select {
     width: 100%;
     padding: 8px;
     border: 2px solid #ddd;
     font-size: 13px;
     border-radius: 4px;
+}
+
+/* 多选下拉框样式 */
+.quadrant-filter {
+    position: relative;
+}
+
+.quadrant-select {
+    width: 100%;
+    padding: 8px;
+    border: 2px solid #ddd;
+    font-size: 13px;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.quadrant-select:hover {
+    border-color: #3b4ba0;
+}
+
+.quadrant-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    z-index: 100;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.quadrant-dropdown.open {
+    display: block;
+}
+
+.quadrant-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.quadrant-option:hover {
+    background: #f5f5f5;
+}
+
+.quadrant-option input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.quadrant-option label {
+    cursor: pointer;
+    flex: 1;
+}
+
+.quadrant-selected {
+    font-size: 12px;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.quadrant-arrow {
+    font-size: 10px;
+    color: #666;
+}
+
+/* 四象限工具栏 */
+.quadrant-toolbar {
+    padding: 10px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.btn-clear {
+    padding: 6px 15px;
+    background: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-clear:hover {
+    background: #7f8c8d;
 }
 
 .records-list {
@@ -201,6 +321,26 @@ button {
 
 .date-toggle.expanded {
     transform: rotate(180deg);
+}
+
+.date-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-redraw {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 3px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.3s;
+}
+
+.btn-redraw:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .btn-delete-all {
