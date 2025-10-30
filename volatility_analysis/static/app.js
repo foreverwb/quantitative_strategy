@@ -147,14 +147,26 @@ function handleQuadrantChange(e) {
     
     if (targetId === 'quad-all') {
         if (allCheckbox.checked) {
+            // 选中"全部"时，取消所有其他选项
             checkboxes.forEach(function(cb) { cb.checked = false; });
             selectedQuadrants = ['全部'];
         }
     } else {
+        // 选中或取消其他选项时，先取消"全部"
         allCheckbox.checked = false;
-        selectedQuadrants = checkboxes.filter(function(cb) { return cb.checked; })
-                                       .map(function(cb) { return cb.value; });
         
+        // 重新收集选中的选项
+        selectedQuadrants = [];
+        checkboxes.forEach(function(cb) {
+            if (cb && cb.checked) {
+                selectedQuadrants.push(cb.value);
+            }
+        });
+        
+        // 调试输出
+        console.log('Selected quadrants:', selectedQuadrants);
+        
+        // 如果所有选项都未选中，则自动选中"全部"
         if (selectedQuadrants.length === 0) {
             allCheckbox.checked = true;
             selectedQuadrants = ['全部'];

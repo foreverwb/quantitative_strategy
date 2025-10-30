@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>期权策略分析系统</title>
+    <title>σ²</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <div class="container">
         
-        <div id="message" class="message"></div>
+        <!-- 改进的消息通知容器 -->
+        <div class="message-container" id="messageContainer"></div>
         
         <div class="content-wrapper">
             <div class="left-section">
@@ -114,16 +115,59 @@
         var expandedDates = new Set();
         var canvasRecords = [];
 
+        // ==================== 改进的消息通知系统 ====================
         function showMessage(text, type) {
-            var msg = document.getElementById('message');
-            msg.textContent = text;
-            msg.className = 'message ' + type;
-            msg.style.display = 'block';
-            setTimeout(function() {
-                msg.style.display = 'none';
-            }, 3000);
+            const container = document.getElementById('messageContainer');
+            
+            // 创建消息盒子
+            const messageBox = document.createElement('div');
+            messageBox.className = 'message-box';
+            
+            // 图标映射
+            const iconMap = {
+                'success': '✓',
+                'error': '✕',
+                'warning': '!'
+            };
+            
+            // 默认显示时长（毫秒）
+            const durationMap = {
+                'success': 3000,
+                'error': 4000,
+                'warning': 3500
+            };
+            
+            const duration = durationMap[type] || 3000;
+            const icon = iconMap[type] || '•';
+            
+            messageBox.innerHTML = `
+                <div class="message-icon ${type}">
+                    ${icon}
+                </div>
+                <div class="message-content">
+                    <span class="message-text ${type}">${text}</span>
+                </div>
+                <button class="message-close" onclick="this.closest('.message-box').remove()">
+                    ×
+                </button>
+            `;
+            
+            container.appendChild(messageBox);
+            
+            // 自动关闭
+            if (duration > 0) {
+                setTimeout(() => {
+                    if (messageBox.parentNode) {
+                        messageBox.classList.add('hide');
+                        setTimeout(() => {
+                            messageBox.remove();
+                        }, 300);
+                    }
+                }, duration);
+            }
         }
 
+        // ==================== 核心功能函数 ====================
         function openInputDrawer() {
             document.getElementById('inputDrawerOverlay').classList.add('open');
             document.getElementById('inputDrawer').classList.add('open');
@@ -494,7 +538,7 @@
             }).length;
             
             if (existingCount > 0) {
-                showMessage('画布中已存在 ' + date + ' 的数据', 'error');
+                showMessage('画布中已存在 ' + date + ' 的数据', 'warning');
                 return;
             }
             
@@ -554,12 +598,12 @@
             html += '<div class="detail-row"><div class="detail-label">方向评分:</div><div class="detail-value">' + record.direction_score + ' (' + record.direction_bias + ')</div></div>';
             html += '<div class="detail-row"><div class="detail-label">波动评分:</div><div class="detail-value">' + record.vol_score + ' (' + record.vol_bias + ')</div></div></div>';
             
-            html += '<div class="detail-section"><h3>派生指标</h3>';
+            html += '<div class="detail-section"><h3>衍生指标</h3>';
             html += '<div class="detail-row"><div class="detail-label">IVRV 比值:</div><div class="detail-value">' + record.derived_metrics.ivrv_ratio + '</div></div>';
             html += '<div class="detail-row"><div class="detail-label">IVRV 差值:</div><div class="detail-value">' + record.derived_metrics.ivrv_diff + '</div></div>';
             html += '<div class="detail-row"><div class="detail-label">Regime 比值:</div><div class="detail-value">' + record.derived_metrics.regime_ratio + '</div></div>';
             html += '<div class="detail-row"><div class="detail-label">Call/Put 比值:</div><div class="detail-value">' + record.derived_metrics.cp_ratio + '</div></div>';
-            html += '<div class="detail-row"><div class="detail-label">距财报天数:</div><div class="detail-value">' + (record.derived_metrics.days_to_earnings !== null ? record.derived_metrics.days_to_earnings + ' 天' : '无财报') + '</div></div></div>';
+            html += '<div class="detail-row"><div class="detail-label">距离财报天数:</div><div class="detail-value">' + (record.derived_metrics.days_to_earnings !== null ? record.derived_metrics.days_to_earnings + ' 天' : '无财报') + '</div></div></div>';
             
             html += '<div class="detail-section"><h3>方向驱动因素</h3><ul class="factor-list">';
             record.direction_factors.forEach(function(f) {
