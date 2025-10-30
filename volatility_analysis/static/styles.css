@@ -5,7 +5,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: #f5f5f5;
     height: 100vh;
     overflow: hidden;
@@ -20,30 +20,27 @@ body {
 }
 
 h1 {
-    color: #1e3c72;
+    color: #1890ff;
     padding: 15px 30px;
     text-align: left;
     font-size: 1.6em;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #f0f0f0;
     flex-shrink: 0;
 }
 
-/* 主内容区 */
 .content-wrapper {
     display: flex;
     flex: 1;
     overflow: hidden;
 }
 
-/* 左侧区域 (65%) */
 .left-section {
     width: 65%;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid #e0e0e0;
+    border-right: 1px solid #f0f0f0;
 }
 
-/* 右侧区域 (35%) */
 .right-section {
     width: 35%;
     display: flex;
@@ -52,73 +49,25 @@ h1 {
     overflow: hidden;
 }
 
-/* 数据输入区 */
-.input-section {
-    background: #f8f9fa;
-    padding: 20px 30px;
-    border-bottom: 1px solid #e0e0e0;
-    flex-shrink: 0;
-}
-
-.input-section h2 {
-    font-size: 1.1em;
-    margin-bottom: 12px;
-    color: #333;
-}
-
-textarea {
-    width: 100%;
-    height: 120px;
-    padding: 12px;
-    border: 2px solid #ddd;
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    resize: none;
-    border-radius: 4px;
-}
-
-.button-group {
-    display: flex;
-    gap: 12px;
-    margin-top: 12px;
-}
-
-button {
-    padding: 8px 20px;
-    border: none;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    transition: all 0.3s;
-    border-radius: 4px;
-}
-
-.btn-primary {
-    background: #3b4ba0;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #2a3a80;
-}
-
-.message {
+#message {
     padding: 12px 30px;
     display: none;
     flex-shrink: 0;
+    border-radius: 4px;
 }
 
-.message.success {
-    background: #d4edda;
-    color: #155724;
+#message.success {
+    background: #f6ffed;
+    color: #52c41a;
+    border: 1px solid #b7eb8f;
 }
 
-.message.error {
-    background: #f8d7da;
-    color: #721c24;
+#message.error {
+    background: #fff1f0;
+    color: #ff4d4f;
+    border: 1px solid #ffccc7;
 }
 
-/* 四象限图区 */
 .quadrant-section {
     flex: 1;
     display: flex;
@@ -141,11 +90,53 @@ button {
     height: 100%;
 }
 
-/* 右侧面板 */
+.quadrant-toolbar {
+    padding: 15px 20px;
+    background: white;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+    align-items: center;
+}
+
+button {
+    padding: 6px 16px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.3s;
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background: #1890ff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #40a9ff;
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+}
+
+.btn-clear {
+    background: white;
+    border: 1px solid #d9d9d9;
+    color: #000000d9;
+    margin-left: auto;
+}
+
+.btn-clear:hover {
+    border-color: #1890ff;
+    color: #1890ff;
+}
+
 .date-filter {
     background: white;
     padding: 15px 20px;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #f0f0f0;
     flex-shrink: 0;
 }
 
@@ -161,28 +152,40 @@ button {
 
 .filter-label {
     font-size: 12px;
-    color: #666;
+    color: #00000045;
     margin-bottom: 5px;
     display: block;
+    font-weight: 500;
 }
 
-.date-filter select {
+select {
     width: 100%;
-    padding: 8px;
-    border: 2px solid #ddd;
+    padding: 6px 8px;
+    border: 1px solid #d9d9d9;
     font-size: 13px;
     border-radius: 4px;
+    background: white;
+    font-family: inherit;
 }
 
-/* 多选下拉框样式 */
+select:hover {
+    border-color: #40a9ff;
+}
+
+select:focus {
+    border-color: #1890ff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
 .quadrant-filter {
     position: relative;
 }
 
 .quadrant-select {
     width: 100%;
-    padding: 8px;
-    border: 2px solid #ddd;
+    padding: 6px 8px;
+    border: 1px solid #d9d9d9;
     font-size: 13px;
     border-radius: 4px;
     background: white;
@@ -190,10 +193,11 @@ button {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    font-family: inherit;
 }
 
 .quadrant-select:hover {
-    border-color: #3b4ba0;
+    border-color: #40a9ff;
 }
 
 .quadrant-dropdown {
@@ -202,14 +206,14 @@ button {
     left: 0;
     right: 0;
     background: white;
-    border: 2px solid #ddd;
+    border: 1px solid #d9d9d9;
     border-top: none;
     border-radius: 0 0 4px 4px;
     max-height: 200px;
     overflow-y: auto;
     display: none;
     z-index: 100;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12);
 }
 
 .quadrant-dropdown.open {
@@ -217,12 +221,12 @@ button {
 }
 
 .quadrant-option {
-    padding: 8px 12px;
+    padding: 6px 12px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .quadrant-option:hover {
@@ -239,8 +243,8 @@ button {
 }
 
 .quadrant-selected {
-    font-size: 12px;
-    color: #333;
+    font-size: 13px;
+    color: #000000d9;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -248,33 +252,7 @@ button {
 
 .quadrant-arrow {
     font-size: 10px;
-    color: #666;
-}
-
-/* 四象限工具栏 */
-.quadrant-toolbar {
-    padding: 10px 20px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e0e0e0;
-    display: flex;
-    gap: 10px;
-    flex-shrink: 0;
-}
-
-.btn-clear {
-    padding: 6px 15px;
-    background: #95a5a6;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 600;
-    transition: all 0.3s;
-}
-
-.btn-clear:hover {
-    background: #7f8c8d;
+    color: #00000045;
 }
 
 .records-list {
@@ -283,16 +261,16 @@ button {
     padding: 15px;
 }
 
-/* 折叠菜单 */
 .date-group {
     margin-bottom: 12px;
     border-radius: 4px;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f0f0f0;
 }
 
 .date-header {
-    background: #6c5ce7;
+    background: #1890ff;
     color: white;
     padding: 10px 12px;
     display: flex;
@@ -303,14 +281,14 @@ button {
 }
 
 .date-header:hover {
-    background: #5f4dd4;
+    background: #40a9ff;
 }
 
 .date-title {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 13px;
 }
 
@@ -331,9 +309,9 @@ button {
 .btn-redraw {
     background: rgba(255, 255, 255, 0.2);
     color: white;
-    padding: 3px 10px;
+    padding: 2px 8px;
     border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 3px;
+    border-radius: 2px;
     cursor: pointer;
     font-size: 11px;
     transition: all 0.3s;
@@ -344,18 +322,18 @@ button {
 }
 
 .btn-delete-all {
-    background: #e74c3c;
+    background: #ff4d4f;
     color: white;
-    padding: 3px 10px;
+    padding: 2px 8px;
     border: none;
-    border-radius: 3px;
+    border-radius: 2px;
     cursor: pointer;
     font-size: 11px;
     transition: all 0.3s;
 }
 
 .btn-delete-all:hover {
-    background: #c0392b;
+    background: #ff7875;
 }
 
 .date-content {
@@ -370,7 +348,6 @@ button {
     transition: max-height 0.5s ease-in;
 }
 
-/* 记录项 */
 .record-item {
     padding: 10px 12px;
     border-bottom: 1px solid #f0f0f0;
@@ -382,7 +359,7 @@ button {
 }
 
 .record-item:hover {
-    background: #f8f9fa;
+    background: #fafafa;
 }
 
 .record-item:last-child {
@@ -394,9 +371,9 @@ button {
 }
 
 .record-symbol {
-    font-weight: 700;
+    font-weight: 600;
     font-size: 14px;
-    color: #1e3c72;
+    color: #1890ff;
     margin-bottom: 5px;
 }
 
@@ -404,37 +381,52 @@ button {
     display: flex;
     gap: 10px;
     font-size: 11px;
-    color: #666;
+    color: #00000045;
     flex-wrap: wrap;
+}
+
+.record-quadrant {
+    font-weight: 600;
+}
+
+.record-quadrant.bullish {
+    color: #52c41a;
+}
+
+.record-quadrant.bearish {
+    color: #ff4d4f;
 }
 
 .badge {
     display: inline-block;
     padding: 2px 6px;
-    border-radius: 3px;
+    border-radius: 2px;
     font-size: 10px;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .badge-high {
-    background: #d4edda;
-    color: #155724;
+    background: #f6ffed;
+    color: #52c41a;
+    border: 1px solid #b7eb8f;
 }
 
 .badge-medium {
-    background: #fff3cd;
-    color: #856404;
+    background: #fffbe6;
+    color: #faad14;
+    border: 1px solid #ffe58f;
 }
 
 .badge-low {
-    background: #f8d7da;
-    color: #721c24;
+    background: #fff1f0;
+    color: #ff4d4f;
+    border: 1px solid #ffccc7;
 }
 
 .btn-delete-item {
     background: none;
     border: none;
-    color: #e74c3c;
+    color: #ff4d4f;
     font-size: 16px;
     cursor: pointer;
     padding: 5px 8px;
@@ -443,11 +435,10 @@ button {
 }
 
 .btn-delete-item:hover {
-    color: #c0392b;
+    color: #ff7875;
     transform: scale(1.2);
 }
 
-/* Drawer 样式 */
 .drawer-overlay {
     display: none;
     position: fixed;
@@ -455,7 +446,7 @@ button {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.45);
     z-index: 1000;
 }
 
@@ -465,23 +456,25 @@ button {
 
 .drawer {
     position: fixed;
-    right: -600px;
+    left: -600px;
     top: 0;
     width: 600px;
     height: 100%;
     background: white;
-    box-shadow: -2px 0 8px rgba(0,0,0,0.15);
-    transition: right 0.3s ease-out;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    transition: left 0.3s ease-out;
     z-index: 1001;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .drawer.open {
-    right: 0;
+    left: 0;
 }
 
 .drawer-header {
-    background: #1e3c72;
+    background: #1890ff;
     color: white;
     padding: 18px;
     display: flex;
@@ -490,6 +483,7 @@ button {
     position: sticky;
     top: 0;
     z-index: 10;
+    flex-shrink: 0;
 }
 
 .drawer-title {
@@ -515,73 +509,192 @@ button {
 
 .drawer-content {
     padding: 25px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-section h2 {
+    font-size: 15px;
+    margin-bottom: 15px;
+    color: #000000d9;
+    font-weight: 600;
+}
+
+textarea {
+    width: 100%;
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #d9d9d9;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    resize: none;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+textarea:focus {
+    border-color: #1890ff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.btn-primary-drawer {
+    background: #1890ff;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s;
+    font-family: inherit;
+    flex: 1;
+}
+
+.btn-primary-drawer:hover {
+    background: #40a9ff;
+}
+
+.btn-cancel-drawer {
+    background: white;
+    border: 1px solid #d9d9d9;
+    color: #000000d9;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s;
+    font-family: inherit;
+    flex: 1;
+}
+
+.btn-cancel-drawer:hover {
+    border-color: #1890ff;
+    color: #1890ff;
+}
+
+.detail-drawer {
+    position: fixed;
+    right: -600px;
+    top: 0;
+    width: 600px;
+    height: 100%;
+    background: white;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
+    transition: right 0.3s ease-out;
+    z-index: 1001;
+    overflow-y: auto;
+}
+
+.detail-drawer.open {
+    right: 0;
+}
+
+.detail-drawer-header {
+    background: #1890ff;
+    color: white;
+    padding: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.detail-drawer-title {
+    font-size: 17px;
+    font-weight: 600;
 }
 
 .detail-section {
     margin-bottom: 22px;
+    padding: 0 25px;
 }
 
 .detail-section h3 {
-    color: #1e3c72;
+    color: #1890ff;
     margin-bottom: 10px;
     padding-bottom: 8px;
-    border-bottom: 2px solid #1e3c72;
+    border-bottom: 2px solid #1890ff;
     font-size: 15px;
+    margin-top: 15px;
+}
+
+.detail-section:first-child {
+    padding-top: 25px;
 }
 
 .detail-row {
     display: flex;
     padding: 7px 0;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .detail-label {
     font-weight: 600;
     width: 160px;
-    color: #555;
+    color: #00000045;
     font-size: 13px;
 }
 
 .detail-value {
     flex: 1;
-    color: #333;
+    color: #000000d9;
     font-size: 13px;
 }
 
 .factor-list {
     list-style: none;
     padding-left: 0;
+    margin: 0;
 }
 
 .factor-list li {
     padding: 7px 10px;
     margin: 4px 0;
-    background: #f8f9fa;
-    border-left: 3px solid #1e3c72;
+    background: #f5f5f5;
+    border-left: 3px solid #1890ff;
     font-size: 12px;
 }
 
 .empty-state {
     text-align: center;
     padding: 30px;
-    color: #999;
+    color: #00000045;
     font-size: 13px;
 }
 
-/* 自定义滚动条 */
-.records-list::-webkit-scrollbar {
+.records-list::-webkit-scrollbar,
+.drawer::-webkit-scrollbar,
+.detail-drawer::-webkit-scrollbar {
     width: 8px;
 }
 
-.records-list::-webkit-scrollbar-track {
+.records-list::-webkit-scrollbar-track,
+.drawer::-webkit-scrollbar-track,
+.detail-drawer::-webkit-scrollbar-track {
     background: #f1f1f1;
 }
 
-.records-list::-webkit-scrollbar-thumb {
-    background: #888;
+.records-list::-webkit-scrollbar-thumb,
+.drawer::-webkit-scrollbar-thumb,
+.detail-drawer::-webkit-scrollbar-thumb {
+    background: #bfbfbf;
     border-radius: 4px;
 }
 
-.records-list::-webkit-scrollbar-thumb:hover {
-    background: #555;
+.records-list::-webkit-scrollbar-thumb:hover,
+.drawer::-webkit-scrollbar-thumb:hover,
+.detail-drawer::-webkit-scrollbar-thumb:hover {
+    background: #8c8c8c;
 }
