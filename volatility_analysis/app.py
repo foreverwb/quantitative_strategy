@@ -490,7 +490,7 @@ def get_strategy_info(quadrant: str, liquidity: str) -> Dict[str, str]:
 # =========================
 # 核心分析函数
 # =========================
-def calculate_analysis(data: Dict[str, Any], cfg: Dict[str, Any] = None) -> Dict[str, Any]:
+def calculate_analysis(data: Dict[str, Any], cfg: Dict[str, Any] = None, ignore_earnings: bool = False) -> Dict[str, Any]:
     if cfg is None:
         cfg = DEFAULT_CFG
     
@@ -502,7 +502,7 @@ def calculate_analysis(data: Dict[str, Any], cfg: Dict[str, Any] = None) -> Dict
     
     # 计算评分
     dir_score = compute_direction_score(normed, cfg)
-    vol_score = compute_vol_score(normed, cfg, ignore_earnings=False)
+    vol_score = compute_vol_score(normed, cfg, ignore_earnings=ignore_earnings)
     
     # 偏好映射
     dir_pref = map_direction_pref(dir_score)
@@ -612,6 +612,8 @@ def index():
 @app.route('/api/analyze', methods=['POST'])
 def analyze():
     try:
+        # 获取ignore_earnings参数
+        ignore_earnings = request.args.get('ignore_earnings', 'false').lower() == 'true'
         records = request.json.get('records', [])
         
         if not isinstance(records, list):
@@ -625,7 +627,7 @@ def analyze():
         
         for i, record in enumerate(records):
             try:
-                analysis = calculate_analysis(record)
+                analysis = calculate_analysis(record, ignore_earnings=ignore_earnings)
                 results.append(analysis)
             except Exception as e:
                 error_msg = f"标的 {record.get('symbol', f'#{i+1}')} 分析失败: {str(e)}"

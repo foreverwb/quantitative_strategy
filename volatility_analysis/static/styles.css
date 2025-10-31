@@ -428,6 +428,94 @@ select:focus {
 .date-actions {
     display: flex;
     gap: 8px;
+    align-items: center;
+}
+
+.earnings-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 8px;
+}
+
+.earnings-label {
+    font-size: 11px;
+    color: white;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .3s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #1890ff;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.slider-text {
+    position: absolute;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: opacity .3s;
+}
+
+.slider-text.open {
+    left: 6px;
+    opacity: 0;
+}
+
+.slider-text.close {
+    right: 4px;
+    opacity: 1;
+}
+
+input:checked + .slider .slider-text.open {
+    opacity: 1;
+}
+
+input:checked + .slider .slider-text.close {
+    opacity: 0;
 }
 
 .btn-redraw {
@@ -504,13 +592,16 @@ select:focus {
 .record-meta {
     display: flex;
     gap: 10px;
-    font-size: 11px;
+    font-size: 12px;
     color: #00000045;
     flex-wrap: wrap;
+    align-items: center;
 }
 
 .record-quadrant {
     font-weight: 600;
+    min-width: 90px;
+    display: inline-block;
 }
 
 .record-quadrant.bullish {
@@ -519,6 +610,24 @@ select:focus {
 
 .record-quadrant.bearish {
     color: #ff4d4f;
+}
+
+.record-confidence {
+    font-weight: 600;
+    font-size: 13px;
+    color: #000000d9;
+}
+
+.record-liquidity {
+    font-weight: 600;
+    font-size: 13px;
+    color: #000000d9;
+}
+
+.record-earnings {
+    font-weight: 500;
+    font-size: 12px;
+    color: #fa8c16;
 }
 
 .badge {

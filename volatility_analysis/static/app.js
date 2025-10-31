@@ -5,6 +5,7 @@ var currentFilter = '';
 var selectedQuadrants = ['全部'];
 var expandedDates = new Set();
 var canvasRecords = [];
+var earningsToggles = {}; // 存储每个日期的财报开关状态
 
 // ==================== 改进的消息通知系统 ====================
 function showMessage(text, type) {
@@ -334,6 +335,17 @@ function renderRecordsList() {
         html += '<span>' + date + ' (' + count + '条)</span>';
         html += '</div>';
         html += '<div class="date-actions">';
+        html += '<div class="earnings-toggle">';
+        html += '<span class="earnings-label">财报</span>';
+        html += '<label class="switch">';
+        var isChecked = earningsToggles[date] ? 'checked' : '';
+        html += '<input type="checkbox" class="earnings-checkbox" data-date="' + date + '" ' + isChecked + '>';
+        html += '<span class="slider">';
+        html += '<span class="slider-text open">Open</span>';
+        html += '<span class="slider-text close">Close</span>';
+        html += '</span>';
+        html += '</label>';
+        html += '</div>';
         html += '<button class="btn-redraw" data-date="' + date + '">重绘</button>';
         html += '<button class="btn-delete-all" data-date="' + date + '">全部删除</button>';
         html += '</div>';
@@ -342,13 +354,20 @@ function renderRecordsList() {
         
         records.forEach(function(record) {
             var quadrantClass = getQuadrantClass(record.quadrant);
+            var daysToEarnings = record.derived_metrics.days_to_earnings;
+            var showEarnings = daysToEarnings !== null && daysToEarnings > 0;
+            var eventIcon = record.earnings_event_enabled ? '✅' : '';
+            
             html += '<div class="record-item" data-timestamp="' + record.timestamp + '" data-symbol="' + record.symbol + '">';
             html += '<div class="record-info">';
-            html += '<div class="record-symbol">' + record.symbol + '</div>';
+            html += '<div class="record-symbol">' + record.symbol + (eventIcon ? ' ' + eventIcon : '') + '</div>';
             html += '<div class="record-meta">';
             html += '<span class="record-quadrant ' + quadrantClass + '">' + record.quadrant + '</span>';
-            html += '<span class="badge ' + getBadgeClass(record.confidence) + '">' + record.confidence + '</span>';
-            html += '<span>流动性: ' + record.liquidity + '</span>';
+            html += '<span class="record-confidence">置信度: ' + record.confidence + '</span>';
+            html += '<span class="record-liquidity">流动性: ' + record.liquidity + '</span>';
+            if (showEarnings) {
+                html += '<span class="record-earnings">财报: ' + daysToEarnings + '天</span>';
+            }
             html += '</div></div>';
             html += '<button class="btn-delete-item" data-timestamp="' + record.timestamp + '" data-symbol="' + record.symbol + '">&times;</button>';
             html += '</div>';
@@ -395,6 +414,13 @@ function handleRecordsListClick(e) {
     if (target.classList.contains('btn-delete-item')) {
         e.stopPropagation();
         deleteRecord(e, target.getAttribute('data-timestamp'), target.getAttribute('data-symbol'));
+        return;
+    }
+    
+    // 财报开关切换
+    if (target.classList.contains('earnings-checkbox')) {
+        e.stopPropagation();
+        handleEarningsToggle(target);
         return;
     }
 }
@@ -539,6 +565,97 @@ async function deleteRecord(event, timestamp, symbol) {
     }
 }
 
+// ==================== 财报事件处理 ====================
+async function handleEarningsToggle(checkbox) {
+    var date = checkbox.getAttribute('data-date');
+    var ignoreEarnings = checkbox.checked;
+    
+    // 保存开关状态
+    earningsToggles[date] = ignoreEarnings;
+    
+    showMessage('正在重新计算 ' + date + ' 的数据...', 'warning');
+    
+    // 获取该日期的原始数据
+    var dateRecords = allRecords.filter(function(r) {
+        return r.timestamp.startsWith(date);
+    });
+    
+    if (dateRecords.length === 0) {
+        showMessage('该日期没有数据', 'error');
+        return;
+    }
+    
+    // 提取原始数据
+    var rawDataList = dateRecords.map(function(r) { return r.raw_data; });
+    
+    try {
+        // 调用后端API重新计算，传递ignore_earnings参数
+        var response = await fetch('/api/analyze?ignore_earnings=' + ignoreEarnings, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ records: rawDataList })
+        });
+        
+        var result = await response.json();
+        
+        if (response.ok && result.results) {
+            // 标记这些记录是否启用了财报事件
+            result.results.forEach(function(r) {
+                r.earnings_event_enabled = ignoreEarnings;
+            });
+            
+            // 更新allRecords中的数据
+            allRecords = allRecords.filter(function(r) {
+                return !r.timestamp.startsWith(date);
+            });
+            allRecords.push.apply(allRecords, result.results);
+            
+            // 如果画布中有该日期的数据，也需要更新
+            var hasDateInCanvas = canvasRecords.some(function(r) {
+                return r.timestamp.startsWith(date);
+            });
+            
+            if (hasDateInCanvas) {
+                // 应用方向筛选
+                var filteredResults = result.results;
+                if (!selectedQuadrants.includes('全部')) {
+                    filteredResults = result.results.filter(function(record) {
+                        var quadrant = record.quadrant || '';
+                        if (selectedQuadrants.includes(quadrant)) return true;
+                        var normalizedQuadrant = quadrant.replace(/—/g, '--');
+                        return selectedQuadrants.some(function(selected) {
+                            var normalizedSelected = selected.replace(/—/g, '--');
+                            return normalizedQuadrant === normalizedSelected;
+                        });
+                    });
+                }
+                
+                // 更新画布数据
+                canvasRecords = canvasRecords.filter(function(r) {
+                    return !r.timestamp.startsWith(date);
+                });
+                canvasRecords.push.apply(canvasRecords, filteredResults);
+                drawQuadrant();
+            }
+            
+            // 重新渲染列表
+            renderRecordsList();
+            
+            showMessage('已' + (ignoreEarnings ? '开启' : '关闭') + '财报事件计算', 'success');
+        } else {
+            showMessage('重新计算失败: ' + (result.error || '未知错误'), 'error');
+            // 恢复开关状态
+            checkbox.checked = !ignoreEarnings;
+            earningsToggles[date] = !ignoreEarnings;
+        }
+    } catch (e) {
+        showMessage('重新计算失败: ' + e.message, 'error');
+        // 恢复开关状态
+        checkbox.checked = !ignoreEarnings;
+        earningsToggles[date] = !ignoreEarnings;
+    }
+}
+
 // ==================== 详情抽屉 ====================
 function showDrawer(timestamp, symbol) {
     var record = allRecords.find(function(r) {
@@ -547,16 +664,25 @@ function showDrawer(timestamp, symbol) {
     
     if (!record) return;
     
-    document.getElementById('detailDrawerTitle').textContent = record.symbol + ' - 详细分析';
+    var eventIcon = record.earnings_event_enabled ? ' ✅' : '';
+    document.getElementById('detailDrawerTitle').textContent = record.symbol + eventIcon + ' - 详细分析';
     
     var confidenceBadge = getBadgeClass(record.confidence);
     var quadrantClass = getQuadrantClass(record.quadrant);
+    var daysToEarnings = record.derived_metrics.days_to_earnings;
+    var showEarnings = daysToEarnings !== null && daysToEarnings > 0;
     
     var html = '<p style="color: #00000045; margin-bottom: 20px;">' + record.timestamp + '</p>';
     html += '<div class="detail-section"><h3>核心结论</h3>';
     html += '<div class="detail-row"><div class="detail-label">四象限定位:</div><div class="detail-value"><strong><span class="record-quadrant ' + quadrantClass + '">' + record.quadrant + '</span></strong></div></div>';
     html += '<div class="detail-row"><div class="detail-label">置信度:</div><div class="detail-value"><span class="badge ' + confidenceBadge + '">' + record.confidence + '</span></div></div>';
     html += '<div class="detail-row"><div class="detail-label">流动性:</div><div class="detail-value">' + record.liquidity + '</div></div>';
+    if (showEarnings) {
+        html += '<div class="detail-row"><div class="detail-label">距离财报:</div><div class="detail-value">' + daysToEarnings + ' 天</div></div>';
+    }
+    if (record.earnings_event_enabled) {
+        html += '<div class="detail-row"><div class="detail-label">财报事件:</div><div class="detail-value">✅ 已开启</div></div>';
+    }
     html += '<div class="detail-row"><div class="detail-label">方向评分:</div><div class="detail-value">' + record.direction_score + ' (' + record.direction_bias + ')</div></div>';
     html += '<div class="detail-row"><div class="detail-label">波动评分:</div><div class="detail-value">' + record.vol_score + ' (' + record.vol_bias + ')</div></div></div>';
     
@@ -664,10 +790,46 @@ function drawQuadrant() {
     
     ctx.setLineDash([]);
     
+    // 绘制当前画布日期标记
+    if (canvasRecords.length > 0) {
+        // 获取画布中所有日期
+        var datesInCanvas = {};
+        canvasRecords.forEach(function(r) {
+            var date = r.timestamp.split(' ')[0];
+            datesInCanvas[date] = (datesInCanvas[date] || 0) + 1;
+        });
+        
+        // 按日期排序
+        var sortedDates = Object.keys(datesInCanvas).sort();
+        
+        // 绘制日期标签
+        ctx.fillStyle = '#1890ff';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        
+        if (sortedDates.length === 1) {
+            // 单个日期
+            var dateText = sortedDates[0] + ' (' + datesInCanvas[sortedDates[0]] + '条)';
+            ctx.fillText(dateText, centerX, 15);
+        } else if (sortedDates.length <= 3) {
+            // 多个日期，显示详情
+            var dateTexts = sortedDates.map(function(date) {
+                return date + '(' + datesInCanvas[date] + ')';
+            });
+            ctx.fillText(dateTexts.join(' | '), centerX, 15);
+        } else {
+            // 太多日期，显示总数
+            var totalCount = canvasRecords.length;
+            ctx.fillText(sortedDates.length + '个日期，共' + totalCount + '条数据', centerX, 15);
+        }
+    }
+    
     // 绘制轴标签
     ctx.fillStyle = '#333';
     ctx.font = 'bold 14px Arial';
     ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
     ctx.fillText('买波', centerX, padding - 15);
     ctx.fillText('卖波', centerX, height - padding + 30);
     ctx.textAlign = 'left';
@@ -772,9 +934,9 @@ function handleCanvasClick(event) {
     var x = event.clientX - rect.left;
     var y = event.clientY - rect.top;
     
-    // Bug Fix: 画布点击也要考虑破折号格式
+    // 画布点击筛选 - 不受日期筛选影响
     var filteredRecords = canvasRecords.filter(function(r) {
-        if (currentFilter && !r.timestamp.startsWith(currentFilter)) return false;
+        // 移除日期筛选判断: if (currentFilter && !r.timestamp.startsWith(currentFilter)) return false;
         if (selectedQuadrants.includes('全部')) return true;
         
         var quadrant = r.quadrant || '';
