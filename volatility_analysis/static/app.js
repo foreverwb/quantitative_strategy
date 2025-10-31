@@ -6,18 +6,80 @@ var selectedQuadrants = ['全部'];
 var expandedDates = new Set();
 var canvasRecords = [];
 
-// 显示消息
+// ==================== 改进的消息通知系统 ====================
 function showMessage(text, type) {
-    var msg = document.getElementById('message');
-    msg.textContent = text;
-    msg.className = 'message ' + type;
-    msg.style.display = 'block';
-    setTimeout(function() {
-        msg.style.display = 'none';
-    }, 3000);
+    const container = document.getElementById('messageContainer');
+    
+    // 创建消息盒子
+    const messageBox = document.createElement('div');
+    messageBox.className = 'message-box';
+    
+    // 图标映射
+    const iconMap = {
+        'success': '✓',
+        'error': '✕',
+        'warning': '!'
+    };
+    
+    // 默认显示时长（毫秒）
+    const durationMap = {
+        'success': 3000,
+        'error': 4000,
+        'warning': 3500
+    };
+    
+    const duration = durationMap[type] || 3000;
+    const icon = iconMap[type] || '•';
+    
+    messageBox.innerHTML = `
+        <div class="message-icon ${type}">
+            ${icon}
+        </div>
+        <div class="message-content">
+            <span class="message-text ${type}">${text}</span>
+        </div>
+        <button class="message-close" onclick="this.closest('.message-box').remove()">
+            ×
+        </button>
+    `;
+    
+    container.appendChild(messageBox);
+    
+    // 自动关闭
+    if (duration > 0) {
+        setTimeout(() => {
+            if (messageBox.parentNode) {
+                messageBox.classList.add('hide');
+                setTimeout(() => {
+                    messageBox.remove();
+                }, 300);
+            }
+        }, duration);
+    }
 }
 
-// 分析数据
+// ==================== Drawer 控制函数 ====================
+function openInputDrawer() {
+    document.getElementById('inputDrawerOverlay').classList.add('open');
+    document.getElementById('inputDrawer').classList.add('open');
+}
+
+function closeInputDrawer() {
+    document.getElementById('inputDrawerOverlay').classList.remove('open');
+    document.getElementById('inputDrawer').classList.remove('open');
+}
+
+function openDetailDrawer() {
+    document.getElementById('detailDrawerOverlay').classList.add('open');
+    document.getElementById('detailDrawer').classList.add('open');
+}
+
+function closeDetailDrawer() {
+    document.getElementById('detailDrawerOverlay').classList.remove('open');
+    document.getElementById('detailDrawer').classList.remove('open');
+}
+
+// ==================== 数据分析函数 ====================
 async function analyzeData() {
     var input = document.getElementById('dataInput').value.trim();
     
@@ -51,6 +113,7 @@ async function analyzeData() {
         if (response.ok) {
             showMessage(result.message, 'success');
             document.getElementById('dataInput').value = '';
+            closeInputDrawer();
             
             var newDates = new Set();
             if (result.results && Array.isArray(result.results)) {
@@ -58,7 +121,6 @@ async function analyzeData() {
                     var date = r.timestamp.split(' ')[0];
                     newDates.add(date);
                 });
-                
                 canvasRecords.push.apply(canvasRecords, result.results);
             }
             
@@ -82,7 +144,7 @@ async function analyzeData() {
     }
 }
 
-// 加载记录
+// ==================== 加载记录函数 ====================
 async function loadRecords() {
     try {
         var response = await fetch('/api/records');
@@ -97,21 +159,15 @@ async function loadRecords() {
         var data = await response.json();
         allRecords = Array.isArray(data) ? data : [];
         
-        // Bug Fix: 避免重复加载,只在第一次加载或重置后才初始化画布
-        // 使用标志位判断是否是首次加载
         if (!window.hasInitializedCanvas) {
             window.hasInitializedCanvas = true;
-            
-            // 只显示当天数据
             var today = new Date();
             var todayStr = today.getFullYear() + '-' + 
                           String(today.getMonth() + 1).padStart(2, '0') + '-' + 
                           String(today.getDate()).padStart(2, '0');
-            
             var todayRecords = allRecords.filter(function(r) {
                 return r.timestamp.startsWith(todayStr);
             });
-            
             canvasRecords = todayRecords;
         }
         
@@ -126,13 +182,12 @@ async function loadRecords() {
     }
 }
 
-// 切换方向下拉框
+// ==================== 方向筛选相关函数 ====================
 function toggleQuadrantDropdown() {
     var dropdown = document.getElementById('quadrantDropdown');
     dropdown.classList.toggle('open');
 }
 
-// 处理方向筛选变化
 function handleQuadrantChange(e) {
     var allCheckbox = document.getElementById('quad-all');
     var checkboxes = [
@@ -147,26 +202,14 @@ function handleQuadrantChange(e) {
     
     if (targetId === 'quad-all') {
         if (allCheckbox.checked) {
-            // 选中"全部"时，取消所有其他选项
             checkboxes.forEach(function(cb) { cb.checked = false; });
             selectedQuadrants = ['全部'];
         }
     } else {
-        // 选中或取消其他选项时，先取消"全部"
         allCheckbox.checked = false;
+        selectedQuadrants = checkboxes.filter(function(cb) { return cb.checked; })
+                                       .map(function(cb) { return cb.value; });
         
-        // 重新收集选中的选项
-        selectedQuadrants = [];
-        checkboxes.forEach(function(cb) {
-            if (cb && cb.checked) {
-                selectedQuadrants.push(cb.value);
-            }
-        });
-        
-        // 调试输出
-        console.log('Selected quadrants:', selectedQuadrants);
-        
-        // 如果所有选项都未选中，则自动选中"全部"
         if (selectedQuadrants.length === 0) {
             allCheckbox.checked = true;
             selectedQuadrants = ['全部'];
@@ -177,35 +220,55 @@ function handleQuadrantChange(e) {
     filterRecords();
 }
 
-// 更新方向筛选显示
+// 改进的方向筛选显示函数 - 显示所有选中项，用顿号分隔
 function updateQuadrantDisplay() {
     var display = document.getElementById('quadrantSelected');
+    
     if (selectedQuadrants.includes('全部')) {
         display.textContent = '全部';
     } else if (selectedQuadrants.length === 0) {
         display.textContent = '全部';
-    } else if (selectedQuadrants.length === 1) {
-        display.textContent = selectedQuadrants[0];
     } else {
-        display.textContent = '已选 ' + selectedQuadrants.length + ' 项';
+        // 直接显示所有选中项，用顿号分隔
+        display.textContent = selectedQuadrants.join('、');
     }
 }
 
-// 筛选记录
 function filterRecords() {
     currentFilter = document.getElementById('dateFilterSelect').value;
+    // 只重新渲染列表，不影响画布
     renderRecordsList();
-    drawQuadrant();
+    // 移除 drawQuadrant()，不重绘画布
 }
 
-// 清空画布
 function clearCanvas() {
     canvasRecords = [];
     drawQuadrant();
     showMessage('画布已清空', 'success');
 }
 
-// 渲染记录列表
+// ==================== 辅助函数 ====================
+function getQuadrantClass(quadrant) {
+    // 支持两种破折号格式
+    if (quadrant.includes('偏多') && quadrant.includes('买波')) {
+        return 'bullish';
+    } else if (quadrant.includes('偏空') && quadrant.includes('卖波')) {
+        return 'bullish';
+    } else if (quadrant.includes('偏多') && quadrant.includes('卖波')) {
+        return 'bearish';
+    } else if (quadrant.includes('偏空') && quadrant.includes('买波')) {
+        return 'bearish';
+    }
+    return '';
+}
+
+function getBadgeClass(confidence) {
+    if (confidence === '高') return 'badge-high';
+    if (confidence === '中') return 'badge-medium';
+    return 'badge-low';
+}
+
+// ==================== 渲染记录列表 ====================
 function renderRecordsList() {
     var container = document.getElementById('recordsList');
     
@@ -228,14 +291,23 @@ function renderRecordsList() {
         groupedByDate[date].push(record);
     });
     
-    // Bug Fix: 先完成分组,再应用方向筛选
-    // 如果方向筛选不是"全部",则过滤记录
+    // Bug Fix: 方向筛选 - 支持中文破折号（——）和双短横线（--）
     if (!selectedQuadrants.includes('全部')) {
         for (var date in groupedByDate) {
             groupedByDate[date] = groupedByDate[date].filter(function(record) {
-                return selectedQuadrants.includes(record.quadrant);
+                var quadrant = record.quadrant || '';
+                // 检查是否完全匹配
+                if (selectedQuadrants.includes(quadrant)) {
+                    return true;
+                }
+                // 转换破折号格式进行匹配
+                var normalizedQuadrant = quadrant.replace(/—/g, '--');
+                var matchFound = selectedQuadrants.some(function(selected) {
+                    var normalizedSelected = selected.replace(/—/g, '--');
+                    return normalizedQuadrant === normalizedSelected;
+                });
+                return matchFound;
             });
-            // 如果该日期下没有符合条件的记录,删除该日期
             if (groupedByDate[date].length === 0) {
                 delete groupedByDate[date];
             }
@@ -269,11 +341,12 @@ function renderRecordsList() {
         html += '<div class="date-content ' + (isExpanded ? 'expanded' : '') + '" id="content-' + date + '">';
         
         records.forEach(function(record) {
+            var quadrantClass = getQuadrantClass(record.quadrant);
             html += '<div class="record-item" data-timestamp="' + record.timestamp + '" data-symbol="' + record.symbol + '">';
             html += '<div class="record-info">';
             html += '<div class="record-symbol">' + record.symbol + '</div>';
             html += '<div class="record-meta">';
-            html += '<span>' + record.quadrant + '</span>';
+            html += '<span class="record-quadrant ' + quadrantClass + '">' + record.quadrant + '</span>';
             html += '<span class="badge ' + getBadgeClass(record.confidence) + '">' + record.confidence + '</span>';
             html += '<span>流动性: ' + record.liquidity + '</span>';
             html += '</div></div>';
@@ -285,16 +358,13 @@ function renderRecordsList() {
     });
     
     container.innerHTML = html;
-    
-    // 使用事件委托绑定事件
     container.addEventListener('click', handleRecordsListClick);
 }
 
-// 新增: 独立的事件处理函数,避免重复绑定
+// ==================== 事件处理函数 ====================
 function handleRecordsListClick(e) {
     var target = e.target;
     
-    // 日期标题点击
     var dateHeader = target.closest('.date-header');
     if (dateHeader) {
         var date = dateHeader.getAttribute('data-date');
@@ -304,28 +374,24 @@ function handleRecordsListClick(e) {
         }
     }
     
-    // 重绘按钮
     if (target.classList.contains('btn-redraw')) {
         e.stopPropagation();
         redrawDate(e, target.getAttribute('data-date'));
         return;
     }
     
-    // 删除全部按钮
     if (target.classList.contains('btn-delete-all')) {
         e.stopPropagation();
         deleteAllByDate(e, target.getAttribute('data-date'));
         return;
     }
     
-    // 记录项点击
     var recordItem = target.closest('.record-item');
     if (recordItem && !target.classList.contains('btn-delete-item')) {
         showDrawer(recordItem.getAttribute('data-timestamp'), recordItem.getAttribute('data-symbol'));
         return;
     }
     
-    // 删除单条
     if (target.classList.contains('btn-delete-item')) {
         e.stopPropagation();
         deleteRecord(e, target.getAttribute('data-timestamp'), target.getAttribute('data-symbol'));
@@ -333,14 +399,6 @@ function handleRecordsListClick(e) {
     }
 }
 
-// 获取徽章样式
-function getBadgeClass(confidence) {
-    if (confidence === '高') return 'badge-high';
-    if (confidence === '中') return 'badge-medium';
-    return 'badge-low';
-}
-
-// 切换日期组展开/折叠
 function toggleDateGroup(date) {
     var content = document.getElementById('content-' + date);
     var toggle = document.getElementById('toggle-' + date);
@@ -356,7 +414,7 @@ function toggleDateGroup(date) {
     }
 }
 
-// 删除所有记录(按日期)
+// ==================== 删除操作 ====================
 async function deleteAllByDate(event, date) {
     event.stopPropagation();
     
@@ -367,11 +425,9 @@ async function deleteAllByDate(event, date) {
         
         if (response.ok) {
             showMessage('已删除 ' + date + ' 的所有记录', 'success');
-            
             canvasRecords = canvasRecords.filter(function(r) {
                 return !r.timestamp.startsWith(date);
             });
-            
             await loadRecords();
             await loadDates();
         } else {
@@ -382,10 +438,10 @@ async function deleteAllByDate(event, date) {
     }
 }
 
-// 重绘指定日期
 function redrawDate(event, date) {
     event.stopPropagation();
     
+    // 获取该日期的所有记录
     var dateRecords = allRecords.filter(function(r) {
         return r.timestamp.startsWith(date);
     });
@@ -395,21 +451,63 @@ function redrawDate(event, date) {
         return;
     }
     
-    var existingCount = canvasRecords.filter(function(r) {
-        return r.timestamp.startsWith(date);
-    }).length;
+    // 应用方向筛选
+    var filteredDateRecords = dateRecords;
+    if (!selectedQuadrants.includes('全部')) {
+        filteredDateRecords = dateRecords.filter(function(record) {
+            var quadrant = record.quadrant || '';
+            // 完全匹配
+            if (selectedQuadrants.includes(quadrant)) {
+                return true;
+            }
+            // 转换破折号格式进行匹配
+            var normalizedQuadrant = quadrant.replace(/—/g, '--');
+            var matchFound = selectedQuadrants.some(function(selected) {
+                var normalizedSelected = selected.replace(/—/g, '--');
+                return normalizedQuadrant === normalizedSelected;
+            });
+            return matchFound;
+        });
+    }
     
-    if (existingCount > 0) {
-        showMessage('画布中已存在 ' + date + ' 的数据', 'error');
+    if (filteredDateRecords.length === 0) {
+        showMessage('该日期没有符合筛选条件的数据', 'warning');
         return;
     }
     
-    canvasRecords.push.apply(canvasRecords, dateRecords);
-    drawQuadrant();
-    showMessage('已重绘 ' + date + ' 的 ' + dateRecords.length + ' 条数据', 'success');
+    // 检查画布中是否已有其他日期的数据
+    var otherDatesExist = canvasRecords.some(function(r) {
+        return !r.timestamp.startsWith(date);
+    });
+    
+    if (otherDatesExist) {
+        // 清空画布，只加载当前日期的数据
+        canvasRecords = filteredDateRecords;
+        drawQuadrant();
+        showMessage('已清空画布并重绘 ' + date + ' 的 ' + filteredDateRecords.length + ' 条数据', 'success');
+    } else {
+        // 检查该日期数据是否已在画布中
+        var existingCount = canvasRecords.filter(function(r) {
+            return r.timestamp.startsWith(date);
+        }).length;
+        
+        if (existingCount > 0) {
+            // 替换该日期的数据（支持重新筛选）
+            canvasRecords = canvasRecords.filter(function(r) {
+                return !r.timestamp.startsWith(date);
+            });
+            canvasRecords.push.apply(canvasRecords, filteredDateRecords);
+            drawQuadrant();
+            showMessage('已更新 ' + date + ' 的 ' + filteredDateRecords.length + ' 条数据', 'success');
+        } else {
+            // 添加该日期的数据
+            canvasRecords.push.apply(canvasRecords, filteredDateRecords);
+            drawQuadrant();
+            showMessage('已重绘 ' + date + ' 的 ' + filteredDateRecords.length + ' 条数据', 'success');
+        }
+    }
 }
 
-// 删除单条记录
 async function deleteRecord(event, timestamp, symbol) {
     event.stopPropagation();
     
@@ -441,7 +539,7 @@ async function deleteRecord(event, timestamp, symbol) {
     }
 }
 
-// 显示详情抽屉
+// ==================== 详情抽屉 ====================
 function showDrawer(timestamp, symbol) {
     var record = allRecords.find(function(r) {
         return r.timestamp === timestamp && r.symbol === symbol;
@@ -449,24 +547,25 @@ function showDrawer(timestamp, symbol) {
     
     if (!record) return;
     
-    document.getElementById('drawerTitle').textContent = record.symbol + ' - 详细分析';
+    document.getElementById('detailDrawerTitle').textContent = record.symbol + ' - 详细分析';
     
     var confidenceBadge = getBadgeClass(record.confidence);
+    var quadrantClass = getQuadrantClass(record.quadrant);
     
-    var html = '<p style="color: #666; margin-bottom: 20px;">' + record.timestamp + '</p>';
+    var html = '<p style="color: #00000045; margin-bottom: 20px;">' + record.timestamp + '</p>';
     html += '<div class="detail-section"><h3>核心结论</h3>';
-    html += '<div class="detail-row"><div class="detail-label">四象限定位:</div><div class="detail-value"><strong>' + record.quadrant + '</strong></div></div>';
+    html += '<div class="detail-row"><div class="detail-label">四象限定位:</div><div class="detail-value"><strong><span class="record-quadrant ' + quadrantClass + '">' + record.quadrant + '</span></strong></div></div>';
     html += '<div class="detail-row"><div class="detail-label">置信度:</div><div class="detail-value"><span class="badge ' + confidenceBadge + '">' + record.confidence + '</span></div></div>';
     html += '<div class="detail-row"><div class="detail-label">流动性:</div><div class="detail-value">' + record.liquidity + '</div></div>';
     html += '<div class="detail-row"><div class="detail-label">方向评分:</div><div class="detail-value">' + record.direction_score + ' (' + record.direction_bias + ')</div></div>';
     html += '<div class="detail-row"><div class="detail-label">波动评分:</div><div class="detail-value">' + record.vol_score + ' (' + record.vol_bias + ')</div></div></div>';
     
-    html += '<div class="detail-section"><h3>派生指标</h3>';
+    html += '<div class="detail-section"><h3>衍生指标</h3>';
     html += '<div class="detail-row"><div class="detail-label">IVRV 比值:</div><div class="detail-value">' + record.derived_metrics.ivrv_ratio + '</div></div>';
     html += '<div class="detail-row"><div class="detail-label">IVRV 差值:</div><div class="detail-value">' + record.derived_metrics.ivrv_diff + '</div></div>';
     html += '<div class="detail-row"><div class="detail-label">Regime 比值:</div><div class="detail-value">' + record.derived_metrics.regime_ratio + '</div></div>';
     html += '<div class="detail-row"><div class="detail-label">Call/Put 比值:</div><div class="detail-value">' + record.derived_metrics.cp_ratio + '</div></div>';
-    html += '<div class="detail-row"><div class="detail-label">距财报天数:</div><div class="detail-value">' + (record.derived_metrics.days_to_earnings !== null ? record.derived_metrics.days_to_earnings + ' 天' : '无财报') + '</div></div></div>';
+    html += '<div class="detail-row"><div class="detail-label">距离财报天数:</div><div class="detail-value">' + (record.derived_metrics.days_to_earnings !== null ? record.derived_metrics.days_to_earnings + ' 天' : '无财报') + '</div></div></div>';
     
     html += '<div class="detail-section"><h3>方向驱动因素</h3><ul class="factor-list">';
     record.direction_factors.forEach(function(f) {
@@ -484,20 +583,13 @@ function showDrawer(timestamp, symbol) {
     html += '<div class="detail-row"><div class="detail-value">' + record.strategy + '</div></div></div>';
     
     html += '<div class="detail-section"><h3>风险提示</h3>';
-    html += '<div class="detail-row"><div class="detail-value" style="color: #e74c3c;">' + record.risk + '</div></div></div>';
+    html += '<div class="detail-row"><div class="detail-value" style="color: #ff4d4f;">' + record.risk + '</div></div></div>';
     
-    document.getElementById('drawerContent').innerHTML = html;
-    document.getElementById('drawerOverlay').classList.add('open');
-    document.getElementById('drawer').classList.add('open');
+    document.getElementById('detailDrawerContent').innerHTML = html;
+    openDetailDrawer();
 }
 
-// 关闭抽屉
-function closeDrawer() {
-    document.getElementById('drawerOverlay').classList.remove('open');
-    document.getElementById('drawer').classList.remove('open');
-}
-
-// 绘制四象限图
+// ==================== 四象限图绘制 ====================
 function drawQuadrant() {
     if (!canvas) {
         canvas = document.getElementById('quadrantCanvas');
@@ -515,17 +607,19 @@ function drawQuadrant() {
     
     ctx.clearRect(0, 0, width, height);
     
+    // 绘制背景区域
     ctx.globalAlpha = 0.08;
-    ctx.fillStyle = '#4caf50';
+    ctx.fillStyle = '#52c41a';
     ctx.fillRect(padding, padding, centerX - padding, centerY - padding);
-    ctx.fillStyle = '#ff9800';
+    ctx.fillStyle = '#faad14';
     ctx.fillRect(centerX, padding, width - centerX - padding, centerY - padding);
-    ctx.fillStyle = '#f44336';
+    ctx.fillStyle = '#ff4d4f';
     ctx.fillRect(padding, centerY, centerX - padding, height - centerY - padding);
-    ctx.fillStyle = '#ffc107';
+    ctx.fillStyle = '#1890ff';
     ctx.fillRect(centerX, centerY, width - centerX - padding, height - centerY - padding);
     ctx.globalAlpha = 1.0;
     
+    // 绘制主轴线
     ctx.strokeStyle = '#333';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -537,6 +631,7 @@ function drawQuadrant() {
     ctx.lineTo(centerX, height - padding);
     ctx.stroke();
     
+    // 绘制网格线
     ctx.strokeStyle = '#ddd';
     ctx.lineWidth = 1;
     ctx.setLineDash([5, 5]);
@@ -569,6 +664,7 @@ function drawQuadrant() {
     
     ctx.setLineDash([]);
     
+    // 绘制轴标签
     ctx.fillStyle = '#333';
     ctx.font = 'bold 14px Arial';
     ctx.textAlign = 'center';
@@ -579,18 +675,30 @@ function drawQuadrant() {
     ctx.textAlign = 'right';
     ctx.fillText('偏多', width - padding - 5, centerY - 10);
     
+    // 绘制象限标签
     ctx.font = 'bold 13px Arial';
     ctx.fillStyle = '#666';
     ctx.textAlign = 'center';
-    ctx.fillText('偏空—买波', padding + (centerX - padding) / 2, padding + 25);
-    ctx.fillText('偏多—买波', centerX + (width - centerX - padding) / 2, padding + 25);
-    ctx.fillText('偏空—卖波', padding + (centerX - padding) / 2, height - padding - 15);
-    ctx.fillText('偏多—卖波', centerX + (width - centerX - padding) / 2, height - padding - 15);
+    ctx.fillText('偏空--买波', padding + (centerX - padding) / 2, padding + 25);
+    ctx.fillText('偏多--买波', centerX + (width - centerX - padding) / 2, padding + 25);
+    ctx.fillText('偏空--卖波', padding + (centerX - padding) / 2, height - padding - 15);
+    ctx.fillText('偏多--卖波', centerX + (width - centerX - padding) / 2, height - padding - 15);
     
+    // 筛选要显示的记录 - 画布不受日期筛选影响，只受方向筛选影响
     var filteredRecords = canvasRecords.filter(function(r) {
-        if (currentFilter && !r.timestamp.startsWith(currentFilter)) return false;
-        if (!selectedQuadrants.includes('全部') && !selectedQuadrants.includes(r.quadrant)) return false;
-        return true;
+        // 移除日期筛选判断: if (currentFilter && !r.timestamp.startsWith(currentFilter)) return false;
+        if (selectedQuadrants.includes('全部')) return true;
+        
+        var quadrant = r.quadrant || '';
+        // 完全匹配
+        if (selectedQuadrants.includes(quadrant)) return true;
+        
+        // 转换破折号格式匹配
+        var normalizedQuadrant = quadrant.replace(/—/g, '--');
+        return selectedQuadrants.some(function(selected) {
+            var normalizedSelected = selected.replace(/—/g, '--');
+            return normalizedQuadrant === normalizedSelected;
+        });
     });
     
     if (!Array.isArray(filteredRecords) || filteredRecords.length === 0) {
@@ -601,6 +709,7 @@ function drawQuadrant() {
         return;
     }
     
+    // 计算点的位置
     var points = filteredRecords.map(function(record) {
         var xRange = record.direction_score >= 0 ? (width - centerX - padding) : (centerX - padding);
         var yRange = record.vol_score >= 0 ? (centerY - padding) : (height - centerY - padding);
@@ -609,6 +718,7 @@ function drawQuadrant() {
         return { record: record, x: x, y: y };
     });
     
+    // 防止点重叠
     var minDistance = 30;
     for (var i = 0; i < points.length; i++) {
         for (var j = i + 1; j < points.length; j++) {
@@ -627,6 +737,7 @@ function drawQuadrant() {
         }
     }
     
+    // 绘制数据点
     points.forEach(function(item) {
         var record = item.record;
         var x = item.x;
@@ -634,11 +745,11 @@ function drawQuadrant() {
         
         var color;
         if (record.confidence === '高') {
-            color = '#27ae60';
+            color = '#52c41a';
         } else if (record.confidence === '中') {
-            color = '#f39c12';
+            color = '#faad14';
         } else {
-            color = '#e74c3c';
+            color = '#ff4d4f';
         }
         
         ctx.fillStyle = color;
@@ -654,7 +765,6 @@ function drawQuadrant() {
     });
 }
 
-// 处理画布点击
 function handleCanvasClick(event) {
     if (!Array.isArray(canvasRecords) || canvasRecords.length === 0) return;
     
@@ -662,10 +772,19 @@ function handleCanvasClick(event) {
     var x = event.clientX - rect.left;
     var y = event.clientY - rect.top;
     
+    // Bug Fix: 画布点击也要考虑破折号格式
     var filteredRecords = canvasRecords.filter(function(r) {
         if (currentFilter && !r.timestamp.startsWith(currentFilter)) return false;
-        if (!selectedQuadrants.includes('全部') && !selectedQuadrants.includes(r.quadrant)) return false;
-        return true;
+        if (selectedQuadrants.includes('全部')) return true;
+        
+        var quadrant = r.quadrant || '';
+        if (selectedQuadrants.includes(quadrant)) return true;
+        
+        var normalizedQuadrant = quadrant.replace(/—/g, '--');
+        return selectedQuadrants.some(function(selected) {
+            var normalizedSelected = selected.replace(/—/g, '--');
+            return normalizedQuadrant === normalizedSelected;
+        });
     });
     
     for (var i = 0; i < filteredRecords.length; i++) {
@@ -684,7 +803,7 @@ function handleCanvasClick(event) {
     }
 }
 
-// 加载日期列表
+// ==================== 加载日期列表 ====================
 async function loadDates() {
     try {
         var response = await fetch('/api/dates');
@@ -708,7 +827,7 @@ async function loadDates() {
     }
 }
 
-// 窗口大小调整
+// ==================== 窗口调整和全局事件监听 ====================
 window.addEventListener('resize', function() {
     if (canvas) {
         canvas.width = canvas.offsetWidth;
@@ -726,18 +845,22 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// 页面加载完成
+// ==================== 页面加载完成初始化 ====================
 window.onload = function() {
     loadRecords();
     loadDates();
     
     // 绑定按钮事件
-    document.getElementById('btnAnalyze').addEventListener('click', analyzeData);
+    document.getElementById('btnAnalyze').addEventListener('click', openInputDrawer);
+    document.getElementById('btnSubmitAnalyze').addEventListener('click', analyzeData);
+    document.getElementById('btnCancelAnalyze').addEventListener('click', closeInputDrawer);
+    document.getElementById('btnCloseInputDrawer').addEventListener('click', closeInputDrawer);
     document.getElementById('btnClear').addEventListener('click', clearCanvas);
     document.getElementById('dateFilterSelect').addEventListener('change', filterRecords);
     document.getElementById('quadrantSelectBtn').addEventListener('click', toggleQuadrantDropdown);
-    document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
-    document.getElementById('btnCloseDrawer').addEventListener('click', closeDrawer);
+    document.getElementById('detailDrawerOverlay').addEventListener('click', closeDetailDrawer);
+    document.getElementById('btnCloseDetailDrawer').addEventListener('click', closeDetailDrawer);
+    document.getElementById('inputDrawerOverlay').addEventListener('click', closeInputDrawer);
     
     // 绑定checkbox事件
     var allCheckbox = document.getElementById('quad-all');

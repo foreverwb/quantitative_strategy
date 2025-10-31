@@ -310,6 +310,7 @@ select:focus {
     justify-content: space-between;
     align-items: center;
     font-family: inherit;
+    min-height: 30px;
 }
 
 .quadrant-select:hover {
@@ -358,17 +359,24 @@ select:focus {
     flex: 1;
 }
 
+/* ==================== 改进：方向筛选显示样式 ==================== */
 .quadrant-selected {
     font-size: 13px;
     color: #000000d9;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: keep-all;
+    line-height: 1.4;
+    flex: 1;
+    padding-right: 4px;
 }
 
 .quadrant-arrow {
     font-size: 10px;
     color: #00000045;
+    flex-shrink: 0;
+    margin-left: 4px;
 }
 
 .records-list {
