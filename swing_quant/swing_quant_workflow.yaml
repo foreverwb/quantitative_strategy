@@ -1,0 +1,942 @@
+app:
+  description: '输入1-3个美股代码获取命令清单,或回传数据获取完整分析。'
+  icon: '🤖'
+  icon_background: '#FCE7F3'
+  mode: advanced-chat
+  name: 'swing'
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai:0.2.5@373362a028986aae53a7baf73a7f11991ba3c22c69eaf97d6cde048cfd4a9f98
+kind: app
+version: 0.4.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      enabled: false
+    opening_statement: "你好!我是您的美股期权分析师。请输入1-3个美股代码(例如:AAPL 或 NVDA, TSLA)"
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions:
+    - "AAPL"
+    - "NVDA, TSLA"
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+  graph:
+    edges:
+    # 1. Start -> Router
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: llm
+      id: edge-1001-1002
+      selected: false
+      source: '1001'
+      sourceHandle: source
+      target: '1002'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    
+    # 2. Router -> Main Hub
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: if-else
+      id: edge-1002-1003
+      selected: false
+      source: '1002'
+      sourceHandle: source
+      target: '1003'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      
+    # 3. Path A: Invalid
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: edge-1003-2001
+      selected: false
+      source: '1003'
+      sourceHandle: source
+      target: '2001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+
+    # 4. Path B: Ticker Input
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: edge-1003-2002
+      selected: false
+      source: '1003'
+      sourceHandle: source
+      target: '2002'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: edge-2002-2003
+      selected: false
+      source: '2002'
+      sourceHandle: source
+      target: '2003'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+
+    # 5. Path C: Data Input -> Validation
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: edge-1003-3001
+      selected: false
+      source: '1003'
+      sourceHandle: source
+      target: '3001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: if-else
+      id: edge-3001-3002
+      selected: false
+      source: '3001'
+      sourceHandle: source
+      target: '3002'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      
+    # 6. Path C.1: Missing Data
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: edge-3002-3003
+      selected: false
+      source: '3002'
+      sourceHandle: source
+      target: '3003'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      
+    # 7. Path C.2: Analysis Chain
+    # Validation -> TA
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: edge-3002-4001
+      selected: false
+      source: '3002'
+      sourceHandle: source
+      target: '4001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    # TA -> Scenario
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: edge-4001-5001
+      selected: false
+      source: '4001'
+      sourceHandle: source
+      target: '5001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    # Validation -> Scenario
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: edge-3001-5001
+      selected: false
+      source: '3001'
+      sourceHandle: source
+      target: '5001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    # Scenario -> Strategy
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: edge-5001-6001
+      selected: false
+      source: '5001'
+      sourceHandle: source
+      target: '6001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    # Validation -> Strategy
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: edge-3001-6001
+      selected: false
+      source: '3001'
+      sourceHandle: source
+      target: '6001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    # Strategy -> Report
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: edge-6001-7001
+      selected: false
+      source: '6001'
+      sourceHandle: source
+      target: '7001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    # Scenario -> Report
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: edge-5001-7001
+      selected: false
+      source: '5001'
+      sourceHandle: source
+      target: '7001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    # TA -> Report
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: edge-4001-7001
+      selected: false
+      source: '4001'
+      sourceHandle: source
+      target: '7001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    # Validation -> Report
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: edge-3001-7001
+      selected: false
+      source: '3001'
+      sourceHandle: source
+      target: '7001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    # Report -> Final Answer
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: edge-7001-7002
+      selected: false
+      source: '7001'
+      sourceHandle: source
+      target: '7002'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+
+    nodes:
+    # --------------------------------------------------
+    # 1. START NODE
+    # --------------------------------------------------
+    - data:
+        desc: ''
+        selected: false
+        title: user input
+        type: start
+        variables:
+        - label: query
+          max_length: 15000
+          options: []
+          required: true
+          type: text-input
+          variable: query
+      height: 94
+      id: '1001'
+      position:
+        x: 30
+        y: 300
+      positionAbsolute:
+        x: 30
+        y: 300
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+
+    # --------------------------------------------------
+    # 2. AGENT 1: Triage Router
+    # --------------------------------------------------
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 'Detects if input is tickers or data.'
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: claude-3-haiku-20240307
+          provider: anthropic
+        prompt_template:
+        - id: "sys-router"
+          role: system
+          text: |
+            你是一个路由助手。你的唯一任务是判断用户输入属于以下哪一类,并仅输出 "TICKER", "DATA", 或 "INVALID"。
+            
+            1. "TICKER": 如果消息中包含1-3个符合美股代码格式的字符串(例如:AAPL, MSFT, "amzn us", "tsla"),并且不包含 "!gexr" 或 "SPOT PRICE" 等数据特征。
+               - 正则(参考):(^|[^A-Z])([A-Za-z]{1,5})(?:\s*,\s*([A-Za-z]{1,5})){0,2}([^A-Z]|$)
+            
+            2. "DATA": 如果消息中包含数据特征词,如 "!gexr", "!skew", "SPOT PRICE", "Call Wall", "EM1$" 等。
+            
+            3. "INVALID": 其他所有情况。
+            
+            【你的判断】(TICKER, DATA, or INVALID)
+        - id: "user-router"
+          role: user
+          text: '{{#1001.query#}}'
+        selected: false
+        title: Agent 1 路由
+        type: llm
+        vision:
+          enabled: false
+      height: 94
+      id: '1002'
+      position:
+        x: 330
+        y: 300
+      positionAbsolute:
+        x: 330
+        y: 300
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+
+    # --------------------------------------------------
+    # 3. ROUTER NODE: Splits the workflow
+    # --------------------------------------------------
+    - data:
+        cases:
+        - case_id: case-ticker
+          conditions:
+          - comparison_operator: contains
+            id: cond-ticker
+            value: TICKER
+            variable_selector:
+            - '1002'
+            - text
+          logical_operator: and
+        - case_id: case-data
+          conditions:
+          - comparison_operator: contains
+            id: cond-data
+            value: DATA
+            variable_selector:
+            - '1002'
+            - text
+          logical_operator: and
+        - case_id: case-invalid
+          conditions:
+          - comparison_operator: contains
+            id: cond-invalid
+            value: INVALID
+            variable_selector:
+            - '1002'
+            - text
+          logical_operator: and
+        desc: ''
+        selected: false
+        title: 意图分支
+        type: if-else
+      height: 94
+      id: '1003'
+      position:
+        x: 630
+        y: 300
+      positionAbsolute:
+        x: 630
+        y: 300
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+
+    # --------------------------------------------------
+    # 4. PATH A: INVALID
+    # --------------------------------------------------
+    - data:
+        answer: "请提供1-3个美股代码(示例:AAPL 或 AAPL, MSFT)"
+        desc: ''
+        selected: false
+        title: 🚫 回复无效输入
+        type: answer
+      height: 94
+      id: '2001'
+      position:
+        x: 930
+        y: 50
+      positionAbsolute:
+        x: 930
+        y: 50
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      
+    # --------------------------------------------------
+    # 5. PATH B: TICKER INPUT
+    # --------------------------------------------------
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 'Agent 2: Generates the command list.'
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: claude-3-haiku-20240307
+          provider: anthropic
+        prompt_template:
+        - id: "sys-cmdlist"
+          role: system
+          text: |
+            你是一个美股期权分析助手。你的唯一任务是根据用户提供的代码,严格按照【数据抓取命令清单】的格式,为每个标的(和指数)生成一个清晰的、可供用户复制粘贴去执行的命令列表。
+            
+            【用户输入】
+            {{#1001.query#}}
+            
+            【预处理】
+            1. 提取代码:例如 "amzn us, QQQ" -> ["AMZN", "QQQ"]
+            2. 大写去重。
+            
+            【数据抓取命令清单】
+            请为每个标的生成完整的命令列表,包括:
+            * 必跑(逐标的 {SYMBOL}):
+              * 墙与飙:!gexr {SYMBOL} 25 7 w;!gexr {SYMBOL} 25 14 w
+              * ATM IV:!skew {SYMBOL} 0 7;!skew {SYMBOL} 0 14
+              * 现价与希腊值:!iv {SYMBOL}
+            * 指数背景(必需字段)
+            * 回传要求
+            
+            请立即开始为 {{#1001.query#}} 生成命令清单。
+        - id: "user-cmdlist"
+          role: user
+          text: '{{#1001.query#}}'
+        selected: false
+        title: Agent 2 命令清单
+        type: llm
+        vision:
+          enabled: false
+      height: 94
+      id: '2002'
+      position:
+        x: 930
+        y: 200
+      positionAbsolute:
+        x: 930
+        y: 200
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#2002.text#}}'
+        desc: ''
+        selected: false
+        title: ✅ 回复命令清单
+        type: answer
+      height: 94
+      id: '2003'
+      position:
+        x: 1230
+        y: 200
+      positionAbsolute:
+        x: 1230
+        y: 200
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+
+    # --------------------------------------------------
+    # 6. PATH C: DATA INPUT -> Validation
+    # --------------------------------------------------
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 'Agent 3: Parse raw data, calculate metrics, check completeness.'
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: claude-3-opus-20240229
+          provider: anthropic
+        prompt_template:
+        - id: "sys-validate"
+          role: system
+          text: |
+            你是一个数据校验与计算 Agent。
+            你的任务是解析用户回传的原始数据,并严格按照【数据口径与指标定义】计算所有核心字段,最后输出一个 JSON 对象。
+            
+            【用户原始数据】
+            {{#1001.query#}}
+            
+            【数据口径与指标定义】
+            * EM1$(预期单日波幅,美元):Spot × min(ATM_IV_7D, ATM_IV_14D) × sqrt(1/252)。
+            * Call Wall / Put Wall:取 7D 和 14D 中 net_gex 正负最大值对应的 strike。
+            
+            【数据校验关口】
+            核对以下核心字段是否齐全并已计算出数值:
+            * 标的必需字段: SPOT PRICE | EM1$ | Call Wall | Put Wall | ATM_IV_7D | ATM_IV_14D
+            * 指数背景必需字段: SPX/NDX/VIX等
+            
+            【任务】
+            1. 解析【用户原始数据】。
+            2. 执行【数据口径与指标定义】中的所有计算。
+            3. 核对【数据校验关口】中的必需字段。
+            4. 严格仅输出 JSON 对象。
+            
+            【输出格式】
+            如果数据齐全,输出:
+            {
+              "status": "data_ready",
+              "data": {
+                "AAPL": { "SPOT_PRICE": 170.0, "EM1$": 2.5, "Call_Wall": 180, ... },
+                "SPX": { "NET_GEX_IDX": "...", "EM1$_IDX": "..." }
+              }
+            }
+            
+            如果数据缺失,输出:
+            {
+              "status": "missing_data",
+              "message": "数据校验失败。缺失项与补齐指引:...",
+              "missing_fields": ["...", "..."]
+            }
+        - id: "user-validate"
+          role: user
+          text: '{{#1001.query#}}'
+        selected: false
+        title: Agent 3 数据校验
+        type: llm
+        vision:
+          enabled: false
+      height: 94
+      id: '3001'
+      position:
+        x: 930
+        y: 400
+      positionAbsolute:
+        x: 930
+        y: 400
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        cases:
+        - case_id: case-ready
+          conditions:
+          - comparison_operator: contains
+            id: cond-ready
+            value: data_ready
+            variable_selector:
+            - '3001'
+            - text
+          logical_operator: and
+        - case_id: case-missing
+          conditions:
+          - comparison_operator: contains
+            id: cond-missing
+            value: missing_data
+            variable_selector:
+            - '3001'
+            - text
+          logical_operator: and
+        desc: ''
+        selected: false
+        title: 校验分支
+        type: if-else
+      height: 94
+      id: '3002'
+      position:
+        x: 1230
+        y: 400
+      positionAbsolute:
+        x: 1230
+        y: 400
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+
+    # --------------------------------------------------
+    # 7. PATH C.1: MISSING DATA
+    # --------------------------------------------------
+    - data:
+        answer: '{{#3001.text#}}'
+        desc: ''
+        selected: false
+        title: ⚠️ 回复缺失数据
+        type: answer
+      height: 94
+      id: '3003'
+      position:
+        x: 1530
+        y: 300
+      positionAbsolute:
+        x: 1530
+        y: 300
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+
+    # --------------------------------------------------
+    # 8. PATH C.2: ANALYSIS CHAIN
+    # --------------------------------------------------
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 'Agent 4: Analyze technicals.'
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: claude-3-sonnet-20240229
+          provider: anthropic
+        prompt_template:
+        - id: "sys-ta"
+          role: system
+          text: |
+            你是一个技术面分析 Agent。
+            你的任务是基于【数据JSON】中的 "TA_Data",计算技术面得分并给出简短读数。
+            
+            【数据JSON】
+            {{#3001.text#}}
+            
+            【技术面规则】
+            * 技术面默认组合A:EMA20/50与其斜率、RSI(14)
+            * 默认启用1-3项互补指标
+            
+            【任务】
+            1. 解析【数据JSON】中的 "TA_Data"。
+            2. 应用【技术面规则】进行评分(最多+2)。
+            3. 严格仅输出 JSON 对象:
+               {
+                 "ta_score": 1, 
+                 "ta_commentary": "EMA20/50 走平 (+1), RSI(14) 处在 55 区间 (+0)"
+               }
+        - id: "user-ta"
+          role: user
+          text: "请基于 Agent 3 的数据,进行技术面分析。"
+        selected: false
+        title: Agent 4 技术面
+        type: llm
+        vision:
+          enabled: false
+      height: 94
+      id: '4001'
+      position:
+        x: 1530
+        y: 500
+      positionAbsolute:
+        x: 1530
+        y: 500
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 'Agent 5: Core analysis, scoring, and scenario probability.'
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: claude-3-opus-20240229
+          provider: anthropic
+        prompt_template:
+        - id: "sys-scenario"
+          role: system
+          text: |
+            你是核心剧本推演 Agent。
+            你的任务是整合【数据JSON】和【技术面JSON】,应用【评分框架】和【剧本分类】,输出分析结果。
+            
+            【数据JSON】(来自 Agent 3)
+            {{#3001.text#}}
+            
+            【技术面JSON】(来自 Agent 4)
+            {{#4001.text#}}
+            
+            【分析规则】
+            * 评分框架:基于 GEX 墙位、IV 偏斜、技术面等综合评分
+            * 剧本分类:区间/趋势上/趋势下/过渡
+            * 入场门槛:总分≥3分
+            
+            【任务】
+            1. 整合所有数据。
+            2. 执行【评分框架】,计算总分。
+            3. 执行【剧本分类】,判定概率。
+            4. 严格仅输出 JSON 对象:
+               {
+                 "analysis_summary": "主导方向与驱动...",
+                 "total_score": 3,
+                 "scenarios": [
+                   { "type": "区间", "probability": 65 },
+                   { "type": "趋势上行", "probability": 25 }
+                 ],
+                 "dominant_scenario": "区间",
+                 "entry_threshold_check": "入场" 
+               }
+        - id: "user-scenario"
+          role: user
+          text: "请整合数据,进行剧本推演与评分。"
+        selected: false
+        title: Agent 5 剧本分析
+        type: llm
+        vision:
+          enabled: false
+      height: 94
+      id: '5001'
+      position:
+        x: 1830
+        y: 500
+      positionAbsolute:
+        x: 1830
+        y: 500
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 'Agent 6: Generate actionable strategies with RR/Pw.'
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: claude-3-opus-20240229
+          provider: anthropic
+        prompt_template:
+        - id: "sys-strategy"
+          role: system
+          text: |
+            你是期权策略生成 Agent。
+            你的任务是基于【数据JSON】和【剧本分析JSON】,生成三种策略(保守/均衡/进取),并严格计算每种策略的盈亏比(RR)和胜率(Pw)。
+            
+            【数据JSON】(来自 Agent 3)
+            {{#3001.text#}}
+            
+            【剧本分析JSON】(来自 Agent 5)
+            {{#5001.text#}}
+            
+            【策略映射规则】
+            * 信用价差/铁鹰(保守)
+            * 蝶式/铁秃鹰(均衡)
+            * 借贷价差/日历价差(进取)
+            * 盈亏比(RR)≈ C:(W-C);胜率(Pw)≈ clamp[...]
+            
+            【任务】
+            1. 根据 dominant_scenario 选择策略类型。
+            2. 根据 EM1$ 和 Walls 确定行权价。
+            3. 严格执行【策略映射规则】中的公式,计算 RR 和 Pw。
+            4. 严格仅输出 JSON 数组:
+               [
+                 {
+                   "type": "保守 (信用价差)",
+                   "structure": "Sell 1x AAPL 180C / Buy 1x AAPL 182.5C",
+                   "DTE": 14,
+                   "greeks": "...",
+                   "RR_estimate": "1:4 (C=0.5, W=2.5)",
+                   "Pw_estimate": "75%"
+                 }
+               ]
+        - id: "user-strategy"
+          role: user
+          text: "请根据分析结果,生成带RR/Pw的策略。"
+        selected: false
+        title: Agent 6 策略生成
+        type: llm
+        vision:
+          enabled: false
+      height: 94
+      id: '6001'
+      position:
+        x: 2130
+        y: 500
+      positionAbsolute:
+        x: 2130
+        y: 500
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 'Agent 7: Assemble the final report based on the template.'
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: claude-3-opus-20240229
+          provider: anthropic
+        prompt_template:
+        - id: "sys-report"
+          role: system
+          text: |
+            你是最终报告生成 Agent。
+            你的任务是汇总所有上游 Agent 的 JSON 输出,并严格按照【输出模板】生成一份给用户的、人类可读的 Markdown 报告。
+            
+            【数据JSON】(来自 Agent 3)
+            {{#3001.text#}}
+            
+            【技术面JSON】(来自 Agent 4)
+            {{#4001.text#}}
+            
+            【剧本分析JSON】(来自 Agent 5)
+            {{#5001.text#}}
+            
+            【策略JSON】(来自 Agent 6)
+            {{#6001.text#}}
+            
+            【风控规则】
+            * 入场:次日开盘后15-30分钟
+            * 止盈:到达最大利润的70-80%
+            * 止损:达到最大亏损的50%或持有3-5个交易日
+            
+            【输出模板】
+            * 数据校验关口结果
+              * 标的:EM1$=;... (从 Agent 3 JSON 提取)
+            * 初次分析(含技术互补1-3项)
+              * 主导方向与驱动... (从 Agent 5 JSON 提取)
+              * 技术读数:... (从 Agent 4 JSON 提取)
+            * 剧本与概率
+              * 区间/趋势上/趋势下/过渡:... (从 Agent 5 JSON 提取)
+            * 策略建议(逐一给:保守/均衡/进取)
+              * (从 Agent 6 JSON 提取, 格式化)
+              * 止盈止损与时间规则 (从【风控规则】提取)
+            * 是否入场交易:(从 Agent 5 JSON 提取 'entry_threshold_check'),并给出明确理由...
+            * 监控要点:...
+            
+            请立即开始生成最终报告。
+        - id: "user-report"
+          role: user
+          text: "请汇总所有分析,生成最终报告。"
+        selected: false
+        title: Agent 7 最终报告
+        type: llm
+        vision:
+          enabled: false
+      height: 94
+      id: '7001'
+      position:
+        x: 2430
+        y: 650
+      positionAbsolute:
+        x: 2430
+        y: 650
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#7001.text#}}'
+        desc: ''
+        selected: false
+        title: 📈 回复最终分析报告
+        type: answer
+      height: 94
+      id: '7002'
+      position:
+        x: 2730
+        y: 650
+      positionAbsolute:
+        x: 2730
+        y: 650
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+
+  rag_pipeline_variables: []

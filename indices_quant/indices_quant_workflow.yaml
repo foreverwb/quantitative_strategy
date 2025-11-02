@@ -1,0 +1,521 @@
+app:
+  description: '期权量化分析师 (SPX, QQQ, SPY, IWM, SMH)'
+  icon: '🤖'
+  icon_background: '#E1F5FE'
+  mode: advanced-chat
+  name: 'GEXBOT量化分析师'
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai:0.2.5@373362a028986aae53a7baf73a7f11991ba3c22c69eaf97d6cde048cfd4a9f98
+kind: app
+version: 0.4.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: "你好,我是您的期权量化分析师 (SPX, QQQ, SPY, IWM, SMH)。\n请按\"快速模式\"模板或输入\"研究模式 [SYMBOL]\"开始。"
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions:
+    - "研究模式 SPX"
+    - "快速模式 QQQ 周期 5-15日"
+    suggested_questions_after_answer:
+      enabled: true
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    # 1. Start -> Router
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: llm
+      id: 1730000001-source-1730000002-target
+      source: '1730000001'
+      sourceHandle: source
+      target: '1730000002'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    
+    # 2. Router -> Main Router
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: if-else
+      id: 1730000002-source-1730000003-target
+      source: '1730000002'
+      sourceHandle: source
+      target: '1730000003'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      
+    # 3. Path A: New Request
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1730000003-source-1730000011-target
+      source: '1730000003'
+      sourceHandle: source
+      target: '1730000011'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1730000011-source-1730000012-target
+      source: '1730000011'
+      sourceHandle: source
+      target: '1730000012'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+
+    # 4. Path B: Data Input
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1730000003-source-1730000021-target
+      source: '1730000003'
+      sourceHandle: source
+      target: '1730000021'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1730000021-source-1730000022-target
+      source: '1730000021'
+      sourceHandle: source
+      target: '1730000022'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+
+    # 5. Path C: Detail Request
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1730000003-source-1730000031-target
+      source: '1730000003'
+      sourceHandle: source
+      target: '1730000031'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1730000031-source-1730000032-target
+      source: '1730000031'
+      sourceHandle: source
+      target: '1730000032'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+
+    # 6. Path D: Invalid
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1730000003-source-1730000041-target
+      source: '1730000003'
+      sourceHandle: source
+      target: '1730000041'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+
+    nodes:
+    # --------------------------------------------------
+    # 1. START NODE
+    # --------------------------------------------------
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - label: query
+          max_length: 15000
+          options: []
+          required: true
+          type: text-input
+          variable: query
+      height: 90
+      id: '1730000001'
+      position:
+        x: 30
+        y: 300
+      positionAbsolute:
+        x: 30
+        y: 300
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+
+    # --------------------------------------------------
+    # 2. AGENT 1: Router Agent
+    # --------------------------------------------------
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o
+          provider: openai
+        prompt_template:
+        - id: sys-router-001
+          role: system
+          text: "你是一个路由助手。你的唯一任务是判断用户输入属于以下哪一类,并仅输出 NEW_REQUEST, DATA_INPUT, DETAIL_REQUEST, 或 INVALID。1.NEW_REQUEST:如果消息中包含研究模式或快速模式,并带有SPX,QQQ,SPY,IWM,SMH之一。2.DATA_INPUT:如果消息中包含gexbot的图表数据特征词,如!gexn,vol_trigger,NET GEX,Call Wall等。3.DETAIL_REQUEST:如果消息中精确包含详细分析。4.INVALID:其他所有情况。【你的判断】"
+        - role: user
+          text: '{{#1730000001.query#}}'
+        selected: false
+        title: LLM路由
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1730000002'
+      position:
+        x: 334
+        y: 300
+      positionAbsolute:
+        x: 334
+        y: 300
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+
+    # --------------------------------------------------
+    # 3. IF-ELSE NODE
+    # --------------------------------------------------
+    - data:
+        cases:
+        - case_id: case-new-request
+          conditions:
+          - comparison_operator: contains
+            id: cond-new-request
+            value: NEW_REQUEST
+            variable_selector:
+            - '1730000002'
+            - text
+          logical_operator: and
+        - case_id: case-data-input
+          conditions:
+          - comparison_operator: contains
+            id: cond-data-input
+            value: DATA_INPUT
+            variable_selector:
+            - '1730000002'
+            - text
+          logical_operator: and
+        - case_id: case-detail-request
+          conditions:
+          - comparison_operator: contains
+            id: cond-detail-request
+            value: DETAIL_REQUEST
+            variable_selector:
+            - '1730000002'
+            - text
+          logical_operator: and
+        - case_id: case-invalid
+          conditions:
+          - comparison_operator: contains
+            id: cond-invalid
+            value: INVALID
+            variable_selector:
+            - '1730000002'
+            - text
+          logical_operator: and
+        desc: ''
+        selected: false
+        title: 意图分支
+        type: if-else
+      height: 90
+      id: '1730000003'
+      position:
+        x: 638
+        y: 300
+      positionAbsolute:
+        x: 638
+        y: 300
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+
+    # --------------------------------------------------
+    # PATH A: NEW REQUEST
+    # --------------------------------------------------
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o
+          provider: openai
+        prompt_template:
+        - id: sys-cmd-001
+          role: system
+          text: "你是期权量化分析师。根据用户请求生成gexbot命令清单。研究模式(1-3日):1.!gexn {SYMBOL} 10 1 w 2.!gexn {SYMBOL} 10 3 w 3.!dex {SYMBOL} 10 1 4.!vanna {SYMBOL} 10 1 5.!term {SYMBOL} 6.!skew {SYMBOL} 0 1。快速模式(5-15日):1.!gexn {SYMBOL} 25 7 w 2.!gexn {SYMBOL} 25 14 w 3.!dex {SYMBOL} 25 7 4.!vanna {SYMBOL} 25 7 5.!term {SYMBOL} 6.!skew {SYMBOL} 0 7。根据用户输入生成对应命令清单。"
+        - role: user
+          text: '{{#1730000001.query#}}'
+        selected: false
+        title: LLM命令生成
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1730000011'
+      position:
+        x: 942
+        y: 100
+      positionAbsolute:
+        x: 942
+        y: 100
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: '{{#1730000011.text#}}'
+        desc: ''
+        selected: false
+        title: 回复命令清单
+        type: answer
+        variables: []
+      height: 90
+      id: '1730000012'
+      position:
+        x: 1246
+        y: 100
+      positionAbsolute:
+        x: 1246
+        y: 100
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+
+    # --------------------------------------------------
+    # PATH B: DATA INPUT
+    # --------------------------------------------------
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o
+          provider: openai
+        prompt_template:
+        - id: sys-simple-001
+          role: system
+          text: "你是期权量化分析师。用户已回传gexbot数据。请解析数据并按以下四段式输出简版结论:1.状态摘要:vol_trigger位置、净GEX、Vanna方向、Term形态 2.关键价位:vol_trigger、主要墙位、技术位 3.策略候选:1-2个最佳结构及理由 4.触发与失效:入场止损止盈条件"
+        - role: user
+          text: '{{#1730000001.query#}}'
+        selected: false
+        title: LLM简版分析
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1730000021'
+      position:
+        x: 942
+        y: 250
+      positionAbsolute:
+        x: 942
+        y: 250
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: "{{#1730000021.text#}}\n\n---\n如需完整分析,请输入\"详细分析\""
+        desc: ''
+        selected: false
+        title: 回复简版结论
+        type: answer
+        variables: []
+      height: 90
+      id: '1730000022'
+      position:
+        x: 1246
+        y: 250
+      positionAbsolute:
+        x: 1246
+        y: 250
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+
+    # --------------------------------------------------
+    # PATH C: DETAIL REQUEST
+    # --------------------------------------------------
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o
+          provider: openai
+        prompt_template:
+        - id: sys-detail-001
+          role: system
+          text: "你是期权量化分析师。用户要求详细分析。请基于对话历史中的数据和简版结论,生成完整分析报告: 1.曝险结构:GEX/DEX/VEX/Vanna/Triggers 2.波动结构:Term/Skew/Surface 3.技术面:≤5项关键指标 4.评分与Edge:三档胜率与R:R 5.策略与风控:具体策略、入场条件、止损止盈 6.事件影响:重要事件及影响 7.监控与调整:关键监控点"
+        - role: user
+          text: '{{#1730000001.query#}}'
+        selected: false
+        title: LLM详细分析
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1730000031'
+      position:
+        x: 942
+        y: 400
+      positionAbsolute:
+        x: 942
+        y: 400
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: '{{#1730000031.text#}}'
+        desc: ''
+        selected: false
+        title: 回复详细分析
+        type: answer
+        variables: []
+      height: 90
+      id: '1730000032'
+      position:
+        x: 1246
+        y: 400
+      positionAbsolute:
+        x: 1246
+        y: 400
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+
+    # --------------------------------------------------
+    # PATH D: INVALID
+    # --------------------------------------------------
+    - data:
+        answer: "无效输入。请按以下格式发起请求:\n- \"研究模式 SPX\"\n- \"快速模式 QQQ 周期 5-15日\"\n\n或在收到简版结论后输入\"详细分析\""
+        desc: ''
+        selected: false
+        title: 回复无效
+        type: answer
+        variables: []
+      height: 90
+      id: '1730000041'
+      position:
+        x: 942
+        y: 550
+      positionAbsolute:
+        x: 942
+        y: 550
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: 0
+      y: 0
+      zoom: 1
+  rag_pipeline_variables: []

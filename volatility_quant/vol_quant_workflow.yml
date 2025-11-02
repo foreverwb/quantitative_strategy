@@ -1,0 +1,520 @@
+app:
+  description: '波动率与结构性供需分析师'
+  icon: '🤖'
+  icon_background: '#D5D9EB'
+  mode: advanced-chat
+  name: '波动率量化分析师 V3'
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai:0.2.5@373362a028986aae53a7baf73a7f11991ba3c22c69eaf97d6cde048cfd4a9f98
+kind: app
+version: 0.4.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: "你好,我是您的波动率与结构性供需分析师。请稍等,我将向您收集分析所需的变量。"
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions:
+    - "开始分析"
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    # 1. Start -> Router
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: llm
+      id: 1740000001-source-1740000002-target
+      source: '1740000001'
+      sourceHandle: source
+      target: '1740000002'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    
+    # 2. Router -> Main Router
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: if-else
+      id: 1740000002-source-1740000003-target
+      source: '1740000002'
+      sourceHandle: source
+      target: '1740000003'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+      
+    # 3. Path A: New Request
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1740000003-source-1740000011-target
+      source: '1740000003'
+      sourceHandle: source
+      target: '1740000011'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1740000011-source-1740000012-target
+      source: '1740000011'
+      sourceHandle: source
+      target: '1740000012'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+
+    # 4. Path B: Vars Provided
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1740000003-source-1740000021-target
+      source: '1740000003'
+      sourceHandle: source
+      target: '1740000021'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1740000021-source-1740000022-target
+      source: '1740000021'
+      sourceHandle: source
+      target: '1740000022'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+
+    # 5. Path C: Data Provided
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1740000003-source-1740000031-target
+      source: '1740000003'
+      sourceHandle: source
+      target: '1740000031'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 1740000031-source-1740000032-target
+      source: '1740000031'
+      sourceHandle: source
+      target: '1740000032'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+
+    # 6. Path D: Invalid
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1740000003-source-1740000041-target
+      source: '1740000003'
+      sourceHandle: source
+      target: '1740000041'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+
+    nodes:
+    # --------------------------------------------------
+    # 1. START NODE
+    # --------------------------------------------------
+    - data:
+        desc: ''
+        selected: false
+        title: 用户输入
+        type: start
+        variables:
+        - label: query
+          max_length: 20000
+          options: []
+          required: true
+          type: text-input
+          variable: query
+      height: 90
+      id: '1740000001'
+      position:
+        x: 30
+        y: 300
+      positionAbsolute:
+        x: 30
+        y: 300
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+
+    # --------------------------------------------------
+    # 2. AGENT 1: Router
+    # --------------------------------------------------
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o
+          provider: openai
+        prompt_template:
+        - id: sys-router-001
+          role: system
+          text: "你是一个路由助手。你的唯一任务是判断用户输入属于以下哪一类,并仅输出 VARS_PROVIDED, DATA_PROVIDED, NEW_REQUEST, 或 INVALID。1.VARS_PROVIDED:如果消息中包含明确的变量赋值,如symbol:,event_type:,HV10:,holding_window:。2.DATA_PROVIDED:如果消息中包含gexbot的图表数据特征词,如!trigger,!gexn,VOL TRIGGER:,gexr output:,RIM:,VVIX:。3.NEW_REQUEST:如果消息是新的会话发起,如你好,开始分析,分析一下NVDA,并且不包含上述1和2的特征词。4.INVALID:其他所有情况。【你的判断】"
+        - role: user
+          text: '{{#1740000001.query#}}'
+        selected: false
+        title: LLM路由
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1740000002'
+      position:
+        x: 334
+        y: 300
+      positionAbsolute:
+        x: 334
+        y: 300
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+
+    # --------------------------------------------------
+    # 3. IF-ELSE NODE
+    # --------------------------------------------------
+    - data:
+        cases:
+        - case_id: case-new-request
+          conditions:
+          - comparison_operator: contains
+            id: cond-new-request
+            value: NEW_REQUEST
+            variable_selector:
+            - '1740000002'
+            - text
+          logical_operator: and
+        - case_id: case-vars-provided
+          conditions:
+          - comparison_operator: contains
+            id: cond-vars-provided
+            value: VARS_PROVIDED
+            variable_selector:
+            - '1740000002'
+            - text
+          logical_operator: and
+        - case_id: case-data-provided
+          conditions:
+          - comparison_operator: contains
+            id: cond-data-provided
+            value: DATA_PROVIDED
+            variable_selector:
+            - '1740000002'
+            - text
+          logical_operator: and
+        - case_id: case-invalid
+          conditions:
+          - comparison_operator: contains
+            id: cond-invalid
+            value: INVALID
+            variable_selector:
+            - '1740000002'
+            - text
+          logical_operator: and
+        desc: ''
+        selected: false
+        title: 意图分支
+        type: if-else
+      height: 90
+      id: '1740000003'
+      position:
+        x: 638
+        y: 300
+      positionAbsolute:
+        x: 638
+        y: 300
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+
+    # --------------------------------------------------
+    # PATH A: NEW REQUEST
+    # --------------------------------------------------
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o
+          provider: openai
+        prompt_template:
+        - id: sys-ask-001
+          role: system
+          text: "你是我的波动率与结构性供需分析师。你的第一个任务是开始交互流程,向我收集必要的初始变量。请严格按照以下格式,向用户提问,要求他她提供:您好,我是您的波动率量化分析师。为了开始分析,请提供以下信息(若无特定值,可回复默认):1.symbol:(指数板块ETF单股)2.event_type:(财报FOMCCPI非农并购其他)3.event_time_ET:(事件发生时间)4.holding_window:(如T到T+3,或5-20DTE)5.策略偏好:(delta-neutral或允许delta暴露)6.HV10HV20HV60:(请提供YZ口径的年化值,如25/30/35)7.会话时间:(盘中RTH盘前盘后)8.上下文:(是否静默期?是否临近OPEX?有无突发新闻?)9.增强数据(可选):(若能提供,请一并给出:VVIX,VIX9D/VIX,财报implied move,隐含相关性等)请仅输出以上提问内容。"
+        - role: user
+          text: '{{#1740000001.query#}}'
+        selected: false
+        title: LLM变量收集
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1740000011'
+      position:
+        x: 942
+        y: 50
+      positionAbsolute:
+        x: 942
+        y: 50
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: '{{#1740000011.text#}}'
+        desc: ''
+        selected: false
+        title: 回复提问
+        type: answer
+        variables: []
+      height: 90
+      id: '1740000012'
+      position:
+        x: 1246
+        y: 50
+      positionAbsolute:
+        x: 1246
+        y: 50
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+
+    # --------------------------------------------------
+    # PATH B: VARS PROVIDED
+    # --------------------------------------------------
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o
+          provider: openai
+        prompt_template:
+        - id: sys-gencmd-001
+          role: system
+          text: "你是分析师。用户已提供了初始变量。你的任务是:1.解析用户提供的变量。2.将这些变量打包成一个JSON存根(隐藏在HTML注释中),用于对话历史传递。3.根据变量(主要是SYMBOL),生成标准指令列表(默认套件)。4.严格按照简化版按行输出的格式返回命令。标准指令列表(默认套件):!gexn {SYMBOL} 15 98;!gexr {SYMBOL} 15 98;!dex {SYMBOL} 15 98;!vexn {SYMBOL} 15 98;!vanna {SYMBOL} 15 98;!trigger {SYMBOL};!term {SYMBOL};!skew {SYMBOL} 0 98;!skew {SYMBOL} 25 98;!surface {SYMBOL} vex ntm 190。请输出:感谢您提供变量。请执行以下gexbot命令并回传所有图表和读数,然后将实际命令列表替换到此处。"
+        - role: user
+          text: '{{#1740000001.query#}}'
+        selected: false
+        title: LLM命令生成
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1740000021'
+      position:
+        x: 942
+        y: 200
+      positionAbsolute:
+        x: 942
+        y: 200
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: '{{#1740000021.text#}}'
+        desc: ''
+        selected: false
+        title: 回复命令清单
+        type: answer
+        variables: []
+      height: 90
+      id: '1740000022'
+      position:
+        x: 1246
+        y: 200
+      positionAbsolute:
+        x: 1246
+        y: 200
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+
+    # --------------------------------------------------
+    # PATH C: DATA PROVIDED
+    # --------------------------------------------------
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: gpt-4o
+          provider: openai
+        prompt_template:
+        - id: sys-analyst-001
+          role: system
+          text: "你是波动率与结构性供需分析师。这是最关键的一步。任务:1.回溯状态:仔细阅读对话历史,找到HTML注释块,提取所有初始变量(symbol,event,HV10/20/60,holding_window等)。2.解析数据:解析用户当前的输入,这包含了gexbot图表数据(如VOL TRIGGER,GEX,VEX,Skew等)。3.完整性检查(追问RIM):检查输入中是否已包含RIM(Realized/Implied Move比值)或其计算所需数据。如果缺失RIM:你的唯一任务是停止分析,并严格按照用户补充数据的获取路径与要求模板向用户追问RIM数据。追问模板:数据已收到。分析还需要最后一步关键数据:盘中真实波幅(RIM)。请提供RIM(Realized/Implied Move比值)或其计算所需字段(三选一):1.价差法(推荐):提供近5-15分钟的高低价或ATR(1-5m),以及当前标的价格S。2.IV法:提供目标DTE的ATM IV、标的S、窗口w(分钟)。3.跨价法:提供目标DTE的ATM straddle价格。(若为财报场景,请提供平台显示的earnings implied move%)。如果RIM已提供:则执行完整分析。完整分析步骤:1.NET-GEX判定(必须使用VOL TRIGGER作为唯一证据)2.墙距评估(计算GammaWallProx)3.RV/HV匹配4.计算信号(VRP_sel,S_vrp,S_carry,S_skew,S_gex,S_vex,S_vanna,S_rv,S_liq,S_vov,S_rim等所有分数)5.计算总分(LongVolScore和ShortVolScore)6.校准概率(使用冷启动先验p_long和p_short)7.三分类决策(做多波动率/做空波动率/观望)8.Edge检查(必须EV>0且RR>=1.5:1)9.策略映射(仅在决策非观望且Edge检查通过时,给出1-3种策略)。最终输出:1.结论:(多空观望)+方向概率p与主要理由(明确引用VOL TRIGGER判断)2.策略与参数:(DTE、行权区间、希腊、目标盈亏比、胜率EV估计、入场触发与退出)3.关键分数:列出所有S_开头的分数4.时间戳与缺失项替代;0DTE已规避;限定盘中执行(ET)"
+        - role: user
+          text: '{{#1740000001.query#}}'
+        selected: false
+        title: LLM量化分析
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1740000031'
+      position:
+        x: 942
+        y: 400
+      positionAbsolute:
+        x: 942
+        y: 400
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        answer: '{{#1740000031.text#}}'
+        desc: ''
+        selected: false
+        title: 回复分析或追问RIM
+        type: answer
+        variables: []
+      height: 90
+      id: '1740000032'
+      position:
+        x: 1246
+        y: 400
+      positionAbsolute:
+        x: 1246
+        y: 400
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+
+    # --------------------------------------------------
+    # PATH D: INVALID
+    # --------------------------------------------------
+    - data:
+        answer: "输入无法识别。请按以下流程操作:\n1.(如果刚开始)等待我向您提问。\n2.(如果我已提问)请按symbol:XXX格式回复变量。\n3.(如果我已给命令)请粘贴gexbot数据。\n4.(如果我已追问)请提供RIM数据。"
+        desc: ''
+        selected: false
+        title: 回复无效
+        type: answer
+        variables: []
+      height: 90
+      id: '1740000041'
+      position:
+        x: 942
+        y: 600
+      positionAbsolute:
+        x: 942
+        y: 600
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: 0
+      y: 0
+      zoom: 1
+  rag_pipeline_variables: []
