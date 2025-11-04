@@ -52,6 +52,7 @@ h1 {
     background: #fafafa;
     overflow: hidden;
     flex-shrink: 1;
+    position: relative;
 }
 
 /* 响应式布局 */
@@ -230,7 +231,7 @@ h1 {
     width: 100%;
     height: 100%;
     background: white;
-    min-height: 420px;
+    min-height: 400px;
 }
 
 .quadrant-canvas {
@@ -239,16 +240,16 @@ h1 {
     left: 0;
     width: 100%;
     height: 100%;
-    min-height: 420px;
+    min-height: 400px;
 }
 
 @media (max-width: 768px) {
     .quadrant-chart {
-        min-height: 420px;
+        min-height: 350px;
     }
     
     .quadrant-canvas {
-        min-height: 420px;
+        min-height: 350px;
     }
 }
 
@@ -315,6 +316,8 @@ button {
     padding: 12px 20px;
     border-bottom: 1px solid #f0f0f0;
     flex-shrink: 0;
+    position: relative;
+    z-index: 100;
 }
 
 .filter-row {
@@ -377,6 +380,7 @@ select:focus {
 
 .quadrant-filter {
     position: relative;
+    z-index: 101;
 }
 
 .quadrant-select {
@@ -410,8 +414,8 @@ select:focus {
     max-height: 200px;
     overflow-y: auto;
     display: none;
-    z-index: 100;
-    box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12);
+    z-index: 102 !important;
+    box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08);
 }
 
 .quadrant-dropdown.open {
@@ -467,12 +471,13 @@ select:focus {
     overflow-y: auto;
     padding: 15px;
     position: relative;
+    z-index: 1;
 }
 
 .date-header.sticky {
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 10;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
@@ -482,6 +487,8 @@ select:focus {
     overflow: visible;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
     border: 1px solid #f0f0f0;
+    position: relative;
+    z-index: 1;
 }
 
 @media (max-width: 768px) {
@@ -552,7 +559,7 @@ select:focus {
     color: white;
     padding: 2px;
     border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 2px;
+    border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
     transition: all 0.2s ease;
