@@ -1,15 +1,21 @@
 app:
-  description: '输入1-3个美股代码获取命令清单,或回传数据获取完整分析。'
-  icon: '🤖'
+  description: 输入1-3个美股代码获取命令清单,或回传数据获取完整分析。
+  icon: 🤖
   icon_background: '#FCE7F3'
   mode: advanced-chat
-  name: 'swing'
+  name: swing
   use_icon_as_answer_icon: false
 dependencies:
 - current_identifier: null
   type: marketplace
   value:
-    marketplace_plugin_unique_identifier: langgenius/openai:0.2.5@373362a028986aae53a7baf73a7f11991ba3c22c69eaf97d6cde048cfd4a9f98
+    marketplace_plugin_unique_identifier: langgenius/aihubmix:0.0.9@c48d6660af38ba867cd5a21cff893caf7f24bcd689297ad7acb7674212437c18
+    version: null
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/openai_api_compatible:0.0.23@59ef558a46420c436b280af1ee452b4129ddfd3567826112f6f193279d8c4a37
+    version: null
 kind: app
 version: 0.4.0
 workflow:
@@ -17,8 +23,34 @@ workflow:
   environment_variables: []
   features:
     file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
       enabled: false
-    opening_statement: "你好!我是您的美股期权分析师。请输入1-3个美股代码(例如:AAPL 或 NVDA, TSLA)"
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: 你好!我是您的美股期权分析师。请输入1-3个美股代码(例如:AAPL 或 NVDA, TSLA)
     retriever_resource:
       enabled: false
     sensitive_word_avoidance:
@@ -26,15 +58,16 @@ workflow:
     speech_to_text:
       enabled: false
     suggested_questions:
-    - "AAPL"
-    - "NVDA, TSLA"
+    - AAPL
+    - NVDA, TSLA
     suggested_questions_after_answer:
       enabled: false
     text_to_speech:
       enabled: false
+      language: ''
+      voice: ''
   graph:
     edges:
-    # 1. Start -> Router
     - data:
         isInIteration: false
         isInLoop: false
@@ -48,8 +81,6 @@ workflow:
       targetHandle: target
       type: custom
       zIndex: 0
-    
-    # 2. Router -> Main Hub
     - data:
         isInIteration: false
         isInLoop: false
@@ -63,23 +94,6 @@ workflow:
       targetHandle: target
       type: custom
       zIndex: 0
-      
-    # 3. Path A: Invalid
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: if-else
-        targetType: answer
-      id: edge-1003-2001
-      selected: false
-      source: '1003'
-      sourceHandle: source
-      target: '2001'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-
-    # 4. Path B: Ticker Input
     - data:
         isInIteration: false
         isInLoop: false
@@ -106,8 +120,6 @@ workflow:
       targetHandle: target
       type: custom
       zIndex: 0
-
-    # 5. Path C: Data Input -> Validation
     - data:
         isInIteration: false
         isInLoop: false
@@ -134,8 +146,6 @@ workflow:
       targetHandle: target
       type: custom
       zIndex: 0
-      
-    # 6. Path C.1: Missing Data
     - data:
         isInIteration: false
         isInLoop: false
@@ -149,9 +159,6 @@ workflow:
       targetHandle: target
       type: custom
       zIndex: 0
-      
-    # 7. Path C.2: Analysis Chain
-    # Validation -> TA
     - data:
         isInIteration: false
         isInLoop: false
@@ -165,137 +172,110 @@ workflow:
       targetHandle: target
       type: custom
       zIndex: 0
-    # TA -> Scenario
     - data:
-        isInIteration: false
         isInLoop: false
-        sourceType: llm
+        sourceType: if-else
         targetType: llm
-      id: edge-4001-5001
+      id: 1003-case-ticker-2002-target
       selected: false
-      source: '4001'
-      sourceHandle: source
+      source: '1003'
+      sourceHandle: case-ticker
+      target: '2002'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 3002-case-missing-3003-target
+      selected: false
+      source: '3002'
+      sourceHandle: case-missing
+      target: '3003'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1003-case-data-3001-target
+      selected: false
+      source: '1003'
+      sourceHandle: case-data
+      target: '3001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 3002-case-ready-4001-target
+      selected: false
+      source: '3002'
+      sourceHandle: case-ready
+      target: '4001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 3002-case-ready-5001-target
+      source: '3002'
+      sourceHandle: case-ready
       target: '5001'
       targetHandle: target
       type: custom
       zIndex: 0
-    # Validation -> Scenario
     - data:
-        isInIteration: false
         isInLoop: false
         sourceType: llm
         targetType: llm
-      id: edge-3001-5001
-      selected: false
-      source: '3001'
-      sourceHandle: source
-      target: '5001'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    # Scenario -> Strategy
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: llm
-      id: edge-5001-6001
-      selected: false
+      id: 5001-source-6001-target
       source: '5001'
       sourceHandle: source
       target: '6001'
       targetHandle: target
       type: custom
       zIndex: 0
-    # Validation -> Strategy
     - data:
-        isInIteration: false
         isInLoop: false
         sourceType: llm
         targetType: llm
-      id: edge-3001-6001
-      selected: false
-      source: '3001'
-      sourceHandle: source
-      target: '6001'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    # Strategy -> Report
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: llm
-      id: edge-6001-7001
-      selected: false
+      id: 6001-source-7001-target
       source: '6001'
       sourceHandle: source
       target: '7001'
       targetHandle: target
       type: custom
       zIndex: 0
-    # Scenario -> Report
     - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: llm
-      id: edge-5001-7001
-      selected: false
-      source: '5001'
-      sourceHandle: source
-      target: '7001'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    # TA -> Report
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: llm
-      id: edge-4001-7001
-      selected: false
-      source: '4001'
-      sourceHandle: source
-      target: '7001'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    # Validation -> Report
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: llm
-      id: edge-3001-7001
-      selected: false
-      source: '3001'
-      sourceHandle: source
-      target: '7001'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    # Report -> Final Answer
-    - data:
-        isInIteration: false
         isInLoop: false
         sourceType: llm
         targetType: answer
-      id: edge-7001-7002
-      selected: false
+      id: 7001-source-7002-target
       source: '7001'
       sourceHandle: source
       target: '7002'
       targetHandle: target
       type: custom
       zIndex: 0
-
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: 4001-source-5001-target
+      source: '4001'
+      sourceHandle: source
+      target: '5001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
     nodes:
-    # --------------------------------------------------
-    # 1. START NODE
-    # --------------------------------------------------
     - data:
         desc: ''
         selected: false
@@ -308,7 +288,7 @@ workflow:
           required: true
           type: text-input
           variable: query
-      height: 94
+      height: 88
       id: '1001'
       position:
         x: 30
@@ -321,44 +301,36 @@ workflow:
       targetPosition: left
       type: custom
       width: 242
-
-    # --------------------------------------------------
-    # 2. AGENT 1: Triage Router
-    # --------------------------------------------------
     - data:
         context:
           enabled: false
           variable_selector: []
-        desc: 'Detects if input is tickers or data.'
+        desc: 根据用户输入，判断是新任务（Ticker）还是数据回传（Data）。
         model:
           completion_params:
-            temperature: 0.7
+            temperature: 0.3
           mode: chat
-          name: claude-3-haiku-20240307
-          provider: anthropic
+          name: Qwen3-8B
+          provider: langgenius/openai_api_compatible/openai_api_compatible
         prompt_template:
-        - id: "sys-router"
+        - id: sys-router
           role: system
-          text: |
-            你是一个路由助手。你的唯一任务是判断用户输入属于以下哪一类,并仅输出 "TICKER", "DATA", 或 "INVALID"。
-            
-            1. "TICKER": 如果消息中包含1-3个符合美股代码格式的字符串(例如:AAPL, MSFT, "amzn us", "tsla"),并且不包含 "!gexr" 或 "SPOT PRICE" 等数据特征。
-               - 正则(参考):(^|[^A-Z])([A-Za-z]{1,5})(?:\s*,\s*([A-Za-z]{1,5})){0,2}([^A-Z]|$)
-            
-            2. "DATA": 如果消息中包含数据特征词,如 "!gexr", "!skew", "SPOT PRICE", "Call Wall", "EM1$" 等。
-            
-            3. "INVALID": 其他所有情况。
-            
-            【你的判断】(TICKER, DATA, or INVALID)
-        - id: "user-router"
+          text: "你是一个路由助手。你的唯一任务是判断用户输入属于以下哪一类,并仅输出 \"SYMBOL\", \"DATA\", 或 \"INVALID\"\
+            。\n\n1. \"TICKER\": 如果消息中包含1-3个符合美股代码格式的字符串(例如:AAPL, MSFT, \"amzn us\"\
+            , \"tsla\"),并且不包含 \"!gexr\" 或 \"SPOT PRICE\" 等数据特征。\n   - 正则(参考):(^|[^A-Z])([A-Za-z]{1,5})(?:\\\
+            s*,\\s*([A-Za-z]{1,5})){0,2}([^A-Z]|$)\n\n2. \"DATA\": 如果消息中包含数据特征词,如\
+            \ \"!gexr\", \"!skew\", \"SPOT PRICE\", \"Call Wall\", \"EM1$\" 等。\n\n\
+            3. \"INVALID\": 其他所有情况。\n\n【你的判断】(SYMBOL, DATA, or INVALID)\n"
+        - id: user-router
           role: user
           text: '{{#1001.query#}}'
         selected: false
-        title: Agent 1 路由
+        structured_output_enabled: false
+        title: 路由
         type: llm
         vision:
           enabled: false
-      height: 94
+      height: 132
       id: '1002'
       position:
         x: 330
@@ -371,83 +343,60 @@ workflow:
       targetPosition: left
       type: custom
       width: 242
-
-    # --------------------------------------------------
-    # 3. ROUTER NODE: Splits the workflow
-    # --------------------------------------------------
     - data:
         cases:
         - case_id: case-ticker
           conditions:
-          - comparison_operator: contains
+          - comparison_operator: is
             id: cond-ticker
-            value: TICKER
+            value: SYMBOL
             variable_selector:
             - '1002'
             - text
+          id: case-ticker
           logical_operator: and
         - case_id: case-data
           conditions:
           - comparison_operator: contains
             id: cond-data
-            value: DATA
+            sub_variable_condition:
+              case_id: 6f06a580-b00a-493c-bab4-57cc20c3086a
+              conditions: []
+              logical_operator: and
+            value: ''
+            varType: array[file]
             variable_selector:
-            - '1002'
-            - text
+            - sys
+            - files
+          id: case-data
           logical_operator: and
         - case_id: case-invalid
           conditions:
-          - comparison_operator: contains
+          - comparison_operator: is
             id: cond-invalid
             value: INVALID
             variable_selector:
             - '1002'
             - text
+          id: case-invalid
           logical_operator: and
         desc: ''
         selected: false
-        title: 意图分支
+        title: 判定分支
         type: if-else
-      height: 94
+      height: 220
       id: '1003'
       position:
-        x: 630
-        y: 300
+        x: 631.4737315063629
+        y: 162.94296990825057
       positionAbsolute:
-        x: 630
-        y: 300
+        x: 631.4737315063629
+        y: 162.94296990825057
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
-
-    # --------------------------------------------------
-    # 4. PATH A: INVALID
-    # --------------------------------------------------
-    - data:
-        answer: "请提供1-3个美股代码(示例:AAPL 或 AAPL, MSFT)"
-        desc: ''
-        selected: false
-        title: 🚫 回复无效输入
-        type: answer
-      height: 94
-      id: '2001'
-      position:
-        x: 930
-        y: 50
-      positionAbsolute:
-        x: 930
-        y: 50
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-      
-    # --------------------------------------------------
-    # 5. PATH B: TICKER INPUT
-    # --------------------------------------------------
     - data:
         context:
           enabled: false
@@ -455,34 +404,29 @@ workflow:
         desc: 'Agent 2: Generates the command list.'
         model:
           completion_params:
-            temperature: 0.7
+            temperature: 0.3
           mode: chat
-          name: claude-3-haiku-20240307
-          provider: anthropic
+          name: deepseek-v3.2-exp-thinking
+          provider: langgenius/openai_api_compatible/openai_api_compatible
         prompt_template:
-        - id: "sys-cmdlist"
+        - id: sys-cmdlist
           role: system
-          text: |
-            你是一个美股期权分析助手。你的唯一任务是根据用户提供的代码,严格按照【数据抓取命令清单】的格式,为每个标的(和指数)生成一个清晰的、可供用户复制粘贴去执行的命令列表。
-            
-            【用户输入】
-            {{#1001.query#}}
-            
-            【预处理】
-            1. 提取代码:例如 "amzn us, QQQ" -> ["AMZN", "QQQ"]
-            2. 大写去重。
-            
-            【数据抓取命令清单】
-            请为每个标的生成完整的命令列表,包括:
-            * 必跑(逐标的 {SYMBOL}):
-              * 墙与飙:!gexr {SYMBOL} 25 7 w;!gexr {SYMBOL} 25 14 w
-              * ATM IV:!skew {SYMBOL} 0 7;!skew {SYMBOL} 0 14
-              * 现价与希腊值:!iv {SYMBOL}
-            * 指数背景(必需字段)
-            * 回传要求
-            
-            请立即开始为 {{#1001.query#}} 生成命令清单。
-        - id: "user-cmdlist"
+          text: "你是一个美股期权分析助手。你的唯一任务是根据用户提供的代码,严格按照【数据抓取命令清单】的格式,为每个标的(和指数)生成一个清晰的、可供用户复制粘贴去执行的命令列表。\n\
+            \n【用户输入】\n{{#1001.query#}}\n\n【预处理】\n1. 提取代码:例如 \"amzn us, QQQ\" -> [\"\
+            AMZN\", \"QQQ\"]\n2. 大写去重。\n\n【数据抓取命令清单】\n* 必跑（逐标的）\n  * 墙与簇：!gexr {SYMBOL}\
+            \ 25 7 w；!gexr {SYMBOL} 25 14 w\n  * 正γ/负γ：!gexn {SYMBOL} 60 98；!tigger\
+            \ 60\n  * DEX：!dexn {SYMBOL} 25 14 w\n  * Vanna：!vanna {SYMBOL} ntm 60\
+            \ m\n  * 波动率：!skew {SYMBOL} ivmid atm 7；!skew {SYMBOL} ivmid atm 14；!skew\
+            \ {SYMBOL} ivmid ntm 14 w；!term {SYMBOL} 60\n* 扩展（条件触发）\n  * 周度簇稀疏或月度主导：!gexr\
+            \ {SYMBOL} 30 m\n  * 更远到期影响：!gexn {SYMBOL} 120 98；!dexn {SYMBOL} 25 30\
+            \ w 或 !dexn {SYMBOL} 35 98\n  * 7D ATM-IV噪声>阈值：以14D为准并备注；必要时补 !skew {SYMBOL}\
+            \ ivmid atm 21\n  * 验证Vanna稳定性：!vanna {SYMBOL} ntm 30 m\n  * 解释可选：!vexn\
+            \ {SYMBOL} 30 190\n* 指数背景（必需字段）\n  * SPX：!gexn SPX 30 98；!skew SPX ivmid\
+            \ atm 7；!skew SPX ivmid atm 14\n  * QQQ（可选对照）：!gexn QQQ 30 98；!skew QQQ\
+            \ ivmid atm 7；!skew QQQ ivmid atm 14\n  * 若标的偏纳指，请同时回传QQQ；否则SPX即可。\n*\
+            \ iv_path: 比较今日 7D ATM-IV 与昨日/前三日,存档数据获取\n* 回传要求\n  * 每张图/输出请注明命令与时间戳（ET）；可附收盘价与当日变动。\n\
+            \  * 若任一必跑命令输出为空或异常，请直接说明，我会给替代口径。\n\n\n请立即开始为 {{#1001.query#}} 生成命令清单。\n"
+        - id: user-cmdlist
           role: user
           text: '{{#1001.query#}}'
         selected: false
@@ -490,14 +434,14 @@ workflow:
         type: llm
         vision:
           enabled: false
-      height: 94
+      height: 116
       id: '2002'
       position:
-        x: 930
-        y: 200
+        x: 997.7916492926931
+        y: 188.21014794909684
       positionAbsolute:
-        x: 930
-        y: 200
+        x: 997.7916492926931
+        y: 188.21014794909684
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -507,78 +451,130 @@ workflow:
         answer: '{{#2002.text#}}'
         desc: ''
         selected: false
-        title: ✅ 回复命令清单
+        title: 回复命令清单
         type: answer
-      height: 94
+      height: 103
       id: '2003'
       position:
-        x: 1230
-        y: 200
+        x: 1409.7707104668832
+        y: -7.965831120450034
       positionAbsolute:
-        x: 1230
-        y: 200
+        x: 1409.7707104668832
+        y: -7.965831120450034
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
-
-    # --------------------------------------------------
-    # 6. PATH C: DATA INPUT -> Validation
-    # --------------------------------------------------
     - data:
         context:
           enabled: false
           variable_selector: []
-        desc: 'Agent 3: Parse raw data, calculate metrics, check completeness.'
+        desc: 解析原始数据、计算指标、检查完整性
         model:
           completion_params:
-            temperature: 0.7
+            temperature: 0.5
           mode: chat
-          name: claude-3-opus-20240229
-          provider: anthropic
+          name: Qwen3-VL-235B-A22B-Thinking
+          provider: langgenius/openai_api_compatible/openai_api_compatible
+        prompt_config:
+          jinja2_variables: []
         prompt_template:
-        - id: "sys-validate"
+        - id: sys-validate
           role: system
-          text: |
-            你是一个数据校验与计算 Agent。
-            你的任务是解析用户回传的原始数据,并严格按照【数据口径与指标定义】计算所有核心字段,最后输出一个 JSON 对象。
-            
-            【用户原始数据】
-            {{#1001.query#}}
-            
-            【数据口径与指标定义】
-            * EM1$(预期单日波幅,美元):Spot × min(ATM_IV_7D, ATM_IV_14D) × sqrt(1/252)。
-            * Call Wall / Put Wall:取 7D 和 14D 中 net_gex 正负最大值对应的 strike。
-            
-            【数据校验关口】
-            核对以下核心字段是否齐全并已计算出数值:
-            * 标的必需字段: SPOT PRICE | EM1$ | Call Wall | Put Wall | ATM_IV_7D | ATM_IV_14D
-            * 指数背景必需字段: SPX/NDX/VIX等
-            
-            【任务】
-            1. 解析【用户原始数据】。
-            2. 执行【数据口径与指标定义】中的所有计算。
-            3. 核对【数据校验关口】中的必需字段。
-            4. 严格仅输出 JSON 对象。
-            
-            【输出格式】
-            如果数据齐全,输出:
-            {
-              "status": "data_ready",
-              "data": {
-                "AAPL": { "SPOT_PRICE": 170.0, "EM1$": 2.5, "Call_Wall": 180, ... },
-                "SPX": { "NET_GEX_IDX": "...", "EM1$_IDX": "..." }
-              }
-            }
-            
-            如果数据缺失,输出:
-            {
-              "status": "missing_data",
-              "message": "数据校验失败。缺失项与补齐指引:...",
-              "missing_fields": ["...", "..."]
-            }
-        - id: "user-validate"
+          text: "你是一个期权结构和波动率特征图像解析器、数据校验和计算 Agent。\n你的任务是将用户回传的可视化数据 chart,进行 chart\
+            \ 图像解析,准确提取结构化量化数据\n目标是输出标准 JSON schema 并严格按照【数据口径与指标定义】计算所有核心字段。\n【任务】\n\
+            1. 解析【用户原始数据】。\n2. 执行【数据口径与指标定义】中的所有计算。\n3. 核对【数据校验关口】中的必需字段。\n4. 严格仅输出\
+            \ JSON 对象。\n【用户原始数据】\n{{#1001.query#}}\n\n【数据口径与指标定义-核心计算22字段】\n1. 到期与采样:周度优先DTE7与14,无周度取月度30与60,strikes=25,NET类窗口默认60必要时120。\n\
+            2.EM1$预期单日波幅美元:Spot×min(ATM_IV_7D,ATM_IV_14D)×sqrt(1/252)。\n3.墙与簇识别规则:从!gexr\
+            \ SYMBOL 25 7w与14w识别Call/Put/Major墙。\n  - 规则:局部峰≥相邻γ中位数2倍且簇宽≥3相邻行权。  \
+            \     Major_Wall为Call/Put墙中GEX绝对值更大者,记录major_wall_type为call或put。\n4.正γ负γ判定关键:使用!trigger\
+            \ SYMBOL 60输出的VOL_TRIGGER即Gamma翻转价位。若SPOT>VOL_TRIGGER为正γ倾向spot_vs_trigger=above做市商压制波动,若SPOT<VOL_TRIGGER为负γ倾向spot_vs_trigger=below做市商放大波动,若靠近该线为临界spot_vs_trigger=near可能regime反转。输出vol_trigger数值和spot_vs_trigger状态。\n\
+            5.月度叠加机制:若!gexr月度簇强度≥周度1.5倍,破墙阈值降至0.7×EM1$且需次日确认,输出monthly_cluster_override为true或false。\n\
+            6.Vanna三级回退:优先!vanna SYMBOL ntm 60m读取现价附近符号与斜率得vanna_dir为Up/Down/Flat和vanna_confidence为high。若缺补!vanna\
+            \ SYMBOL ntm 30m置信度medium。若仍缺按skew与delta偏斜临时推断标注vanna_confidence为low。\n\
+            7.ATM_IV数据源优先级:!skew SYMBOL ivmid atm 7与14。优先使用7D若噪声大即与14D差异>30%则用14D,若两者皆缺补21D。输出iv_source为7d或14d或21d_fallback。8.iv_path波动率路径:比较今日7D_ATM_IV与昨日或前三日,显著阈值±2vol。输出iv_path为升/降/平/数据不足,输出iv_path_confidence。无历史数据时从!term\
+            \ SYMBOL推断Backwardation为升趋势Contango为降趋势置信度medium。\n9.gap_distance墙距精确定义:从!gexr获取ABS_GEX分布,当前价Spot到下一ABS_GEX峰簇中心或有效边界的美元距离。同时输出gap_distance_em1_multiple归一化为gap_distance/EM1$。判断方向:若spot_vs_trigger=above则向上看Call_Wall阻力,若below则向下看Put_Wall支撑。\n\
+            10.cluster_strength_ratio簇强度比:从!gexr周度数据取主墙Major_Wall的GEX绝对值÷次墙即下一个最强峰的GEX绝对值。若仅单峰无对照,补跑!gexr\
+            \ SYMBOL 25 30m月度数据或延伸DTE以寻参照峰。输出cluster_strength_ratio数值和data_source。\n\
+            11.dex_same_dir方向一致性:gap区间内同向DEX净和在60日历史中的分位百分比,来自!dexn SYMBOL 25 14w。输出dex_same_dir_pct。\n\
+            12.指数背景必需:默认SPX必要时QQQ。NET_GEX_IDX从!gexn SPX 30 98和!trigger SPX 60获取。EM1$_IDX同口径计算Spot_IDX×min(ATM_IV_7D,ATM_IV_14D)×sqrt(1/252)。科技权重高可并行输出QQQ数据。\n\
+            \n【数据校验关口】\n* 标的必需字段： SPOT PRICE | EM1\\$｜Call Wall ｜Put Wall ｜Major Wall｜gap\\\
+            _distance｜cluster\\_strength\\_ratio｜dex\\_same\\_dir｜vanna\\_dir｜iv\\\
+            _path｜NET-GEX（含是否>0）\n* 指数背景必需字段：NET-GEX\\_IDX｜EM1\\$\\_IDX(SPX || QQQ)\n\
+            * 标的18个字段:spot_price,em1_dollar,call_wall,put_wall,major_wall,major_wall_type,gap_distance_dollar,gap_distance_em1_multiple,cluster_strength_ratio,dex_same_dir_pct,vanna_dir,vanna_confidence,iv_path,iv_path_confidence,net_gex,net_gex_sign,vol_trigger,spot_vs_trigger,monthly_cluster_override,atm_iv_7d,atm_iv_14d,iv_source。\n\
+            * 指数字段: 可选 net_gex_idx_spx,em1_dollar_idx_spx,spot_idx_spx,\nnet_gex_idx_qqq,em1_dollar_idx_qqq,spot_idx_qqq。\n\
+            \n【输出JSON格式】\n严格仅输出JSON对象，如果数据齐全时: \n{\n    \"status\": \"data_ready\"\
+            ,\n    \"timestamp\": \"2024-01-15T10:30:00Z\",\n    \"validation_summary\"\
+            : {\n        \"total_fields_required\": 22,\n        \"fields_provided\"\
+            : 22,\n        \"missing_count\": 0,\n        \"completion_rate\": 100\n\
+            \    },\n    \"targets\":  {\n            \"symbol\": \"AAPL\",\n    \
+            \        \"spot_price\": 170,\n            \"em1_dollar\": 2.99,\n   \
+            \         \"walls\": {\n                \"call_wall\": 180,\n        \
+            \        \"put_wall\": 165,\n                \"major_wall\": 180,\n  \
+            \              \"major_wall_type\": \"call\"\n            },\n       \
+            \     \"gamma_metrics\": {\n                \"gap_distance_dollar\": 10,\n\
+            \                \"gap_distance_em1_multiple\": 3.34,\n              \
+            \  \"cluster_strength_ratio\": 1.8,\n                \"net_gex\": -1250000000,\n\
+            \                \"net_gex_sign\": \"negative_gamma\",\n             \
+            \   \"vol_trigger\": 168.5,\n                \"spot_vs_trigger\": \"above\"\
+            ,\n                \"monthly_cluster_override\": false\n            },\n\
+            \            \"directional_metrics\": {\n                \"dex_same_dir_pct\"\
+            : 65,\n                \"vanna_dir\": \"up\",\n                \"vanna_confidence\"\
+            : \"high\",\n                \"iv_path\": \"升\",\n                \"iv_path_confidence\"\
+            : \"medium\"\n            },\n            \"atm_iv\": {\n            \
+            \    \"iv_7d\": 0.28,\n                \"iv_14d\": 0.3,\n            \
+            \    \"iv_source\": \"7d\"\n            }\n      },\n    \"indices\":\
+            \ {\n        \"spx\": {\n            \"net_gex_idx\": -5800000000,\n \
+            \           \"em1_dollar_idx\": 45,\n            \"spot_idx\": 4500\n\
+            \        }\n    },\n    \"missing_fields\": [],\n    \"next_step\": \"\
+            proceed_to_analysis\"\n}\n\n如果数据缺失时,输出:\n{ \n    \"status\": \"missing_data\"\
+            ,\n    \"timestamp\": \"2024-01-15T10:30:00Z\",\n    \"validation_summary\"\
+            : {\n      \"total_fields_required\": 22,\n      \"fields_provided\":\
+            \ 19,\n      \"missing_count\": 3,\n      \"completion_rate\": 86\n  \
+            \  },\n    \"targets\": {\n        \"symbol\": \"AAPL\",\n        \"spot_price\"\
+            : 170.0,\n        \"em1_dollar\": null,\n        \"walls\": {\n      \
+            \    \"call_wall\": 180.0,\n          \"put_wall\": null,\n          \"\
+            major_wall\": 180.0,\n          \"major_wall_type\": \"call\"\n      \
+            \  },\n        \"gamma_metrics\": {\n          \"gap_distance_dollar\"\
+            : null,\n          \"gap_distance_em1_multiple\": null,\n          \"\
+            cluster_strength_ratio\": 1.8,\n          \"net_gex\": -1250000000,\n\
+            \          \"net_gex_sign\": \"negative_gamma\",\n          \"vol_trigger\"\
+            : null,\n          \"spot_vs_trigger\": null,\n          \"monthly_cluster_override\"\
+            : false\n        },\n        \"directional_metrics\": {\n          \"\
+            dex_same_dir_pct\": 65.0,\n          \"vanna_dir\": \"up\",\n        \
+            \  \"vanna_confidence\": \"medium\",\n          \"iv_path\": \"数据不足\"\
+            ,\n          \"iv_path_confidence\": \"low\"\n        },\n        \"atm_iv\"\
+            : {\n          \"iv_7d\": 0.28,\n          \"iv_14d\": null,\n       \
+            \   \"iv_source\": \"7d\"\n        }\n   },\n    \"indices\": {\n    \
+            \  \"spx\": {\n        \"net_gex_idx\": -5800000000,\n        \"em1_dollar_idx\"\
+            : 45.0,\n        \"spot_idx\": 4500.0\n      }\n    },\n    \"missing_fields\"\
+            : [\n      {\n        \"field\": \"vol_trigger\",\n        \"target\"\
+            : \"AAPL\",\n        \"severity\": \"critical\",\n        \"category\"\
+            : \"gamma_flip_line\"\n      },\n      {\n        \"field\": \"atm_iv_14d\"\
+            ,\n        \"target\": \"AAPL\",\n        \"severity\": \"high\",\n  \
+            \      \"category\": \"volatility_input\"\n      },\n      {\n       \
+            \ \"field\": \"put_wall\",\n        \"target\": \"AAPL\",\n        \"\
+            severity\": \"high\",\n        \"category\": \"wall_structure\"\n    \
+            \  }\n    ],\n    \"补齐指引\": [\n      {\n        \"missing_field\": \"\
+            vol_trigger\",\n        \"description\": \"Gamma翻转价位VOL_TRIGGER是判断正γ负γ的关键\"\
+            ,\n        \"command\": \"!trigger AAPL 60\",\n        \"alternative\"\
+            : \"!gexn AAPL 60 98从输出提取Gamma Flip价位\",\n        \"extraction_note\"\
+            : \"提取输出中的VOL TRIGGER或Gamma Flip数值\",\n        \"priority\": 1,\n    \
+            \    \"impact\": \"无此字段无法判断Gamma Regime,影响剧本分类\"\n      },\n      {\n\
+            \        \"missing_field\": \"atm_iv_14d\",\n        \"description\":\
+            \ \"14日ATM隐含波动率\",\n        \"command\": \"!skew AAPL ivmid atm 14\",\n\
+            \        \"extraction_note\": \"提取ATM IV 14DTE数值如0.30\",\n        \"priority\"\
+            : 2,\n        \"impact\": \"影响EM1$计算精度\"\n      },\n      {\n        \"\
+            missing_field\": \"put_wall\",\n        \"description\": \"Put墙行权价\",\n\
+            \        \"command\": \"!gexr AAPL 25 7 w和!gexr AAPL 25 14 w\",\n    \
+            \    \"extraction_note\": \"查看图表标注Put Wall Strike或从负GEX最大值对应strike识别\"\
+            ,\n        \"alternative\": \"使用!gexn输出查找负GEX峰值位置\",\n        \"priority\"\
+            : 3,\n        \"impact\": \"影响支撑位判断和gap_distance计算\"\n      }\n    ],\n\
+            \    \"next_step\": \"request_missing_data\",\n    \"补齐后续\": \"补齐上述3个关键字段后将自动计算em1_dollar和gap_distance等派生指标\"\
+            \n  }\n}\n"
+        - edition_type: basic
+          id: user-validate
           role: user
           text: '{{#1001.query#}}'
         selected: false
@@ -586,14 +582,14 @@ workflow:
         type: llm
         vision:
           enabled: false
-      height: 94
+      height: 116
       id: '3001'
       position:
-        x: 930
-        y: 400
+        x: 1034.3730386199136
+        y: 448.2474211113356
       positionAbsolute:
-        x: 930
-        y: 400
+        x: 1034.3730386199136
+        y: 448.2474211113356
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -609,6 +605,7 @@ workflow:
             variable_selector:
             - '3001'
             - text
+          id: case-ready
           logical_operator: and
         - case_id: case-missing
           conditions:
@@ -618,51 +615,44 @@ workflow:
             variable_selector:
             - '3001'
             - text
+          id: case-missing
           logical_operator: and
         desc: ''
         selected: false
         title: 校验分支
         type: if-else
-      height: 94
+      height: 172
       id: '3002'
       position:
-        x: 1230
-        y: 400
+        x: 1331.8076428705288
+        y: 182.75916073235004
       positionAbsolute:
-        x: 1230
-        y: 400
+        x: 1331.8076428705288
+        y: 182.75916073235004
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
-
-    # --------------------------------------------------
-    # 7. PATH C.1: MISSING DATA
-    # --------------------------------------------------
     - data:
         answer: '{{#3001.text#}}'
         desc: ''
         selected: false
-        title: ⚠️ 回复缺失数据
+        title: 回复缺失数据
         type: answer
-      height: 94
+      height: 103
       id: '3003'
       position:
-        x: 1530
-        y: 300
+        x: 1793.012573026706
+        y: -14.429166611527677
       positionAbsolute:
-        x: 1530
-        y: 300
+        x: 1793.012573026706
+        y: -14.429166611527677
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
-
-    # --------------------------------------------------
-    # 8. PATH C.2: ANALYSIS CHAIN
-    # --------------------------------------------------
     - data:
         context:
           enabled: false
@@ -670,48 +660,39 @@ workflow:
         desc: 'Agent 4: Analyze technicals.'
         model:
           completion_params:
-            temperature: 0.7
+            temperature: 0.5
           mode: chat
-          name: claude-3-sonnet-20240229
-          provider: anthropic
+          name: qwen3-vl-235b-a22b-instruct
+          provider: langgenius/aihubmix/aihubmix
         prompt_template:
-        - id: "sys-ta"
+        - id: sys-ta
           role: system
-          text: |
-            你是一个技术面分析 Agent。
-            你的任务是基于【数据JSON】中的 "TA_Data",计算技术面得分并给出简短读数。
-            
-            【数据JSON】
-            {{#3001.text#}}
-            
-            【技术面规则】
-            * 技术面默认组合A:EMA20/50与其斜率、RSI(14)
-            * 默认启用1-3项互补指标
-            
-            【任务】
-            1. 解析【数据JSON】中的 "TA_Data"。
-            2. 应用【技术面规则】进行评分(最多+2)。
-            3. 严格仅输出 JSON 对象:
-               {
-                 "ta_score": 1, 
-                 "ta_commentary": "EMA20/50 走平 (+1), RSI(14) 处在 55 区间 (+0)"
-               }
-        - id: "user-ta"
+          text: "你是一个技术面分析 Agent。\n你的任务是基于【数据JSON】中的 \"TA_Data\",计算技术面得分并给出简短读数。\n\
+            \n【数据JSON】\n{{#3001.text#}}\n\n【技术面规则】\n* 技术面默认组合A:EMA20/50与其斜率、RSI(14)\n\
+            * 默认启用1-3项互补指标\n\n【任务】\n1. 解析【数据JSON】中的 \"TA_Data\"。\n2. 应用【技术面规则】进行评分(最多+2)。\n\
+            3. 严格仅输出 JSON 对象:\n   {\n     \"ta_score\": 1, \n     \"ta_commentary\"\
+            : \"EMA20/50 走平 (+1), RSI(14) 处在 55 区间 (+0)\"\n   }\n"
+        - id: user-ta
           role: user
-          text: "请基于 Agent 3 的数据,进行技术面分析。"
+          text: 请基于 Agent 3 的数据,进行技术面分析。
         selected: false
         title: Agent 4 技术面
         type: llm
         vision:
-          enabled: false
-      height: 94
+          configs:
+            detail: high
+            variable_selector:
+            - sys
+            - files
+          enabled: true
+      height: 116
       id: '4001'
       position:
-        x: 1530
-        y: 500
+        x: 1730.860345547998
+        y: 122.17470792800194
       positionAbsolute:
-        x: 1530
-        y: 500
+        x: 1730.860345547998
+        y: 122.17470792800194
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -724,59 +705,71 @@ workflow:
         desc: 'Agent 5: Core analysis, scoring, and scenario probability.'
         model:
           completion_params:
-            temperature: 0.7
+            temperature: 0.5
           mode: chat
-          name: claude-3-opus-20240229
-          provider: anthropic
+          name: DeepSeek-V3.2-Exp-Think
+          provider: langgenius/aihubmix/aihubmix
         prompt_template:
-        - id: "sys-scenario"
+        - id: sys-scenario
           role: system
-          text: |
-            你是核心剧本推演 Agent。
-            你的任务是整合【数据JSON】和【技术面JSON】,应用【评分框架】和【剧本分类】,输出分析结果。
-            
-            【数据JSON】(来自 Agent 3)
-            {{#3001.text#}}
-            
-            【技术面JSON】(来自 Agent 4)
-            {{#4001.text#}}
-            
-            【分析规则】
-            * 评分框架:基于 GEX 墙位、IV 偏斜、技术面等综合评分
-            * 剧本分类:区间/趋势上/趋势下/过渡
-            * 入场门槛:总分≥3分
-            
-            【任务】
-            1. 整合所有数据。
-            2. 执行【评分框架】,计算总分。
-            3. 执行【剧本分类】,判定概率。
-            4. 严格仅输出 JSON 对象:
-               {
-                 "analysis_summary": "主导方向与驱动...",
-                 "total_score": 3,
-                 "scenarios": [
-                   { "type": "区间", "probability": 65 },
-                   { "type": "趋势上行", "probability": 25 }
-                 ],
-                 "dominant_scenario": "区间",
-                 "entry_threshold_check": "入场" 
-               }
-        - id: "user-scenario"
+          text: "你是期权量化分析师，根据量化数据，做核心剧本推演 Agent。\n你的任务是整合期权 Greeks exposure 数据和波动率曲面特征数据【数据JSON】和【技术面JSON】,应用【思维评分框架】和【剧本分类】,输出分析结果。\n\
+            \n【数据JSON】(来自 Agent 3)\n{{#3001.text#}}\n\n【技术面JSON】(来自 Agent 4)\n{{#4001.text#}}\n\
+            \n【分析规则-四维评分框架】\n1.Gamma_Regime判定权重40%最优先:从3001.text.targets.gamma_metrics提取vol_trigger和spot_vs_trigger。这是最关键的市场状态判断。若spot_vs_trigger=above则现价在VOL_TRIGGER上方为正γ倾向,做市商提供正Gamma压制波动,基础场景base_scenario为区间,regime_note说明正γ压制波动维持区间。若spot_vs_trigger=below则现价在VOL_TRIGGER下方为负γ倾向,做市商提供负Gamma放大波动,基础场景为趋势,regime_note说明负γ放大波动趋势加速。若spot_vs_trigger=near则临界状态可能发生regime反转,基础场景为过渡,regime_note说明接近Gamma翻转线高波动。此维度评分gamma_regime_score:若明确above或below给6-8分,若near给4-5分警示风险。\n\
+            2.破墙可能性评估权重30%:从 3001.text.targets.gamma_metrics提取gap_distance_em1_multiple,cluster_strength_ratio,monthly_cluster_override。先判断阈值:若monthly_cluster_override=true则破墙阈值threshold=0.7倍EM1$因月度簇强度≥周度1.5倍,否则threshold=1.0倍EM1$。评估破墙概率break_probability:若gap_distance_em1<threshold为高概率,若gap_distance_em1在threshold到2.0之间为中等概率,若>2.0为低概率。同时考虑cluster_strength_ratio:比值越大主墙越强破墙越难,>2.0显著降低破墙概率,1.5-2.0为中等强度,<1.5较易突破。输出break_note综合说明需多少倍EM1$距离和簇强度情况。此维度评分break_wall_score:高概率8-10分,中等5-7分,低概率2-4分,同时按cluster_strength调整±1分。\n\
+            3.方向一致性评估权重20%:从3001.text.targets.directional_metrics提取dex_same_dir_pct,vanna_dir,vanna_confidence。计算vanna_weight权重:若vanna_confidence=high则权重1.0,若medium则0.7,若low则0.4。判断方向信号direction_strength:若dex_same_dir>70且vanna_dir明确Up或Down且vanna_weight>=0.7则为强方向信号,若dex_same_dir在50-70或vanna_weight为medium则为中等信号,若dex_same_dir<50或vanna_confidence=low则为弱信号。此维度评分direction_score:强信号8-10分,中等5-7分,弱信号2-4分。\n\
+            4.IV动态权重10%:从3001.text.targets.directional_metrics提取iv_path,iv_path_confidence。判断iv_signal:若iv_path=升且confidence=high或medium则为波动率扩张信号利多波动率策略,若iv_path=降则为波动率压缩信号利空波动率,若iv_path=平或数据不足则中性。此维度评分iv_score:扩张且high\
+            \ confidence给8-10分,扩张medium给6-7分,压缩给3-5分,平或不足给5-6分。\n【综合评分计算】总分total_score=gamma_regime_score×0.4+break_wall_score×0.3+direction_score×0.2+iv_score×0.1。输出weight_breakdown显示计算过程如6×0.4+3×0.3+7×0.2+6×0.1=5.5。\n\
+            【场景分类规则】基于total_score和gamma_regime综合判定:若total_score>=7为强信号,若spot_vs_trigger=below则primary_scenario为强趋势上行或下行根据direction,若above则为区间突破。若total_score在5-7为中等信号,若below则为弱趋势,若above则为宽幅区间或弱突破。若total_score在3-5为弱信号,若above则为区间震荡,若below需警惕但信号不足。若total_score<3为观望不建议入场。输出scenario_probability为主导场景概率百分比,输出adjustment_note说明如何基于gamma_regime调整判断如虽在正γ区域但方向信号强评估为区间突破。\n\
+            【入场门槛检查】entry_threshold_check判断:总分total_score>=3且至少满足一个关键信号条件:条件1 spot_vs_trigger明确为above或below不是near,条件2\
+            \ gap_distance_em1<2,条件3 dex_same_dir>60,条件4 vanna_confidence为high或medium。若满足则entry_threshold_check为入场,否则为观望或等待。输出entry_rationale详细说明理由列出满足的条件和不满足的条件。\n\
+            【关键位提取】从3001.text.targets[0].walls提取support即put_wall,resistance即call_wall,trigger_line即gamma_metrics.vol_trigger。\n\
+            \n【输出JSON格式】严格仅输出 JSON 对象:\n   \n{\n  \"gamma_regime\": {\n    \"vol_trigger\"\
+            : 168.5,\n    \"spot_vs_trigger\": \"above\",\n    \"base_scenario\":\
+            \ \"区间\",\n    \"regime_note\": \"现价170.0在VOL_TRIGGER 168.5上方,正γ倾向,做市商压制波动维持区间\"\
+            \n  },\n  \"break_wall_assessment\": {\n    \"gap_distance_em1\": 3.34,\n\
+            \    \"cluster_strength\": 1.8,\n    \"monthly_override\": false,\n  \
+            \  \"threshold\": 1.0,\n    \"break_probability\": \"低\",\n    \"break_note\"\
+            : \"需3.34倍EM1$距离到达Call Wall 180,簇强度1.8倍为中等强度,破墙难度中等偏高\"\n  },\n  \"directional_signals\"\
+            : {\n    \"dex_same_dir\": 65.0,\n    \"vanna_dir\": \"up\",\n    \"vanna_confidence\"\
+            : \"high\",\n    \"vanna_weight\": 1.0,\n    \"direction_strength\": \"\
+            中等偏强\",\n    \"direction_note\": \"DEX同向65%中等,Vanna方向up且置信度high权重1.0,综合方向信号中等偏强\"\
+            \n  },\n  \"iv_dynamics\": {\n    \"iv_path\": \"升\",\n    \"iv_path_confidence\"\
+            : \"medium\",\n    \"iv_signal\": \"波动率扩张\",\n    \"iv_note\": \"IV路径显示升趋势,置信度medium,有利于Long\
+            \ Vol策略但需验证\"\n  },\n  \"scoring\": {\n    \"gamma_regime_score\": 6,\n\
+            \    \"gamma_regime_rationale\": \"明确above状态给6分,非near故不扣分\",\n    \"break_wall_score\"\
+            : 3,\n    \"break_wall_rationale\": \"gap_distance 3.34>2.0为低破墙概率给3分,cluster\
+            \ 1.8中等不调整\",\n    \"direction_score\": 7,\n    \"direction_rationale\"\
+            : \"dex 65%中等+vanna up高置信综合给7分\",\n    \"iv_score\": 6,\n    \"iv_score_rationale\"\
+            : \"iv_path升但confidence仅medium给6分\",\n    \"total_score\": 5.5,\n    \"\
+            weight_breakdown\": \"6×0.4+3×0.3+7×0.2+6×0.1=2.4+0.9+1.4+0.6=5.5\"\n\
+            \  },\n  \"scenario_classification\": {\n    \"primary_scenario\": \"\
+            弱趋势上行\",\n    \"scenario_probability\": 55,\n    \"secondary_scenarios\"\
+            : [\n      {\n        \"type\": \"宽幅区间\",\n        \"probability\": 30\n\
+            \      },\n      {\n        \"type\": \"观望\",\n        \"probability\"\
+            : 15\n      }\n    ],\n    \"adjustment_note\": \"虽在正γ区域base为区间,但direction_score\
+            \ 7分方向信号中等偏强,gap_distance 3.34虽大但vanna_dir一致性强,综合评估为弱趋势上行或区间突破,概率55%\"\
+            \n  },\n  \"entry_threshold_check\": \"入场\",\n  \"entry_rationale\": \"\
+            总分5.5>=3满足,关键信号:条件1 spot_vs_trigger=above明确满足,条件2 gap_distance_em1=3.34>2不满足,条件3\
+            \ dex_same_dir=65>60满足,条件4 vanna_confidence=high满足。4个条件满足3个,且total_score>5,建议入场但采用保守策略\"\
+            ,\n  \"risk_warning\": \"gap_distance偏大需3.34倍EM1$才能到阻力位,若短期内未突破需调整为区间策略\"\
+            ,\n  \"key_levels\": {\n    \"support\": 165.0,\n    \"resistance\": 180.0,\n\
+            \    \"trigger_line\": 168.5,\n    \"current_spot\": 170.0\n  }\n}\n\n"
+        - id: user-scenario
           role: user
-          text: "请整合数据,进行剧本推演与评分。"
+          text: 请整合数据,进行剧本推演与评分。
         selected: false
         title: Agent 5 剧本分析
         type: llm
         vision:
           enabled: false
-      height: 94
+      height: 132
       id: '5001'
       position:
-        x: 1830
-        y: 500
+        x: 1718.9514918530517
+        y: 345.4727008545875
       positionAbsolute:
-        x: 1830
-        y: 500
+        x: 1718.9514918530517
+        y: 345.4727008545875
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -788,61 +781,136 @@ workflow:
           variable_selector: []
         desc: 'Agent 6: Generate actionable strategies with RR/Pw.'
         model:
-          completion_params:
-            temperature: 0.7
+          completion_params: {}
           mode: chat
-          name: claude-3-opus-20240229
-          provider: anthropic
+          name: gpt-5
+          provider: langgenius/aihubmix/aihubmix
         prompt_template:
-        - id: "sys-strategy"
+        - id: sys-strategy
           role: system
-          text: |
-            你是期权策略生成 Agent。
-            你的任务是基于【数据JSON】和【剧本分析JSON】,生成三种策略(保守/均衡/进取),并严格计算每种策略的盈亏比(RR)和胜率(Pw)。
-            
-            【数据JSON】(来自 Agent 3)
-            {{#3001.text#}}
-            
-            【剧本分析JSON】(来自 Agent 5)
-            {{#5001.text#}}
-            
-            【策略映射规则】
-            * 信用价差/铁鹰(保守)
-            * 蝶式/铁秃鹰(均衡)
-            * 借贷价差/日历价差(进取)
-            * 盈亏比(RR)≈ C:(W-C);胜率(Pw)≈ clamp[...]
-            
-            【任务】
-            1. 根据 dominant_scenario 选择策略类型。
-            2. 根据 EM1$ 和 Walls 确定行权价。
-            3. 严格执行【策略映射规则】中的公式,计算 RR 和 Pw。
-            4. 严格仅输出 JSON 数组:
-               [
-                 {
-                   "type": "保守 (信用价差)",
-                   "structure": "Sell 1x AAPL 180C / Buy 1x AAPL 182.5C",
-                   "DTE": 14,
-                   "greeks": "...",
-                   "RR_estimate": "1:4 (C=0.5, W=2.5)",
-                   "Pw_estimate": "75%"
-                 }
-               ]
-        - id: "user-strategy"
+          text: "你是期权策略研究员与期权交易教练，负责期权策略生成 Agent。\n任务:基于Gamma Regime和剧本分类生成三种风险等级策略并精确计算RR和Pw。【数据JSON来自Agent3】{{#3001.text#}}【剧本分析JSON来自Agent5】{{#5001.text#}}\n\
+            \n【策略映射规则】\n1.根据gamma_regime和scenario_classification选择策略类型:从5001.text.gamma_regime提取spot_vs_trigger和base_scenario,从5001.text.scenario_classification提取primary_scenario。若spot_vs_trigger=above且primary_scenario为区间或弱趋势,选择收取权利金策略:保守为Iron\
+            \ Condor铁鹰,均衡为Iron Butterfly铁蝶,进取可为Bull Put Spread或Bear Call Spread。若spot_vs_trigger=below且primary_scenario为趋势上行,选择方向性策略:保守为Bull\
+            \ Call Spread牛市价差,均衡为Call Ratio Spread比率价差,进取为Long Call Vertical或Calendar\
+            \ Spread日历价差。若spot_vs_trigger=below且primary_scenario为趋势下行,选择Put方向策略:保守为Bear\
+            \ Put Spread,均衡为Put Ratio Spread,进取为Long Put Vertical。若spot_vs_trigger=near或primary_scenario为过渡观望,不生成策略或仅对冲策略如Collar。\n\
+            2.行权价Strike选择规则:从3001.text.targets提取spot_price,walls.call_wall,walls.put_wall,walls.major_wall,gamma_metrics.gap_distance_em1_multiple,em1_dollar。保守策略围绕墙位构建:若Iron\
+            \ Condor则Short Call腿在call_wall附近,Long Call在call_wall+1.5EM1$,Short Put腿在put_wall附近,Long\
+            \ Put在put_wall-1.5EM1$。若Bull Call Spread则Long Call在spot与call_wall中点,Short\
+            \ Call在call_wall。均衡策略以spot为中心:若Iron Butterfly则Body在spot,两翼Wings在spot±1EM1$。若比率价差Ratio\
+            \ Spread则卖方腿在spot+0.5EM1$,买方腿在spot+1.5EM1$,比率1:2或2:3。进取策略根据direction选择:若看涨则Long\
+            \ Call在spot+0.2EM1$接近现价,Short Call在major_wall给最大获利空间。若Calendar则近月Short在spot,远月Long同strike。\n\
+            3.期限DTE动态选择:从3001.text.targets.gamma_metrics提取gap_distance_em1_multiple和monthly_cluster_override。基础规则:若gap_distance_em1>3则DTE=14日给足时间,若2-3则DTE=10日,若<2则DTE=7日接近到期Gamma更大。月度调整:若monthly_cluster_override=true则在基础DTE上+7日即DTE变为14+7=21,10+7=17,7+7=14以应对月度簇阻力。0DTE规避:不选择0DTE除非spot_vs_trigger=near且gap_distance<0.5EM1$此时可用0DTE做Gamma\
+            \ Scalping但需标注高风险。\n4.希腊值Greeks目标设定:保守策略目标Delta接近0在-0.1到0.1,Theta为正>5代表时间价值衰减收益,Vega为负<-10代表做空波动率。均衡策略Delta允许±0.2轻微方向敞口,Theta>8,Vega接近0即-5到5波动率中性。进取策略Delta\
+            \ 0.3-0.6明确方向,Theta可为负若买入Long策略,Vega>10做多波动率。\n5.RR盈亏比计算公式:信用价差Credit\
+            \ Spread如Iron Condor:C为收取权利金Credit,W为价差宽度Width即Long与Short之间差价。RR=C:(W-C)即收入比最大亏损。示例C=0.8,W=2.5则RR=0.8:(2.5-0.8)=0.8:1.7≈1:2.1。借贷价差Debit\
+            \ Spread如Bull Call Spread:D为支付权利金Debit,W为价差宽度。RR=(W-D):D即最大获利比成本。示例D=2.5,W=7.5则RR=(7.5-2.5):2.5=5.0:2.5=2:1。蝶式Butterfly和铁蝶Iron\
+            \ Butterfly:max_profit为Body处最大利润,max_loss为Wing处最大亏损。RR=max_profit:max_loss通常在2:1到4:1之间。\n\
+            6.Pw胜率估计公式:信用价差Pw公式:Pw=clamp(base+cluster_adj-distance_penalty,min,max)。base=0.5基础,cluster_adj=0.1×cluster_strength_ratio簇强度加成,distance_penalty=0.05×gap_distance_em1_multiple距离惩罚,min=0.4,max=0.85。示例cluster=1.8,gap=3.34则Pw=clamp(0.5+0.1×1.8-0.05×3.34,0.4,0.85)=clamp(0.5+0.18-0.167,0.4,0.85)=0.513约51%但考虑其他因素调整到72%若技术面配合。借贷价差Pw公式:Pw=clamp(base+dex_adj+vanna_adj,min,max)。base=0.3,dex_adj=0.1×dex_same_dir/100,vanna_adj=vanna_weight×0.2,min=0.25,max=0.75。示例dex=65,vanna_weight=1.0则Pw=clamp(0.3+0.1×0.65+1.0×0.2,0.25,0.75)=clamp(0.3+0.065+0.2,0.25,0.75)=0.565约57%。蝶式Pw基于spot到body中心距离和IV:若spot在body内Pw=0.6-0.7,若spot偏离1EM1$则Pw=0.4-0.5。\n\
+            【输出JSON格式】输出策略数组包含三个对象保守均衡进取:\n[\n  {\n    \"strategy_type\": \"保守\",\n\
+            \    \"structure\": \"Iron Condor\",\n    \"description\": \"四腿铁鹰收取权利金策略适合正γ区间环境\"\
+            ,\n    \"legs\": [\n      {\n        \"action\": \"sell\",\n        \"\
+            type\": \"call\",\n        \"strike\": 180.0,\n        \"quantity\": 1,\n\
+            \        \"rationale\": \"Short Call在call_wall阻力位收取权利金\"\n      },\n \
+            \     {\n        \"action\": \"buy\",\n        \"type\": \"call\",\n \
+            \       \"strike\": 182.5,\n        \"quantity\": 1,\n        \"rationale\"\
+            : \"Long Call保护上行风险在call_wall+1EM1$\"\n      },\n      {\n        \"action\"\
+            : \"sell\",\n        \"type\": \"put\",\n        \"strike\": 165.0,\n\
+            \        \"quantity\": 1,\n        \"rationale\": \"Short Put在put_wall支撑位收取权利金\"\
+            \n      },\n      {\n        \"action\": \"buy\",\n        \"type\": \"\
+            put\",\n        \"strike\": 162.5,\n        \"quantity\": 1,\n       \
+            \ \"rationale\": \"Long Put保护下行风险在put_wall-1EM1$\"\n      }\n    ],\n\
+            \    \"dte\": 14,\n    \"dte_rationale\": \"gap_distance_em1=3.34>3选择14日DTE,monthly_cluster_override=false无需延长\"\
+            ,\n    \"greeks_target\": {\n      \"delta\": 0.05,\n      \"delta_note\"\
+            : \"接近中性略偏多\",\n      \"theta\": 8.5,\n      \"theta_note\": \"每日时间价值衰减收益\"\
+            ,\n      \"vega\": -12.0,\n      \"vega_note\": \"做空波动率在正γ环境有利\"\n   \
+            \ },\n    \"rr_calculation\": {\n      \"credit\": 0.8,\n      \"width_call\"\
+            : 2.5,\n      \"width_put\": 2.5,\n      \"max_profit\": 0.8,\n      \"\
+            max_loss\": 1.7,\n      \"rr_ratio\": \"1:2.1\",\n      \"formula\": \"\
+            Credit=0.8,Width=2.5,MaxLoss=Width-Credit=1.7,RR=0.8:1.7\",\n      \"\
+            rr_note\": \"每收0.8权利金风险1.7,盈亏比1:2.1适合高胜率策略\"\n    },\n    \"pw_calculation\"\
+            : {\n      \"base\": 0.5,\n      \"cluster_strength\": 1.8,\n      \"\
+            cluster_adj\": 0.18,\n      \"gap_distance_em1\": 3.34,\n      \"distance_penalty\"\
+            : 0.167,\n      \"technical_boost\": 0.15,\n      \"pw_raw\": 0.513,\n\
+            \      \"pw_adjusted\": 0.72,\n      \"pw_estimate\": \"72%\",\n     \
+            \ \"formula\": \"base 0.5+cluster 0.1×1.8-distance 0.05×3.34+technical\
+            \ 0.15=0.663取0.72\",\n      \"pw_note\": \"簇强度1.8倍中等,gap距离3.34偏大扣分,技术面配合dex\
+            \ 65%和vanna up加分,综合胜率72%\"\n    },\n    \"entry_trigger\": \"Spot在168-172区间徘徊,IV未显著上升,dex_same_dir维持>60%\"\
+            ,\n    \"entry_timing\": \"次日开盘后15-30分钟确认方向,避开盘前跳空\",\n    \"exit_plan\"\
+            : {\n      \"profit_target\": \"权利金衰减至剩余30%即获利70%时平仓,约持有7-10日\",\n   \
+            \   \"stop_loss\": \"任一腿被突破即Spot突破182.5或跌破162.5,或亏损达权利金150%时止损\",\n  \
+            \    \"time_decay\": \"持有至到期前3日,若未达目标则在到期前2日平仓避免Pin Risk\",\n      \"\
+            adjustment\": \"若Spot接近wing边界提前roll或close该侧降低风险\"\n    },\n    \"risk_note\"\
+            : \"最大风险1.7倍于权利金0.8,需严格止损,适合账户2%风险敞口\"\n  },\n  {\n    \"strategy_type\"\
+            : \"均衡\",\n    \"structure\": \"Iron Butterfly\",\n    \"description\"\
+            : \"四腿铁蝶Body在现价收取更多权利金但需Spot维持窄幅\",\n    \"legs\": [\n      {\n      \
+            \  \"action\": \"sell\",\n        \"type\": \"call\",\n        \"strike\"\
+            : 170.0,\n        \"quantity\": 1\n      },\n      {\n        \"action\"\
+            : \"buy\",\n        \"type\": \"call\",\n        \"strike\": 173.0,\n\
+            \        \"quantity\": 1\n      },\n      {\n        \"action\": \"sell\"\
+            ,\n        \"type\": \"put\",\n        \"strike\": 170.0,\n        \"\
+            quantity\": 1\n      },\n      {\n        \"action\": \"buy\",\n     \
+            \   \"type\": \"put\",\n        \"strike\": 167.0,\n        \"quantity\"\
+            : 1\n      }\n    ],\n    \"dte\": 10,\n    \"dte_rationale\": \"gap_distance\
+            \ 3.34在2-3档选10日DTE\",\n    \"greeks_target\": {\n      \"delta\": 0.1,\n\
+            \      \"theta\": 12.0,\n      \"vega\": -8.0\n    },\n    \"rr_calculation\"\
+            : {\n      \"credit\": 1.5,\n      \"wing_width\": 3.0,\n      \"max_profit\"\
+            : 1.5,\n      \"max_loss\": 1.5,\n      \"rr_ratio\": \"1:1\",\n     \
+            \ \"formula\": \"Credit=1.5,Width=3.0,MaxLoss=Width-Credit=1.5,RR=1:1\"\
+            \n    },\n    \"pw_calculation\": {\n      \"body_distance\": 0.0,\n \
+            \     \"iv_level\": \"medium\",\n      \"pw_estimate\": \"65%\",\n   \
+            \   \"formula\": \"Spot在Body内基础Pw 0.65,gap距离中等,IV升趋势略不利\",\n      \"pw_note\"\
+            : \"需Spot在167-173窄幅3EM1$内维持,gap 3.34到call_wall偏大但body宽度给缓冲\"\n    },\n\
+            \    \"entry_trigger\": \"Spot在169-171窄幅波动,IV稳定未扩张,波动率<EM1$\",\n    \"\
+            exit_plan\": {\n      \"profit_target\": \"权利金衰减至剩余20%即获利80%\",\n    \
+            \  \"stop_loss\": \"Spot突破body±0.5EM1$即<169.5或>170.5时止损\",\n      \"time_decay\"\
+            : \"持有至到期前5日\"\n    },\n    \"risk_note\": \"需Spot高度维持在body,适合极低波动环境\"\
+            \n  },\n  {\n    \"strategy_type\": \"进取\",\n    \"structure\": \"Bull\
+            \ Call Spread\",\n    \"description\": \"牛市价差看涨方向策略基于dex和vanna一致性\",\n\
+            \    \"legs\": [\n      {\n        \"action\": \"buy\",\n        \"type\"\
+            : \"call\",\n        \"strike\": 172.5,\n        \"quantity\": 1,\n  \
+            \      \"rationale\": \"Long Call在spot+0.8EM1$接近现价获取Delta\"\n      },\n\
+            \      {\n        \"action\": \"sell\",\n        \"type\": \"call\",\n\
+            \        \"strike\": 180.0,\n        \"quantity\": 1,\n        \"rationale\"\
+            : \"Short Call在call_wall降低成本限制最大获利\"\n      }\n    ],\n    \"dte\": 14,\n\
+            \    \"dte_rationale\": \"gap 3.34需14日时间到达目标\",\n    \"greeks_target\"\
+            : {\n      \"delta\": 0.45,\n      \"delta_note\": \"明确看涨方向\",\n     \
+            \ \"theta\": -3.0,\n      \"theta_note\": \"买入策略时间衰减为负但可接受\",\n      \"\
+            vega\": 15.0,\n      \"vega_note\": \"做多波动率,IV升有利\"\n    },\n    \"rr_calculation\"\
+            : {\n      \"debit\": 2.5,\n      \"width\": 7.5,\n      \"max_profit\"\
+            : 5.0,\n      \"max_loss\": 2.5,\n      \"rr_ratio\": \"2:1\",\n     \
+            \ \"formula\": \"Debit=2.5,Width=7.5,MaxProfit=Width-Debit=5.0,RR=5.0:2.5=2:1\"\
+            ,\n      \"rr_note\": \"每投入2.5可获利5.0,盈亏比2:1,适合中等胜率方向策略\"\n    },\n   \
+            \ \"pw_calculation\": {\n      \"base\": 0.3,\n      \"dex_same_dir\"\
+            : 65.0,\n      \"dex_adj\": 0.065,\n      \"vanna_dir\": \"up\",\n   \
+            \   \"vanna_weight\": 1.0,\n      \"vanna_adj\": 0.2,\n      \"technical_confluence\"\
+            : 0.1,\n      \"pw_raw\": 0.565,\n      \"pw_adjusted\": 0.58,\n     \
+            \ \"pw_estimate\": \"58%\",\n      \"formula\": \"base 0.3+dex 0.1×0.65+vanna\
+            \ 1.0×0.2+technical 0.1=0.665但gap偏大下调到0.58\",\n      \"pw_note\": \"dex\
+            \ 65%中等,vanna up高置信,方向信号中等偏强,但gap 3.34需较大波动故胜率58%略高于50%\"\n    },\n  \
+            \  \"entry_trigger\": \"Spot突破172并维持,dex_same_dir>60%,vanna_dir维持up\"\
+            ,\n    \"entry_timing\": \"等待Spot站稳172上方,成交量确认\",\n    \"exit_plan\":\
+            \ {\n      \"profit_target\": \"到达177.5即价差获利50%平仓,或到达179获利80%\",\n   \
+            \   \"stop_loss\": \"Spot回落至170下方或vanna_dir反转为down时止损,亏损达成本50%\",\n  \
+            \    \"time_decay\": \"持有至到期前5日,若未启动则止损\"\n    },\n    \"risk_note\":\
+            \ \"方向性策略需Spot配合,gap 3.34偏大需较强动能,适合账户3%风险敞口\",\n    \"monitoring\": \"\
+            每日监控dex_same_dir若降至<50%需警惕方向反转\"\n  }\n]"
+        - id: user-strategy
           role: user
-          text: "请根据分析结果,生成带RR/Pw的策略。"
+          text: 请根据分析结果,生成带RR/Pw的策略。
         selected: false
         title: Agent 6 策略生成
         type: llm
         vision:
           enabled: false
-      height: 94
+      height: 132
       id: '6001'
       position:
-        x: 2130
-        y: 500
+        x: 2037.7138935288722
+        y: 245.03910504218067
       positionAbsolute:
-        x: 2130
-        y: 500
+        x: 2037.7138935288722
+        y: 245.03910504218067
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -855,65 +923,72 @@ workflow:
         desc: 'Agent 7: Assemble the final report based on the template.'
         model:
           completion_params:
-            temperature: 0.7
+            temperature: 0.5
           mode: chat
-          name: claude-3-opus-20240229
-          provider: anthropic
+          name: gpt-4o-mini
+          provider: langgenius/aihubmix/aihubmix
         prompt_template:
-        - id: "sys-report"
+        - id: sys-report
           role: system
-          text: |
-            你是最终报告生成 Agent。
-            你的任务是汇总所有上游 Agent 的 JSON 输出,并严格按照【输出模板】生成一份给用户的、人类可读的 Markdown 报告。
-            
-            【数据JSON】(来自 Agent 3)
-            {{#3001.text#}}
-            
-            【技术面JSON】(来自 Agent 4)
-            {{#4001.text#}}
-            
-            【剧本分析JSON】(来自 Agent 5)
-            {{#5001.text#}}
-            
-            【策略JSON】(来自 Agent 6)
-            {{#6001.text#}}
-            
-            【风控规则】
-            * 入场:次日开盘后15-30分钟
-            * 止盈:到达最大利润的70-80%
-            * 止损:达到最大亏损的50%或持有3-5个交易日
-            
-            【输出模板】
-            * 数据校验关口结果
-              * 标的:EM1$=;... (从 Agent 3 JSON 提取)
-            * 初次分析(含技术互补1-3项)
-              * 主导方向与驱动... (从 Agent 5 JSON 提取)
-              * 技术读数:... (从 Agent 4 JSON 提取)
-            * 剧本与概率
-              * 区间/趋势上/趋势下/过渡:... (从 Agent 5 JSON 提取)
-            * 策略建议(逐一给:保守/均衡/进取)
-              * (从 Agent 6 JSON 提取, 格式化)
-              * 止盈止损与时间规则 (从【风控规则】提取)
-            * 是否入场交易:(从 Agent 5 JSON 提取 'entry_threshold_check'),并给出明确理由...
-            * 监控要点:...
-            
-            请立即开始生成最终报告。
-        - id: "user-report"
+          text: "你是最终报告生成 Agent。\n你的任务是汇总所有上游 Agent 的 JSON 输出,并严格按照【输出模板】生成一份给用户的、人类可读的\
+            \ Markdown 报告。\n\n【数据JSON】(来自 Agent 3)\n{{#3001.text#}}\n\n【技术面JSON】(来自\
+            \ Agent 4)\n{{#4001.text#}}\n\n【剧本分析JSON】(来自 Agent 5)\n{{#5001.text#}}\n\
+            \n【策略JSON】(来自 Agent 6)\n{{#6001.text#}}\n\n【输出模板】\n# 美股期权分析报告\n\n## 1.\
+            \ 综合评分与结论\n\n从5001.text.scoring提取:\n\n### 总分: {total_score}/10\n\n**评分构成**\
+            \ ({weight_breakdown}):\n- Gamma Regime: {gamma_regime_score}/10 (权重40%)\n\
+            - 破墙可能性: {break_wall_score}/10 (权重30%)\n- 方向一致性: {direction_score}/10\
+            \ (权重20%)\n- IV动态: {iv_score}/10 (权重10%)\n\n### 核心判断\n\n从5001.text.gamma_regime和scenario_classification提取:\n\
+            \n**Gamma Regime状态**:\n- VOL TRIGGER = {vol_trigger}\n- 现价位置: {spot_vs_trigger}\
+            \ ({base_scenario})\n- 解读: {regime_note}\n\n**市场结论**:\n- 主导场景: {primary_scenario}\
+            \ (概率{scenario_probability}%)\n- 调整说明: {adjustment_note}\n\n**入场判断**:\
+            \ {entry_threshold_check}\n**理由**: {entry_rationale}\n\n---\n\n## 2. 剧本分类与概率\
+            \ \n\n从5001.text详细提取:\n\n### 2.1 破墙评估\n- 墙距: {break_wall_assessment.gap_distance_em1}倍EM1$\n\
+            - 簇强度: {cluster_strength}\n- 破墙概率: {break_probability}\n- {break_note}\n\
+            \n### 2.2 方向信号\n- DEX同向: {directional_signals.dex_same_dir}%\n- Vanna:\
+            \ {vanna_dir} (置信度{vanna_confidence})\n- 方向强度: {direction_strength}\n\n\
+            ### 2.3 场景概率分布\n从scenario_classification.secondary_scenarios提取:\n- {primary_scenario}:\
+            \ {scenario_probability}%\n逐一列出次要场景的type和probability\n\n---\n\n## 3. 策略建议\n\
+            \n从6001.text数组提取,每个策略输出:\n\n### 3.{N} {strategy_type}策略\n\n**结构**: {structure}\n\
+            \n**腿部**:\n从legs数组简化输出:\n- {action} {quantity}x {type}@{strike}\n依次列出所有腿\n\
+            \n**期限**: {dte}日\n\n**盈亏比**: {rr_calculation.rr_ratio}\n**胜率**: {pw_calculation.pw_estimate}\n\
+            \n**希腊值**: Delta {greeks_target.delta} | Theta {greeks_target.theta} |\
+            \ Vega {greeks_target.vega}\n\n**入场**: {entry_trigger}\n**止盈**: {exit_plan.profit_target}\n\
+            **止损**: {exit_plan.stop_loss}\n\n---\n\n## 4. 执行SOP \n### 入场检查\n✓ 时机:\
+            \ 次日开盘后15-30分钟\n✓ 确认: Spot在预期区间,IV未异常波动\n✓ 仓位: 单笔≤2%,总敞口≤10%\n\n### 止损触发\n\
+            立即平仓条件:\n- Spot穿越VOL_TRIGGER (Gamma regime反转)\n- 达到策略止损点\n- gap_distance<0.5EM1$\
+            \ (接近墙位)\n- vanna_dir反转\n- dex_same_dir<40%\n\n### 日常监控\n每日盘前:\n- 检查VOL_TRIGGER更新\n\
+            - 确认spot_vs_trigger状态\n\n盘中关注:\n- gap_distance实时变化\n- DEX同向性是否维持\n- IV是否扩张>50%\n\
+            \n---\n\n## 5. 数据校验字段 (详细)\n\n从3001.text.targets提取所有字段:\n\n### 核心字段\n\
+            ```\nSymbol: {symbol}\nSpot: {spot_price}\nEM1$: {em1_dollar}\n\nVOL_TRIGGER:\
+            \ {gamma_metrics.vol_trigger}\nspot_vs_trigger: {gamma_metrics.spot_vs_trigger}\n\
+            NET_GEX: {gamma_metrics.net_gex}\nnet_gex_sign: {gamma_metrics.net_gex_sign}\n\
+            \nCall_Wall: {walls.call_wall}\nPut_Wall: {walls.put_wall}\nMajor_Wall:\
+            \ {walls.major_wall} ({walls.major_wall_type})\n\ngap_distance: {gamma_metrics.gap_distance_dollar}\
+            \ ({gamma_metrics.gap_distance_em1_multiple}x EM1$)\ncluster_strength:\
+            \ {gamma_metrics.cluster_strength_ratio}\nmonthly_override: {gamma_metrics.monthly_cluster_override}\n\
+            \ndex_same_dir: {directional_metrics.dex_same_dir_pct}%\nvanna_dir: {directional_metrics.vanna_dir}\
+            \ (confidence: {directional_metrics.vanna_confidence})\niv_path: {directional_metrics.iv_path}\
+            \ (confidence: {directional_metrics.iv_path_confidence})\n\nATM_IV_7D:\
+            \ {atm_iv.iv_7d}\nATM_IV_14D: {atm_iv.iv_14d}\niv_source: {atm_iv.iv_source}\n\
+            ```\n\n### 指数背景\n```\nSPX NET_GEX: {indices.spx.net_gex_idx}\nSPX EM1$:\
+            \ {indices.spx.em1_dollar_idx}\n```\n\n### 数据质量\n- 完整度: {validation_summary.completion_rate}%\n\
+            - 缺失字段: {validation_summary.missing_count}个\n- 时间戳: {timestamp}\n\n"
+        - id: user-report
           role: user
-          text: "请汇总所有分析,生成最终报告。"
+          text: 请汇总所有分析,生成最终报告。
         selected: false
         title: Agent 7 最终报告
         type: llm
         vision:
           enabled: false
-      height: 94
+      height: 132
       id: '7001'
       position:
-        x: 2430
-        y: 650
+        x: 2381.844113499949
+        y: 245.03910504218067
       positionAbsolute:
-        x: 2430
-        y: 650
+        x: 2381.844113499949
+        y: 245.03910504218067
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -925,18 +1000,21 @@ workflow:
         selected: false
         title: 📈 回复最终分析报告
         type: answer
-      height: 94
+      height: 103
       id: '7002'
       position:
-        x: 2730
-        y: 650
+        x: 2697.500460209588
+        y: 245.03910504218067
       positionAbsolute:
-        x: 2730
-        y: 650
-      selected: false
+        x: 2697.500460209588
+        y: 245.03910504218067
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
-
+    viewport:
+      x: -522.5157036447893
+      y: 214.50811995991825
+      zoom: 0.5726353502106728
   rag_pipeline_variables: []
