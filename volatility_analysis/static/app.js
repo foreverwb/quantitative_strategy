@@ -235,14 +235,24 @@ function clearCanvas() {
 
 function getQuadrantClass(quadrant) {
     if (quadrant.includes('偏多') && quadrant.includes('买波')) {
-        return 'bullish';
-    } else if (quadrant.includes('偏空') && quadrant.includes('卖波')) {
-        return 'bullish';
+        return 'quad-bull-buy'; // 偏多—买波
     } else if (quadrant.includes('偏多') && quadrant.includes('卖波')) {
-        return 'bearish';
+        return 'quad-bull-sell'; // 偏多—卖波
     } else if (quadrant.includes('偏空') && quadrant.includes('买波')) {
-        return 'bearish';
+        return 'quad-bear-buy'; // 偏空—买波
+    } else if (quadrant.includes('偏空') && quadrant.includes('卖波')) {
+        return 'quad-bear-sell'; // 偏空—卖波
+    } else if (quadrant.includes('中性')) {
+        return 'quad-neutral'; // 中性/待观察
     }
+    return '';
+}
+
+// [新增] 辅助函数：根据流动性获取CSS类
+function getLiquidityClass(liquidity) {
+    if (liquidity === '高') return 'liquidity-high';
+    if (liquidity === '中') return 'liquidity-medium';
+    if (liquidity === '低') return 'liquidity-low';
     return '';
 }
 
@@ -336,13 +346,27 @@ function renderRecordsList() {
             var showEarnings = daysToEarnings !== null && daysToEarnings > 0;
             var eventBadge = record.earnings_event_enabled ? '<span class="earnings-badge">E</span>' : '';
             
+            var dirScore = record.direction_score;
+            var volScore = record.vol_score;
+            var dirColor = dirScore > 0 ? '#00C853' : (dirScore < 0 ? '#FF3B30' : '#9E9E9E');
+            var volColor = volScore > 0 ? '#00C853' : (volScore < 0 ? '#FF3B30' : '#9E9E9E');
+            
+            // [更新] 获取流动性CSS类
+            var confidenceBadge = getBadgeClass(record.confidence);
+            var liquidityClass = getLiquidityClass(record.liquidity);
+
             html += '<div class="record-item" data-timestamp="' + record.timestamp + '" data-symbol="' + record.symbol + '">';
             html += '<div class="record-info">';
             html += '<div class="record-symbol">' + record.symbol + eventBadge + '</div>';
             html += '<div class="record-meta">';
             html += '<span class="record-quadrant ' + quadrantClass + '">' + record.quadrant + '</span>';
-            html += '<span class="record-confidence">置信度: ' + record.confidence + '</span>';
-            html += '<span class="record-liquidity">流动性: ' + record.liquidity + '</span>';
+            // [更新] 应用流动性CSS类
+            html += '<span class="record-confidence">置信度: <span class="badge ' + confidenceBadge + '">' + record.confidence + '</span></span>';
+            html += '<span class="record-liquidity ' + liquidityClass + '">流动性: ' + record.liquidity + '</span>';
+            
+            html += '<span class="record-score-dir" style="color: ' + dirColor + ';">方向: ' + dirScore + '</span>';
+            html += '<span class="record-score-vol" style="color: ' + volColor + ';">波动: ' + volScore + '</span>';
+            
             if (showEarnings) {
                 html += '<span class="record-earnings">财报: ' + daysToEarnings + '天</span>';
             }
@@ -626,19 +650,29 @@ function showDrawer(timestamp, symbol) {
     var daysToEarnings = record.derived_metrics.days_to_earnings;
     var showEarnings = daysToEarnings !== null && daysToEarnings > 0;
     
+    var dirScore = record.direction_score;
+    var volScore = record.vol_score;
+    var dirColor = dirScore > 0 ? '#00C853' : (dirScore < 0 ? '#FF3B30' : '#9E9E9E');
+    var volColor = volScore > 0 ? '#00C853' : (volScore < 0 ? '#FF3B30' : '#9E9E9E');
+
+    // [更新] 获取流动性CSS类
+    var liquidityClass = getLiquidityClass(record.liquidity);
+
     var html = '<p class="timestamp">' + record.timestamp + '</p>';
     html += '<div class="detail-section"><h3>核心结论</h3>';
     html += '<div class="detail-row"><div class="detail-label">四象限定位:</div><div class="detail-value"><strong><span class="record-quadrant ' + quadrantClass + '">' + record.quadrant + '</span></strong></div></div>';
     html += '<div class="detail-row"><div class="detail-label">置信度:</div><div class="detail-value"><span class="badge ' + confidenceBadge + ' detail-value-highlight">' + record.confidence + '</span></div></div>';
-    html += '<div class="detail-row"><div class="detail-label">流动性:</div><div class="detail-value"><span class="detail-value-liquidity">' + record.liquidity + '</span></div></div>';
+    // [更新] 应用流动性CSS类
+    html += '<div class="detail-row"><div class="detail-label">流动性:</div><div class="detail-value"><span class="detail-value-liquidity ' + liquidityClass + '">' + record.liquidity + '</span></div></div>';
     if (showEarnings) {
         html += '<div class="detail-row"><div class="detail-label">距离财报:</div><div class="detail-value">' + daysToEarnings + ' 天</div></div>';
     }
     if (record.earnings_event_enabled) {
         html += '<div class="detail-row"><div class="detail-label">财报事件:</div><div class="detail-value">✅ 已开启</div></div>';
     }
-    html += '<div class="detail-row"><div class="detail-label">方向评分:</div><div class="detail-value">' + record.direction_score + ' (' + record.direction_bias + ')</div></div>';
-    html += '<div class="detail-row"><div class="detail-label">波动评分:</div><div class="detail-value">' + record.vol_score + ' (' + record.vol_bias + ')</div></div></div>';
+    
+    html += '<div class="detail-row"><div class="detail-label">方向评分:</div><div class="detail-value" style="color: ' + dirColor + '; font-weight: bold;">' + record.direction_score + ' (' + record.direction_bias + ')</div></div>';
+    html += '<div class="detail-row"><div class="detail-label">波动评分:</div><div class="detail-value" style="color: ' + volColor + '; font-weight: bold;">' + record.vol_score + ' (' + record.vol_bias + ')</div></div></div>';
     
     html += '<div class="detail-section"><h3>衍生指标</h3>';
     html += '<div class="detail-row"><div class="detail-label">IVRV 比值:</div><div class="detail-value">' + record.derived_metrics.ivrv_ratio + '</div></div>';
@@ -702,13 +736,13 @@ function drawQuadrant() {
     ctx.clearRect(0, 0, width, height);
     
     ctx.globalAlpha = 0.08;
-    ctx.fillStyle = '#52c41a';
+    ctx.fillStyle = '#34C759'; // 偏空—买波
     ctx.fillRect(left, top, halfQuadrant, halfQuadrant);
-    ctx.fillStyle = '#faad14';
+    ctx.fillStyle = '#00C853'; // 偏多—买波
     ctx.fillRect(centerX, top, halfQuadrant, halfQuadrant);
-    ctx.fillStyle = '#ff4d4f';
+    ctx.fillStyle = '#007AFF'; // 偏空—卖波
     ctx.fillRect(left, centerY, halfQuadrant, halfQuadrant);
-    ctx.fillStyle = '#1890ff';
+    ctx.fillStyle = '#FF9500'; // 偏多—卖波
     ctx.fillRect(centerX, centerY, halfQuadrant, halfQuadrant);
     ctx.globalAlpha = 1.0;
     
@@ -799,10 +833,10 @@ function drawQuadrant() {
     ctx.font = 'bold ' + labelFontSize + 'px Arial';
     ctx.fillStyle = '#666';
     ctx.textAlign = 'center';
-    ctx.fillText('偏空--买波', left + halfQuadrant / 2, top + 20);
-    ctx.fillText('偏多--买波', centerX + halfQuadrant / 2, top + 20);
-    ctx.fillText('偏空--卖波', left + halfQuadrant / 2, bottom - 12);
-    ctx.fillText('偏多--卖波', centerX + halfQuadrant / 2, bottom - 12);
+    ctx.fillText('偏空—买波', left + halfQuadrant / 2, top + 20);
+    ctx.fillText('偏多—买波', centerX + halfQuadrant / 2, top + 20);
+    ctx.fillText('偏空—卖波', left + halfQuadrant / 2, bottom - 12);
+    ctx.fillText('偏多—卖波', centerX + halfQuadrant / 2, bottom - 12);
     
     var filteredRecords = canvasRecords.filter(function(r) {
         if (selectedQuadrants.includes('全部')) return true;
@@ -865,12 +899,18 @@ function drawQuadrant() {
         var y = item.y;
         
         var color;
-        if (record.confidence === '高') {
-            color = '#52c41a';
-        } else if (record.confidence === '中') {
-            color = '#faad14';
+        var quadrant = record.quadrant || '';
+        
+        if (quadrant.includes('偏多') && quadrant.includes('买波')) {
+            color = '#00C853'; // 偏多—买波
+        } else if (quadrant.includes('偏多') && quadrant.includes('卖波')) {
+            color = '#FF9500'; // 偏多—卖波
+        } else if (quadrant.includes('偏空') && quadrant.includes('买波')) {
+            color = '#34C759'; // 偏空—买波
+        } else if (quadrant.includes('偏空') && quadrant.includes('卖波')) {
+            color = '#007AFF'; // 偏空—卖波
         } else {
-            color = '#ff4d4f';
+            color = '#9C27B0'; // 中性/待观察
         }
         
         ctx.fillStyle = color;
