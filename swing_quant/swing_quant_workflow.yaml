@@ -14,13 +14,679 @@ dependencies:
 - current_identifier: null
   type: marketplace
   value:
-    marketplace_plugin_unique_identifier: langgenius/openai_api_compatible:0.0.23@59ef558a46420c436b280af1ee452b4129ddfd3567826112f6f193279d8c4a37
+    marketplace_plugin_unique_identifier: langgenius/openai_api_compatible:0.0.24@2266d6adfeafd3a161ba4a033553f4ff8a8b1d07be54f4b11ce9e68032889ac3
     version: null
 kind: app
 version: 0.4.0
 workflow:
   conversation_variables: []
-  environment_variables: []
+  environment_variables:
+  - description: IV路径相对变化阈值百分比, 阈值=max(2 vol点, 8–10%相对变化)
+    id: 6947dc09-d0c3-4aef-aade-6474c620628c
+    name: IV_PATH_THRESHOLD_PCT
+    selector:
+    - env
+    - IV_PATH_THRESHOLD_PCT
+    value: '10'
+    value_type: string
+  - description: 墙识别簇宽度（簇宽 ≥ X 相邻行权价）簇宽≥3相邻行权
+    id: 0e92e13b-cfa8-4210-87d6-5332dde7f755
+    name: WALL_CLUSTER_WIDTH
+    selector:
+    - env
+    - WALL_CLUSTER_WIDTH
+    value: '3'
+    value_type: string
+  - description: '墙识别峰值倍数（局部峰 ≥ 相邻γ中位数 × 此倍数）
+
+      局部峰≥相邻γ中位数2倍'
+    id: 0d039297-a8fd-4d8e-9475-3adb3f04e925
+    name: WALL_PEAK_MULTIPLIER
+    selector:
+    - env
+    - WALL_PEAK_MULTIPLIER
+    value: '2.0'
+    value_type: string
+  - description: 月度中期DTE（当无周度数据时使用）
+    id: d3156f30-66b4-4f28-a246-e9d8e5e31512
+    name: DEFAULT_DTE_MONTHLY_MID
+    selector:
+    - env
+    - DEFAULT_DTE_MONTHLY_MID
+    value: '60'
+    value_type: string
+  - description: ''
+    id: 9f7b2a95-fbb2-4032-a689-462f20895111
+    name: ALPHA_VANTAGE_API_URL
+    selector:
+    - env
+    - ALPHA_VANTAGE_API_URL
+    value: https://www.alphavantage.co/query?
+    value_type: string
+  - description: ''
+    id: 34e50e26-0669-4732-be92-45ae7ff2f4d4
+    name: EM1_SQRT_FACTOR
+    selector:
+    - env
+    - EM1_SQRT_FACTOR
+    value: '0.06299'
+    value_type: string
+  - description: ''
+    id: 56816405-1daf-4126-8efb-4f753d1375c8
+    name: BREAK_WALL_THRESHOLD_LOW
+    selector:
+    - env
+    - BREAK_WALL_THRESHOLD_LOW
+    value: '0.4'
+    value_type: string
+  - description: ''
+    id: 3ea750ec-3a32-4500-8fdf-f07acfe1323d
+    name: BREAK_WALL_THRESHOLD_HIGH
+    selector:
+    - env
+    - BREAK_WALL_THRESHOLD_HIGH
+    value: '0.8'
+    value_type: string
+  - description: ''
+    id: 6e5c1b25-eb44-4858-bcc1-968cf45ae95d
+    name: MONTHLY_OVERRIDE_THRESHOLD
+    selector:
+    - env
+    - MONTHLY_OVERRIDE_THRESHOLD
+    value: '0.7'
+    value_type: string
+  - description: ''
+    id: 42035f4f-962e-4d41-a3aa-13d4bc86f4c8
+    name: MONTHLY_CLUSTER_STRENGTH_RATIO
+    selector:
+    - env
+    - MONTHLY_CLUSTER_STRENGTH_RATIO
+    value: '1.5'
+    value_type: string
+  - description: ''
+    id: 1175c26c-d2b4-4e1c-800e-06be95429cd6
+    name: CLUSTER_STRENGTH_THRESHOLD_TREND
+    selector:
+    - env
+    - CLUSTER_STRENGTH_THRESHOLD_TREND
+    value: '1.2'
+    value_type: string
+  - description: ''
+    id: d1f43157-5c94-4f96-9fc5-40d58dc90dca
+    name: CLUSTER_STRENGTH_THRESHOLD_STRONG
+    selector:
+    - env
+    - CLUSTER_STRENGTH_THRESHOLD_STRONG
+    value: '2.0'
+    value_type: string
+  - description: ''
+    id: d699a30e-4d47-45f1-99a6-f2bf8ef10683
+    name: DEX_SAME_DIR_THRESHOLD_STRONG
+    selector:
+    - env
+    - DEX_SAME_DIR_THRESHOLD_STRONG
+    value: '70'
+    value_type: string
+  - description: ''
+    id: a6206f27-187f-49f5-85c5-b21b0ca55cd1
+    name: DEX_SAME_DIR_THRESHOLD_MEDIUM
+    selector:
+    - env
+    - DEX_SAME_DIR_THRESHOLD_MEDIUM
+    value: '60'
+    value_type: string
+  - description: ''
+    id: 1b2e29d4-4b33-4cc6-9e9f-aa81d1391ce8
+    name: DEX_SAME_DIR_THRESHOLD_WEAK
+    selector:
+    - env
+    - DEX_SAME_DIR_THRESHOLD_WEAK
+    value: '50'
+    value_type: string
+  - description: ''
+    id: ca32c770-d806-4659-944a-d4c899b5aa2b
+    name: IV_PATH_THRESHOLD_VOL
+    selector:
+    - env
+    - IV_PATH_THRESHOLD_VOL
+    value: '2'
+    value_type: string
+  - description: ''
+    id: 75b790bc-d2a1-4324-b8cf-5467923ba39b
+    name: IV_NOISE_THRESHOLD
+    selector:
+    - env
+    - IV_NOISE_THRESHOLD
+    value: '30'
+    value_type: string
+  - description: ''
+    id: a42bcd57-8084-4742-a674-468ff4b1eb23
+    name: DEFAULT_STRIKES
+    selector:
+    - env
+    - DEFAULT_STRIKES
+    value: '25'
+    value_type: string
+  - description: ''
+    id: bff94012-d3ef-4243-899a-6b838cfbd9f9
+    name: DEFAULT_NET_WINDOW
+    selector:
+    - env
+    - DEFAULT_NET_WINDOW
+    value: '60'
+    value_type: string
+  - description: ''
+    id: 9c062833-fabc-4f9a-871e-edab861724b8
+    name: EXTENDED_NET_WINDOW
+    selector:
+    - env
+    - EXTENDED_NET_WINDOW
+    value: '120'
+    value_type: string
+  - description: ''
+    id: 159562a1-174f-49f5-bc6f-e2eb5132b18c
+    name: DEFAULT_DTE_WEEKLY_SHORT
+    selector:
+    - env
+    - DEFAULT_DTE_WEEKLY_SHORT
+    value: '7'
+    value_type: string
+  - description: ''
+    id: d8ca77db-2afc-4c56-a951-0467f8337406
+    name: DEFAULT_DTE_WEEKLY_MID
+    selector:
+    - env
+    - DEFAULT_DTE_WEEKLY_MID
+    value: '14'
+    value_type: string
+  - description: ''
+    id: c98f3d63-3e41-40d2-8900-ea09dae59bce
+    name: DEFAULT_DTE_MONTHLY_SHORT
+    selector:
+    - env
+    - DEFAULT_DTE_MONTHLY_SHORT
+    value: '30'
+    value_type: string
+  - description: ''
+    id: 415be580-c0e0-42b6-8b96-455023aaf1a7
+    name: DEFAULT_INDEX_PRIMARY
+    selector:
+    - env
+    - DEFAULT_INDEX_PRIMARY
+    value: SPX
+    value_type: string
+  - description: ''
+    id: d25ff9d2-7196-440b-9e44-23246e12f4fd
+    name: DEFAULT_INDEX_SECONDARY
+    selector:
+    - env
+    - DEFAULT_INDEX_SECONDARY
+    value: QQQ
+    value_type: string
+  - description: ''
+    id: e1128bdc-b017-4da3-8493-fc1325cbaf10
+    name: SCORE_WEIGHT_GAMMA_REGIME
+    selector:
+    - env
+    - SCORE_WEIGHT_GAMMA_REGIME
+    value: '0.4'
+    value_type: string
+  - description: ''
+    id: fc04500c-157d-4ec8-beea-d651828da32e
+    name: SCORE_WEIGHT_BREAK_WALL
+    selector:
+    - env
+    - SCORE_WEIGHT_BREAK_WALL
+    value: '0.3'
+    value_type: string
+  - description: ''
+    id: 5d072a9d-5fe4-48be-80d4-7ed90134c275
+    name: SCORE_WEIGHT_DIRECTION
+    selector:
+    - env
+    - SCORE_WEIGHT_DIRECTION
+    value: '0.2'
+    value_type: string
+  - description: ''
+    id: c1c3da25-7559-49d5-aa25-8b46ed02e6b2
+    name: SCORE_WEIGHT_IV
+    selector:
+    - env
+    - SCORE_WEIGHT_IV
+    value: '0.1'
+    value_type: string
+  - description: ''
+    id: fae0be53-9900-4354-a2c3-1e2f6c013404
+    name: TECHNICAL_SCORE_MAX
+    selector:
+    - env
+    - TECHNICAL_SCORE_MAX
+    value: '2'
+    value_type: string
+  - description: ''
+    id: 27b59ab6-298e-41d9-8cfe-0b5aac4c6be3
+    name: ENTRY_THRESHOLD_SCORE
+    selector:
+    - env
+    - ENTRY_THRESHOLD_SCORE
+    value: '3'
+    value_type: string
+  - description: ''
+    id: f31e374b-b544-43bb-a19b-c2248099572d
+    name: ENTRY_THRESHOLD_PROBABILITY
+    selector:
+    - env
+    - ENTRY_THRESHOLD_PROBABILITY
+    value: '60'
+    value_type: string
+  - description: ''
+    id: 8f84deb9-de9c-4d39-8d2f-71d9a141c43c
+    name: LIGHT_POSITION_PROBABILITY
+    selector:
+    - env
+    - LIGHT_POSITION_PROBABILITY
+    value: '50'
+    value_type: string
+  - description: ''
+    id: 2e9f3d79-055e-475c-b532-6d877601d0f4
+    name: MAX_SINGLE_RISK_PCT
+    selector:
+    - env
+    - MAX_SINGLE_RISK_PCT
+    value: '2'
+    value_type: string
+  - description: ''
+    id: 338fc286-e85f-49a5-b878-1e590ebde245
+    name: MAX_TOTAL_EXPOSURE_PCT
+    selector:
+    - env
+    - MAX_TOTAL_EXPOSURE_PCT
+    value: '10'
+    value_type: string
+  - description: ''
+    id: f065de1d-7ad8-43e4-bd82-2269277505db
+    name: DTE_GAP_HIGH_THRESHOLD
+    selector:
+    - env
+    - DTE_GAP_HIGH_THRESHOLD
+    value: '3'
+    value_type: string
+  - description: ''
+    id: c5f348f3-ae62-483b-9c7d-feac529d7eef
+    name: DTE_GAP_MID_THRESHOLD
+    selector:
+    - env
+    - DTE_GAP_MID_THRESHOLD
+    value: '2'
+    value_type: string
+  - description: ''
+    id: fb7fedab-92c3-43ef-b576-7356fa0040fc
+    name: DTE_MONTHLY_ADJUSTMENT
+    selector:
+    - env
+    - DTE_MONTHLY_ADJUSTMENT
+    value: '7'
+    value_type: string
+  - description: ''
+    id: 00ce1d05-c506-45bb-8908-fb594b659983
+    name: PW_CREDIT_BASE
+    selector:
+    - env
+    - PW_CREDIT_BASE
+    value: '0.5'
+    value_type: string
+  - description: ''
+    id: 79b63b13-4f69-4045-9189-6f31050b550e
+    name: PW_CREDIT_CLUSTER_COEF
+    selector:
+    - env
+    - PW_CREDIT_CLUSTER_COEF
+    value: '0.1'
+    value_type: string
+  - description: ''
+    id: 0e39310c-a22c-47dc-95ee-793583183a82
+    name: PW_CREDIT_DISTANCE_PENALTY_COEF
+    selector:
+    - env
+    - PW_CREDIT_DISTANCE_PENALTY_COEF
+    value: '0.05'
+    value_type: string
+  - description: ''
+    id: 1452f6c4-9241-4bf9-b87f-88d2eaf603f7
+    name: PW_CREDIT_MIN
+    selector:
+    - env
+    - PW_CREDIT_MIN
+    value: '0.4'
+    value_type: string
+  - description: ''
+    id: 78159142-1ebb-4426-8140-7ccfaa771402
+    name: PW_CREDIT_MAX
+    selector:
+    - env
+    - PW_CREDIT_MAX
+    value: '0.85'
+    value_type: string
+  - description: ''
+    id: c7a44894-02d2-4375-a48b-b8a4218153f0
+    name: PW_DEBIT_BASE
+    selector:
+    - env
+    - PW_DEBIT_BASE
+    value: '0.3'
+    value_type: string
+  - description: ''
+    id: ab70607c-9c90-4d3e-8159-ee15c883f3b5
+    name: PW_DEBIT_MIN
+    selector:
+    - env
+    - PW_DEBIT_MIN
+    value: '0.25'
+    value_type: string
+  - description: ''
+    id: 356ac996-0540-4cf1-9531-9d3851698a53
+    name: PW_DEBIT_MAX
+    selector:
+    - env
+    - PW_DEBIT_MAX
+    value: '0.75'
+    value_type: string
+  - description: ''
+    id: 1d22dba3-e96f-4d77-a64f-a234739cb6c1
+    name: PW_BUTTERFLY_BODY_INSIDE
+    selector:
+    - env
+    - PW_BUTTERFLY_BODY_INSIDE
+    value: '0.65'
+    value_type: string
+  - description: ''
+    id: 23fb0ba8-d974-40de-bbaf-56da24f61f49
+    name: PW_BUTTERFLY_BODY_OFFSET_1EM
+    selector:
+    - env
+    - PW_BUTTERFLY_BODY_OFFSET_1EM
+    value: '0.45'
+    value_type: string
+  - description: ''
+    id: 2eb9a9cc-a1a3-4ced-af39-ceb1f1371bb1
+    name: ENABLE_EARNINGS_API
+    selector:
+    - env
+    - ENABLE_EARNINGS_API
+    value: 'true'
+    value_type: string
+  - description: ''
+    id: 7bc4ee89-7d0a-4015-ae7f-5bff22bbbe3c
+    name: EARNINGS_CACHE_DAYS
+    selector:
+    - env
+    - EARNINGS_CACHE_DAYS
+    value: '30'
+    value_type: string
+  - description: ''
+    id: ee0efa9d-cb6d-4973-bbed-257750b991b6
+    name: ALPHA_VANTAGE_API_KEY
+    selector:
+    - env
+    - ALPHA_VANTAGE_API_KEY
+    value: TKV2HLJJYKSRGR
+    value_type: string
+  - description: 保守策略Delta最小值（接近中性）
+    id: e5f67890-abcd-ef12-3456-7890abcdef12
+    name: CONSERVATIVE_DELTA_MIN
+    selector:
+    - env
+    - CONSERVATIVE_DELTA_MIN
+    value: '-0.1'
+    value_type: string
+  - description: 保守策略Delta最大值（接近中性）
+    id: f6789012-abcd-ef12-3456-7890abcdef23
+    name: CONSERVATIVE_DELTA_MAX
+    selector:
+    - env
+    - CONSERVATIVE_DELTA_MAX
+    value: '0.1'
+    value_type: string
+  - description: 保守策略Theta最小值（时间价值衰减收益）
+    id: 67890123-abcd-ef12-3456-7890abcdef34
+    name: CONSERVATIVE_THETA_MIN
+    selector:
+    - env
+    - CONSERVATIVE_THETA_MIN
+    value: '5.0'
+    value_type: string
+  - description: 保守策略Vega最大值（做空波动率）
+    id: 78901234-abcd-ef12-3456-7890abcdef45
+    name: CONSERVATIVE_VEGA_MAX
+    selector:
+    - env
+    - CONSERVATIVE_VEGA_MAX
+    value: '-10.0'
+    value_type: string
+  - description: 均衡策略Delta范围（±此值）
+    id: 89012345-abcd-ef12-3456-7890abcdef56
+    name: BALANCED_DELTA_RANGE
+    selector:
+    - env
+    - BALANCED_DELTA_RANGE
+    value: '0.2'
+    value_type: string
+  - description: 均衡策略Theta最小值
+    id: 90123456-abcd-ef12-3456-7890abcdef67
+    name: BALANCED_THETA_MIN
+    selector:
+    - env
+    - BALANCED_THETA_MIN
+    value: '8.0'
+    value_type: string
+  - description: 进取策略Delta最小值（明确方向）
+    id: 01234567-abcd-ef12-3456-7890abcdef78
+    name: AGGRESSIVE_DELTA_MIN
+    selector:
+    - env
+    - AGGRESSIVE_DELTA_MIN
+    value: '0.3'
+    value_type: string
+  - description: 进取策略Delta最大值
+    id: 12345678-abcd-ef12-3456-7890abcdef89
+    name: AGGRESSIVE_DELTA_MAX
+    selector:
+    - env
+    - AGGRESSIVE_DELTA_MAX
+    value: '0.6'
+    value_type: string
+  - description: 进取策略Vega最小值（做多波动率）
+    id: 23456789-abcd-ef12-3456-7890abcdef90
+    name: AGGRESSIVE_VEGA_MIN
+    selector:
+    - env
+    - AGGRESSIVE_VEGA_MIN
+    value: '10.0'
+    value_type: string
+  - description: 保守策略Long腿偏移（× EM1$）
+    id: 34567890-abcd-ef12-3456-7890abcdefa1
+    name: STRIKE_CONSERVATIVE_LONG_OFFSET
+    selector:
+    - env
+    - STRIKE_CONSERVATIVE_LONG_OFFSET
+    value: '1.5'
+    value_type: string
+  - description: 均衡策略Wing偏移（× EM1$）
+    id: 45678901-abcd-ef12-3456-7890abcdefa2
+    name: STRIKE_BALANCED_WING_OFFSET
+    selector:
+    - env
+    - STRIKE_BALANCED_WING_OFFSET
+    value: '1.0'
+    value_type: string
+  - description: 比率价差卖方偏移（× EM1$）
+    id: 56789012-abcd-ef12-3456-7890abcdefa3
+    name: STRIKE_RATIO_SHORT_OFFSET
+    selector:
+    - env
+    - STRIKE_RATIO_SHORT_OFFSET
+    value: '0.5'
+    value_type: string
+  - description: 比率价差买方偏移（× EM1$）
+    id: 67890123-abcd-ef12-3456-7890abcdefa4
+    name: STRIKE_RATIO_LONG_OFFSET
+    selector:
+    - env
+    - STRIKE_RATIO_LONG_OFFSET
+    value: '1.5'
+    value_type: string
+  - description: 进取策略Long腿偏移（× EM1$）
+    id: 78901234-abcd-ef12-3456-7890abcdefa5
+    name: STRIKE_AGGRESSIVE_LONG_OFFSET
+    selector:
+    - env
+    - STRIKE_AGGRESSIVE_LONG_OFFSET
+    value: '0.2'
+    value_type: string
+  - description: 信用价差最小宽度（× EM1$）
+    id: 89012345-abcd-ef12-3456-7890abcdefa6
+    name: WIDTH_CREDIT_MIN
+    selector:
+    - env
+    - WIDTH_CREDIT_MIN
+    value: '0.8'
+    value_type: string
+  - description: 信用价差最大宽度（× EM1$）
+    id: 90123456-abcd-ef12-3456-7890abcdefa7
+    name: WIDTH_CREDIT_MAX
+    selector:
+    - env
+    - WIDTH_CREDIT_MAX
+    value: '1.0'
+    value_type: string
+  - description: 借贷价差最小宽度（× EM1$）
+    id: 01234567-abcd-ef12-3456-7890abcdefa8
+    name: WIDTH_DEBIT_MIN
+    selector:
+    - env
+    - WIDTH_DEBIT_MIN
+    value: '1.0'
+    value_type: string
+  - description: 借贷价差最大宽度（× EM1$）
+    id: 12345678-abcd-ef12-3456-7890abcdefa9
+    name: WIDTH_DEBIT_MAX
+    selector:
+    - env
+    - WIDTH_DEBIT_MAX
+    value: '1.2'
+    value_type: string
+  - description: 信用价差IVR 0-25%时的credit ratio
+    id: 23456789-abcd-ef12-3456-7890abcdefb0
+    name: CREDIT_IVR_0_25
+    selector:
+    - env
+    - CREDIT_IVR_0_25
+    value: '0.20'
+    value_type: string
+  - description: 信用价差IVR 25-50%时的credit ratio
+    id: 34567890-abcd-ef12-3456-7890abcdefb1
+    name: CREDIT_IVR_25_50
+    selector:
+    - env
+    - CREDIT_IVR_25_50
+    value: '0.30'
+    value_type: string
+  - description: 信用价差IVR 50-75%时的credit ratio
+    id: 45678901-abcd-ef12-3456-7890abcdefb2
+    name: CREDIT_IVR_50_75
+    selector:
+    - env
+    - CREDIT_IVR_50_75
+    value: '0.40'
+    value_type: string
+  - description: 信用价差IVR 75-100%时的credit ratio
+    id: 56789012-abcd-ef12-3456-7890abcdefb3
+    name: CREDIT_IVR_75_100
+    selector:
+    - env
+    - CREDIT_IVR_75_100
+    value: '0.50'
+    value_type: string
+  - description: 借贷价差IVR 0-40%时的debit ratio
+    id: 67890123-abcd-ef12-3456-7890abcdefb4
+    name: DEBIT_IVR_0_40
+    selector:
+    - env
+    - DEBIT_IVR_0_40
+    value: '0.30'
+    value_type: string
+  - description: 借贷价差IVR 40-70%时的debit ratio
+    id: 78901234-abcd-ef12-3456-7890abcdefb5
+    name: DEBIT_IVR_40_70
+    selector:
+    - env
+    - DEBIT_IVR_40_70
+    value: '0.40'
+    value_type: string
+  - description: 借贷价差IVR 70-100%时的debit ratio
+    id: 89012345-abcd-ef12-3456-7890abcdefb6
+    name: DEBIT_IVR_70_100
+    selector:
+    - env
+    - DEBIT_IVR_70_100
+    value: '0.50'
+    value_type: string
+  - description: Pw借贷计算中的DEX系数
+    id: 90123456-abcd-ef12-3456-7890abcdefb7
+    name: PW_DEBIT_DEX_COEF
+    selector:
+    - env
+    - PW_DEBIT_DEX_COEF
+    value: '0.1'
+    value_type: string
+  - description: Pw借贷计算中的Vanna系数
+    id: 01234567-abcd-ef12-3456-7890abcdefb8
+    name: PW_DEBIT_VANNA_COEF
+    selector:
+    - env
+    - PW_DEBIT_VANNA_COEF
+    value: '0.2'
+    value_type: string
+  - description: 信用策略止盈目标（权利金衰减至剩余%）
+    id: 12345678-abcd-ef12-3456-7890abcdefb9
+    name: PROFIT_TARGET_CREDIT_PCT
+    selector:
+    - env
+    - PROFIT_TARGET_CREDIT_PCT
+    value: '30'
+    value_type: string
+  - description: 借贷策略止盈目标（浮盈%）
+    id: 23456789-abcd-ef12-3456-7890abcdefc0
+    name: PROFIT_TARGET_DEBIT_PCT
+    selector:
+    - env
+    - PROFIT_TARGET_DEBIT_PCT
+    value: '60'
+    value_type: string
+  - description: 借贷策略止损线（亏损%）
+    id: 34567890-abcd-ef12-3456-7890abcdefc1
+    name: STOP_LOSS_DEBIT_PCT
+    selector:
+    - env
+    - STOP_LOSS_DEBIT_PCT
+    value: '50'
+    value_type: string
+  - description: 信用策略止损线（浮亏达权利金%）
+    id: 45678901-abcd-ef12-3456-7890abcdefc2
+    name: STOP_LOSS_CREDIT_PCT
+    selector:
+    - env
+    - STOP_LOSS_CREDIT_PCT
+    value: '150'
+    value_type: string
+  - description: 到期前强制平仓天数
+    id: 56789012-abcd-ef12-3456-7890abcdefc3
+    name: TIME_DECAY_EXIT_DAYS
+    selector:
+    - env
+    - TIME_DECAY_EXIT_DAYS
+    value: '3'
+    value_type: string
   features:
     file_upload:
       allowed_file_extensions:
@@ -221,12 +887,51 @@ workflow:
       type: custom
       zIndex: 0
     - data:
+        isInIteration: false
         isInLoop: false
         sourceType: if-else
-        targetType: llm
-      id: 3002-case-ready-5001-target
+        targetType: code
+      id: 3002-case-ready-1004-target
+      selected: false
       source: '3002'
       sourceHandle: case-ready
+      target: '1004'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: 4001--1007-target
+      selected: false
+      source: '4001'
+      sourceHandle: source
+      target: '1007'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: code
+      id: 1004-source-1007-target
+      selected: false
+      source: '1004'
+      sourceHandle: source
+      target: '1007'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: llm
+      id: 1007-source-5001-target
+      selected: false
+      source: '1007'
+      sourceHandle: source
       target: '5001'
       targetHandle: target
       type: custom
@@ -235,19 +940,9 @@ workflow:
         isInLoop: false
         sourceType: llm
         targetType: llm
-      id: 5001-source-6001-target
-      source: '5001'
-      sourceHandle: source
-      target: '6001'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: llm
-        targetType: llm
-      id: 6001-source-7001-target
-      source: '6001'
+      id: 1005-source-7001-target
+      selected: false
+      source: '1005'
       sourceHandle: source
       target: '7001'
       targetHandle: target
@@ -258,6 +953,7 @@ workflow:
         sourceType: llm
         targetType: answer
       id: 7001-source-7002-target
+      selected: false
       source: '7001'
       sourceHandle: source
       target: '7002'
@@ -265,13 +961,39 @@ workflow:
       type: custom
       zIndex: 0
     - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: 5001-source-1006-target
+      selected: false
+      source: '5001'
+      sourceHandle: source
+      target: '1006'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: llm
+      id: 1006-source-6001-target
+      selected: false
+      source: '1006'
+      sourceHandle: source
+      target: '6001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
         isInLoop: false
         sourceType: llm
         targetType: llm
-      id: 4001-source-5001-target
-      source: '4001'
+      id: 6001-source-1005-target
+      selected: false
+      source: '6001'
       sourceHandle: source
-      target: '5001'
+      target: '1005'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -412,20 +1134,36 @@ workflow:
         - id: sys-cmdlist
           role: system
           text: "你是一个美股期权分析助手。你的唯一任务是根据用户提供的代码,严格按照【数据抓取命令清单】的格式,为每个标的(和指数)生成一个清晰的、可供用户复制粘贴去执行的命令列表。\n\
-            \n【用户输入】\n{{#1001.query#}}\n\n【预处理】\n1. 提取代码:例如 \"amzn us, QQQ\" -> [\"\
-            AMZN\", \"QQQ\"]\n2. 大写去重。\n\n【数据抓取命令清单】\n* 必跑（逐标的）\n  * 墙与簇：!gexr {SYMBOL}\
-            \ 25 7 w；!gexr {SYMBOL} 25 14 w\n  * 正γ/负γ：!gexn {SYMBOL} 60 98；!tigger\
-            \ 60\n  * DEX：!dexn {SYMBOL} 25 14 w\n  * Vanna：!vanna {SYMBOL} ntm 60\
-            \ m\n  * 波动率：!skew {SYMBOL} ivmid atm 7；!skew {SYMBOL} ivmid atm 14；!skew\
-            \ {SYMBOL} ivmid ntm 14 w；!term {SYMBOL} 60\n* 扩展（条件触发）\n  * 周度簇稀疏或月度主导：!gexr\
-            \ {SYMBOL} 30 m\n  * 更远到期影响：!gexn {SYMBOL} 120 98；!dexn {SYMBOL} 25 30\
-            \ w 或 !dexn {SYMBOL} 35 98\n  * 7D ATM-IV噪声>阈值：以14D为准并备注；必要时补 !skew {SYMBOL}\
-            \ ivmid atm 21\n  * 验证Vanna稳定性：!vanna {SYMBOL} ntm 30 m\n  * 解释可选：!vexn\
-            \ {SYMBOL} 30 190\n* 指数背景（必需字段）\n  * SPX：!gexn SPX 30 98；!skew SPX ivmid\
-            \ atm 7；!skew SPX ivmid atm 14\n  * QQQ（可选对照）：!gexn QQQ 30 98；!skew QQQ\
-            \ ivmid atm 7；!skew QQQ ivmid atm 14\n  * 若标的偏纳指，请同时回传QQQ；否则SPX即可。\n*\
-            \ iv_path: 比较今日 7D ATM-IV 与昨日/前三日,存档数据获取\n* 回传要求\n  * 每张图/输出请注明命令与时间戳（ET）；可附收盘价与当日变动。\n\
-            \  * 若任一必跑命令输出为空或异常，请直接说明，我会给替代口径。\n\n\n请立即开始为 {{#1001.query#}} 生成命令清单。\n"
+            \n【预处理】\n1. 提取代码:例如 \"amzn us, QQQ\" -> [\"AMZN\", \"QQQ\"]\n2. 大写去重。\n\
+            \n【数据抓取命令清单】\n### 必跑命令（按顺序执行）\n**1. 墙与簇识别**\n!gexr {SYMBOL} {{#env.DEFAULT_STRIKES#}}\
+            \ {{#env.DEFAULT_DTE_WEEKLY_SHORT#}} w \n!gexr {SYMBOL} {{#env.DEFAULT_STRIKES#}}\
+            \ {{#env.DEFAULT_DTE_WEEKLY_MID#}} w\n **2. 净γ与零γ**\n!gexn {SYMBOL} {{#env.DEFAULT_NET_WINDOW#}}\
+            \ 98 !trigger {SYMBOL} {{#env.DEFAULT_NET_WINDOW#}}\n **3. DEX方向一致性**\
+            \ ``` \n!dexn {SYMBOL} {{#env.DEFAULT_STRIKES#}} {{#env.DEFAULT_DTE_WEEKLY_MID#}}\
+            \ w\n **4. Vanna** \n!vanna {SYMBOL} ntm {{#env.DEFAULT_NET_WINDOW#}}\
+            \ m\n\n**5. 波动率**  \n!skew {SYMBOL} ivmid atm {{#env.DEFAULT_DTE_WEEKLY_SHORT#}}\
+            \ \n!skew {SYMBOL} ivmid atm {{#env.DEFAULT_DTE_WEEKLY_MID#}} \n!skew\
+            \ {SYMBOL} ivmid ntm {{#env.DEFAULT_DTE_WEEKLY_MID#}} w \n!term {SYMBOL}\
+            \ {{#env.DEFAULT_NET_WINDOW#}}\n\n### 扩展命令（条件触发）\n  **若周度簇稀疏或月度主导**： \n\
+            !gexr {SYMBOL} {{#env.DEFAULT_DTE_MONTHLY_SHORT#}} m \n**若需更远到期影响**： \n\
+            \ !gexn {SYMBOL} {{#env.EXTENDED_NET_WINDOW#}} 98 \n!dexn {SYMBOL} {{#env.DEFAULT_STRIKES#}}\
+            \ {{#env.DEFAULT_DTE_MONTHLY_SHORT#}} w  \n**若7D ATM-IV噪声大**（与14D差异>{{#env.IV_NOISE_THRESHOLD#}}%）：\n\
+            \ !skew {SYMBOL} ivmid atm 21 \n **验证Vanna稳定性**：\n !vanna {SYMBOL} ntm\
+            \ {{#env.DEFAULT_DTE_MONTHLY_SHORT#}} m \n **解释可选**：\n!vexn {SYMBOL} {{#env.DEFAULT_DTE_MONTHLY_SHORT#}}\
+            \ 190\n### 指数背景（必需） \n**{{#env.DEFAULT_INDEX_PRIMARY#}}（主要指数）**： !gexn\
+            \ {{#env.DEFAULT_INDEX_PRIMARY#}} {{#env.DEFAULT_DTE_MONTHLY_SHORT#}}\
+            \ 98 \n!trigger {{#env.DEFAULT_INDEX_PRIMARY#}} {{#env.DEFAULT_NET_WINDOW#}}\
+            \ \n!skew {{#env.DEFAULT_INDEX_PRIMARY#}} ivmid atm {{#env.DEFAULT_DTE_WEEKLY_SHORT#}}\
+            \ \n!skew {{#env.DEFAULT_INDEX_PRIMARY#}} ivmid atm {{#env.DEFAULT_DTE_WEEKLY_MID#}}\
+            \ \n**{{#env.DEFAULT_INDEX_SECONDARY#}}（可选，科技股）**：\n !gexn {{#env.DEFAULT_INDEX_SECONDARY#}}\
+            \ {{#env.DEFAULT_DTE_MONTHLY_SHORT#}} 98 \n!skew {{#env.DEFAULT_INDEX_SECONDARY#}}\
+            \ ivmid atm {{#env.DEFAULT_DTE_WEEKLY_SHORT#}} \n!skew {{#env.DEFAULT_INDEX_SECONDARY#}}\
+            \ ivmid atm {{#env.DEFAULT_DTE_WEEKLY_MID#}}\n\n### iv_path\n** iv_path:\
+            \ 比较今日 7D ATM-IV 与昨日/前三日,存档数据获取\n\n### 回传要求 \n✓ **每张图/输出请注明**： \n    \
+            \ - 命令全文 \n     - 收盘价与当日变动（可选） \n✓ **若任一必跑命令输出为空或异常**： \n      - 请直接说明，我会给替代口径\
+            \ \n✓ **数据完整性检查**： \n      - 确保包含SPOT PRICE \n      - 确保包含Call/Put Wall标注\
+            \ \n      - 确保包含VOL_TRIGGER或Gamma Flip数值 \n\n--- \n\n请立即为 **{SYMBOL}**\
+            \ 生成命令清单。\n\n\n请立即开始为 {{#1001.query#}} 生成命令清单。\n"
         - id: user-cmdlist
           role: user
           text: '{{#1001.query#}}'
@@ -473,7 +1211,7 @@ workflow:
         desc: 解析原始数据、计算指标、检查完整性
         model:
           completion_params:
-            temperature: 0.5
+            temperature: 0.7
           mode: chat
           name: Qwen3-VL-235B-A22B-Thinking
           provider: langgenius/openai_api_compatible/openai_api_compatible
@@ -483,105 +1221,168 @@ workflow:
         - id: sys-validate
           role: system
           text: "你是一个期权结构和波动率特征图像解析器、数据校验和计算 Agent。\n你的任务是将用户回传的可视化数据 chart,进行 chart\
-            \ 图像解析,准确提取结构化量化数据\n目标是输出标准 JSON schema 并严格按照【数据口径与指标定义】计算所有核心字段。\n【任务】\n\
+            \ 图像解析,准确提取结构化量化数据\n目标是输出标准 JSON schema 并严格按照【数据口径与指标定义】计算所有核心字段\n\n【任务】\n\
             1. 解析【用户原始数据】。\n2. 执行【数据口径与指标定义】中的所有计算。\n3. 核对【数据校验关口】中的必需字段。\n4. 严格仅输出\
-            \ JSON 对象。\n【用户原始数据】\n{{#1001.query#}}\n\n【数据口径与指标定义-核心计算22字段】\n1. 到期与采样:周度优先DTE7与14,无周度取月度30与60,strikes=25,NET类窗口默认60必要时120。\n\
-            2.EM1$预期单日波幅美元:Spot×min(ATM_IV_7D,ATM_IV_14D)×sqrt(1/252)。\n3.墙与簇识别规则:从!gexr\
-            \ SYMBOL 25 7w与14w识别Call/Put/Major墙。\n  - 规则:局部峰≥相邻γ中位数2倍且簇宽≥3相邻行权。  \
-            \     Major_Wall为Call/Put墙中GEX绝对值更大者,记录major_wall_type为call或put。\n4.正γ负γ判定关键:使用!trigger\
-            \ SYMBOL 60输出的VOL_TRIGGER即Gamma翻转价位。若SPOT>VOL_TRIGGER为正γ倾向spot_vs_trigger=above做市商压制波动,若SPOT<VOL_TRIGGER为负γ倾向spot_vs_trigger=below做市商放大波动,若靠近该线为临界spot_vs_trigger=near可能regime反转。输出vol_trigger数值和spot_vs_trigger状态。\n\
-            5.月度叠加机制:若!gexr月度簇强度≥周度1.5倍,破墙阈值降至0.7×EM1$且需次日确认,输出monthly_cluster_override为true或false。\n\
-            6.Vanna三级回退:优先!vanna SYMBOL ntm 60m读取现价附近符号与斜率得vanna_dir为Up/Down/Flat和vanna_confidence为high。若缺补!vanna\
-            \ SYMBOL ntm 30m置信度medium。若仍缺按skew与delta偏斜临时推断标注vanna_confidence为low。\n\
-            7.ATM_IV数据源优先级:!skew SYMBOL ivmid atm 7与14。优先使用7D若噪声大即与14D差异>30%则用14D,若两者皆缺补21D。输出iv_source为7d或14d或21d_fallback。8.iv_path波动率路径:比较今日7D_ATM_IV与昨日或前三日,显著阈值±2vol。输出iv_path为升/降/平/数据不足,输出iv_path_confidence。无历史数据时从!term\
-            \ SYMBOL推断Backwardation为升趋势Contango为降趋势置信度medium。\n9.gap_distance墙距精确定义:从!gexr获取ABS_GEX分布,当前价Spot到下一ABS_GEX峰簇中心或有效边界的美元距离。同时输出gap_distance_em1_multiple归一化为gap_distance/EM1$。判断方向:若spot_vs_trigger=above则向上看Call_Wall阻力,若below则向下看Put_Wall支撑。\n\
-            10.cluster_strength_ratio簇强度比:从!gexr周度数据取主墙Major_Wall的GEX绝对值÷次墙即下一个最强峰的GEX绝对值。若仅单峰无对照,补跑!gexr\
-            \ SYMBOL 25 30m月度数据或延伸DTE以寻参照峰。输出cluster_strength_ratio数值和data_source。\n\
-            11.dex_same_dir方向一致性:gap区间内同向DEX净和在60日历史中的分位百分比,来自!dexn SYMBOL 25 14w。输出dex_same_dir_pct。\n\
-            12.指数背景必需:默认SPX必要时QQQ。NET_GEX_IDX从!gexn SPX 30 98和!trigger SPX 60获取。EM1$_IDX同口径计算Spot_IDX×min(ATM_IV_7D,ATM_IV_14D)×sqrt(1/252)。科技权重高可并行输出QQQ数据。\n\
-            \n【数据校验关口】\n* 标的必需字段： SPOT PRICE | EM1\\$｜Call Wall ｜Put Wall ｜Major Wall｜gap\\\
-            _distance｜cluster\\_strength\\_ratio｜dex\\_same\\_dir｜vanna\\_dir｜iv\\\
-            _path｜NET-GEX（含是否>0）\n* 指数背景必需字段：NET-GEX\\_IDX｜EM1\\$\\_IDX(SPX || QQQ)\n\
-            * 标的18个字段:spot_price,em1_dollar,call_wall,put_wall,major_wall,major_wall_type,gap_distance_dollar,gap_distance_em1_multiple,cluster_strength_ratio,dex_same_dir_pct,vanna_dir,vanna_confidence,iv_path,iv_path_confidence,net_gex,net_gex_sign,vol_trigger,spot_vs_trigger,monthly_cluster_override,atm_iv_7d,atm_iv_14d,iv_source。\n\
-            * 指数字段: 可选 net_gex_idx_spx,em1_dollar_idx_spx,spot_idx_spx,\nnet_gex_idx_qqq,em1_dollar_idx_qqq,spot_idx_qqq。\n\
-            \n【输出JSON格式】\n严格仅输出JSON对象，如果数据齐全时: \n{\n    \"status\": \"data_ready\"\
-            ,\n    \"timestamp\": \"2024-01-15T10:30:00Z\",\n    \"validation_summary\"\
-            : {\n        \"total_fields_required\": 22,\n        \"fields_provided\"\
-            : 22,\n        \"missing_count\": 0,\n        \"completion_rate\": 100\n\
-            \    },\n    \"targets\":  {\n            \"symbol\": \"AAPL\",\n    \
-            \        \"spot_price\": 170,\n            \"em1_dollar\": 2.99,\n   \
-            \         \"walls\": {\n                \"call_wall\": 180,\n        \
-            \        \"put_wall\": 165,\n                \"major_wall\": 180,\n  \
-            \              \"major_wall_type\": \"call\"\n            },\n       \
-            \     \"gamma_metrics\": {\n                \"gap_distance_dollar\": 10,\n\
-            \                \"gap_distance_em1_multiple\": 3.34,\n              \
-            \  \"cluster_strength_ratio\": 1.8,\n                \"net_gex\": -1250000000,\n\
-            \                \"net_gex_sign\": \"negative_gamma\",\n             \
-            \   \"vol_trigger\": 168.5,\n                \"spot_vs_trigger\": \"above\"\
-            ,\n                \"monthly_cluster_override\": false\n            },\n\
-            \            \"directional_metrics\": {\n                \"dex_same_dir_pct\"\
-            : 65,\n                \"vanna_dir\": \"up\",\n                \"vanna_confidence\"\
-            : \"high\",\n                \"iv_path\": \"升\",\n                \"iv_path_confidence\"\
-            : \"medium\"\n            },\n            \"atm_iv\": {\n            \
-            \    \"iv_7d\": 0.28,\n                \"iv_14d\": 0.3,\n            \
-            \    \"iv_source\": \"7d\"\n            }\n      },\n    \"indices\":\
-            \ {\n        \"spx\": {\n            \"net_gex_idx\": -5800000000,\n \
-            \           \"em1_dollar_idx\": 45,\n            \"spot_idx\": 4500\n\
-            \        }\n    },\n    \"missing_fields\": [],\n    \"next_step\": \"\
-            proceed_to_analysis\"\n}\n\n如果数据缺失时,输出:\n{ \n    \"status\": \"missing_data\"\
-            ,\n    \"timestamp\": \"2024-01-15T10:30:00Z\",\n    \"validation_summary\"\
-            : {\n      \"total_fields_required\": 22,\n      \"fields_provided\":\
-            \ 19,\n      \"missing_count\": 3,\n      \"completion_rate\": 86\n  \
-            \  },\n    \"targets\": {\n        \"symbol\": \"AAPL\",\n        \"spot_price\"\
-            : 170.0,\n        \"em1_dollar\": null,\n        \"walls\": {\n      \
-            \    \"call_wall\": 180.0,\n          \"put_wall\": null,\n          \"\
-            major_wall\": 180.0,\n          \"major_wall_type\": \"call\"\n      \
-            \  },\n        \"gamma_metrics\": {\n          \"gap_distance_dollar\"\
-            : null,\n          \"gap_distance_em1_multiple\": null,\n          \"\
-            cluster_strength_ratio\": 1.8,\n          \"net_gex\": -1250000000,\n\
-            \          \"net_gex_sign\": \"negative_gamma\",\n          \"vol_trigger\"\
-            : null,\n          \"spot_vs_trigger\": null,\n          \"monthly_cluster_override\"\
-            : false\n        },\n        \"directional_metrics\": {\n          \"\
-            dex_same_dir_pct\": 65.0,\n          \"vanna_dir\": \"up\",\n        \
-            \  \"vanna_confidence\": \"medium\",\n          \"iv_path\": \"数据不足\"\
-            ,\n          \"iv_path_confidence\": \"low\"\n        },\n        \"atm_iv\"\
-            : {\n          \"iv_7d\": 0.28,\n          \"iv_14d\": null,\n       \
-            \   \"iv_source\": \"7d\"\n        }\n   },\n    \"indices\": {\n    \
-            \  \"spx\": {\n        \"net_gex_idx\": -5800000000,\n        \"em1_dollar_idx\"\
-            : 45.0,\n        \"spot_idx\": 4500.0\n      }\n    },\n    \"missing_fields\"\
-            : [\n      {\n        \"field\": \"vol_trigger\",\n        \"target\"\
-            : \"AAPL\",\n        \"severity\": \"critical\",\n        \"category\"\
-            : \"gamma_flip_line\"\n      },\n      {\n        \"field\": \"atm_iv_14d\"\
-            ,\n        \"target\": \"AAPL\",\n        \"severity\": \"high\",\n  \
-            \      \"category\": \"volatility_input\"\n      },\n      {\n       \
-            \ \"field\": \"put_wall\",\n        \"target\": \"AAPL\",\n        \"\
-            severity\": \"high\",\n        \"category\": \"wall_structure\"\n    \
-            \  }\n    ],\n    \"补齐指引\": [\n      {\n        \"missing_field\": \"\
-            vol_trigger\",\n        \"description\": \"Gamma翻转价位VOL_TRIGGER是判断正γ负γ的关键\"\
-            ,\n        \"command\": \"!trigger AAPL 60\",\n        \"alternative\"\
-            : \"!gexn AAPL 60 98从输出提取Gamma Flip价位\",\n        \"extraction_note\"\
-            : \"提取输出中的VOL TRIGGER或Gamma Flip数值\",\n        \"priority\": 1,\n    \
-            \    \"impact\": \"无此字段无法判断Gamma Regime,影响剧本分类\"\n      },\n      {\n\
-            \        \"missing_field\": \"atm_iv_14d\",\n        \"description\":\
-            \ \"14日ATM隐含波动率\",\n        \"command\": \"!skew AAPL ivmid atm 14\",\n\
-            \        \"extraction_note\": \"提取ATM IV 14DTE数值如0.30\",\n        \"priority\"\
-            : 2,\n        \"impact\": \"影响EM1$计算精度\"\n      },\n      {\n        \"\
-            missing_field\": \"put_wall\",\n        \"description\": \"Put墙行权价\",\n\
-            \        \"command\": \"!gexr AAPL 25 7 w和!gexr AAPL 25 14 w\",\n    \
-            \    \"extraction_note\": \"查看图表标注Put Wall Strike或从负GEX最大值对应strike识别\"\
-            ,\n        \"alternative\": \"使用!gexn输出查找负GEX峰值位置\",\n        \"priority\"\
-            : 3,\n        \"impact\": \"影响支撑位判断和gap_distance计算\"\n      }\n    ],\n\
-            \    \"next_step\": \"request_missing_data\",\n    \"补齐后续\": \"补齐上述3个关键字段后将自动计算em1_dollar和gap_distance等派生指标\"\
-            \n  }\n}\n"
+            \ JSON schema\n\n【系统环境变量 - 计算参数】 \n- EM1$计算因子：sqrt(1/252) = {{#env.EM1_SQRT_FACTOR#}}\
+            \ \n- 破墙阈值下限：{{#env.BREAK_WALL_THRESHOLD_LOW#}} × EM1$ \n- 破墙阈值上限：{{#env.BREAK_WALL_THRESHOLD_HIGH#}}\
+            \ × EM1$ \n- 月度叠加阈值系数：{{#env.MONTHLY_OVERRIDE_THRESHOLD#}} \n- 月度簇强度触发比：{{#env.MONTHLY_CLUSTER_STRENGTH_RATIO#}}\
+            \ \n- 簇强度趋势阈值：{{#env.CLUSTER_STRENGTH_THRESHOLD_TREND#}} \n- 簇强度极强阈值：{{#env.CLUSTER_STRENGTH_THRESHOLD_STRONG#}}\
+            \ \n- 墙识别峰值倍数：{{#env.WALL_PEAK_MULTIPLIER#}} \n- 墙识别簇宽度：{{#env.WALL_CLUSTER_WIDTH#}}\
+            \ \n- DEX强信号阈值：{{#env.DEX_SAME_DIR_THRESHOLD_STRONG#}}% \n- DEX中等信号阈值：{{#env.DEX_SAME_DIR_THRESHOLD_MEDIUM#}}%\
+            \ \n- IV路径阈值：{{#env.IV_PATH_THRESHOLD_VOL#}} vol 或 {{#env.IV_PATH_THRESHOLD_PCT#}}%\
+            \ \n- IV噪声阈值：{{#env.IV_NOISE_THRESHOLD#}}% \n- 默认strikes：{{#env.DEFAULT_STRIKES#}}\
+            \ \n- 默认NET窗口：{{#env.DEFAULT_NET_WINDOW#}}天\n\n【数据口径与指标定义 - 核心计算22字段】\
+            \ \n**1. 到期与采样** \n- 周度优先：DTE {{#env.DEFAULT_DTE_WEEKLY_SHORT#}}与{{#env.DEFAULT_DTE_WEEKLY_MID#}}\
+            \ \n- 无周度取月度：DTE {{#env.DEFAULT_DTE_MONTHLY_SHORT#}}与{{#env.DEFAULT_DTE_MONTHLY_MID#}}\
+            \ \n- strikes = {{#env.DEFAULT_STRIKES#}} \n- NET类窗口默认{{#env.DEFAULT_NET_WINDOW#}}天，必要时{{#env.EXTENDED_NET_WINDOW#}}天\n\
+            \n**2. EM1$ (预期单日波幅美元)** \n公式：EM1$ = Spot × min(ATM_IV_7D, ATM_IV_14D)\
+            \ × {{#env.EM1_SQRT_FACTOR#}} \n- 优先使用7D ATM-IV \n- 若7D与14D差异>{{#env.IV_NOISE_THRESHOLD#}}%，则用14D\n\
+            \ - 两者皆缺时补21D \n- 输出字段：em1_dollar (数值)\n\n**3. 墙与簇识别规则** \n从 !gexr SYMBOL\
+            \ {{#env.DEFAULT_STRIKES#}} 7w 与 14w 识别Call/Put/Major墙。 \n- 规则：局部峰 ≥ 相邻γ中位数\
+            \ × {{#env.WALL_PEAK_MULTIPLIER#}} 倍 \n- 且簇宽 ≥ {{#env.WALL_CLUSTER_WIDTH#}}\
+            \ 相邻行权价 - Major_Wall 为 Call/Put 墙中 GEX 绝对值更大者 \n- 输出字段： * call_wall (行权价数值)\
+            \ * put_wall (行权价数值) * major_wall (行权价数值) * major_wall_type (\"call\"\
+            \ 或 \"put\")\n\n**4. 正γ负γ判定（Gamma Regime）\n- 最关键**\n使用 !trigger SYMBOL\
+            \ {{#env.DEFAULT_NET_WINDOW#}} 输出的 VOL_TRIGGER 即 Gamma 翻转价位。\n       \
+            \ - 若 SPOT > VOL_TRIGGER：\n          * spot_vs_trigger = \"above\"\n \
+            \         * 解读：正γ倾向，做市商压制波动，基础场景为区间\n        - 若 SPOT < VOL_TRIGGER：\n\
+            \          * spot_vs_trigger = \"below\"\n          * 解读：负γ倾向，做市商放大波动，基础场景为趋势\n\
+            \        - 若 SPOT 靠近 VOL_TRIGGER (±0.3×EM1$)：\n          * spot_vs_trigger\
+            \ = \"near\"\n          * 解读：临界状态，可能 regime 反转\n        - 输出字段：\n    \
+            \      * vol_trigger (数值)\n          * spot_vs_trigger (\"above\" | \"\
+            below\" | \"near\")\n\n **5. 月度叠加机制**\n若 !gexr 月度簇强度 ≥ 周度 × {{#env.MONTHLY_CLUSTER_STRENGTH_RATIO#}}：\n\
+            - 破墙阈值降至 {{#env.MONTHLY_OVERRIDE_THRESHOLD#}} × EM1$\n- 且需次日确认\n- 输出字段：monthly_cluster_override\
+            \ (true | false)\n\n**6. Vanna三级回退** \n优先：!vanna SYMBOL ntm {{#env.DEFAULT_NET_WINDOW#}}\
+            \ m\n - 读取现价附近符号与斜率 \n- 得到 vanna_dir (\"up\" | \"down\" | \"flat\") \n\
+            - 置信度 vanna_confidence (\"high\" | \"medium\" | \"low\") \n- 若缺，补：!vanna\
+            \ SYMBOL ntm {{#env.DEFAULT_DTE_MONTHLY_SHORT#}} m → confidence = \"medium\"\
+            \ \n- 若仍缺，按skew与delta偏斜临时推断 → confidence = \"low\" - 输出字段： * vanna_dir\
+            \ * vanna_confidence\n\n**7. ATM_IV数据源优先级** \n!skew SYMBOL ivmid atm 7\
+            \ 与 14 \n- 优先使用7D - 若7D与14D差异 > {{#env.IV_NOISE_THRESHOLD#}}%，则用14D \n\
+            - 若两者皆缺，补21D \n- 输出字段： * atm_iv_7d (数值或null) * atm_iv_14d (数值或null) *\
+            \ iv_source (\"7d\" | \"14d\" | \"21d_fallback\")\n\n**8. iv_path 波动率路径**\
+            \ \n比较今日7D_ATM_IV与昨日或前三日： \n- 显著阈值：±{{#env.IV_PATH_THRESHOLD_VOL#}} vol\
+            \ 或 ±{{#env.IV_PATH_THRESHOLD_PCT#}}% 相对变化 \n- 输出 iv_path： \n * \"升\"\
+            \ - IV上升趋势 \n * \"降\" - IV下降趋势 \n * \"平\" - IV稳定 \n * \"数据不足\" - 无历史数据\
+            \ \n- 输出 iv_path_confidence (\"high\" | \"medium\" | \"low\") \n- 无历史数据时从\
+            \ !term SYMBOL 推断： \n  * Backwardation → \"升\"，confidence = \"medium\"\
+            \ \n  * Contango → \"降\"，confidence = \"medium\"\n\n**9. gap_distance\
+            \ 墙距精确定义** \n从 !gexr 获取 ABS_GEX 分布：\n - 当前价 Spot 到下一 ABS_GEX 峰簇中心或有效边界的美元距离\
+            \ \n - 判断方向： \n  * 若 spot_vs_trigger = \"above\"：向上看 Call_Wall 阻力 \n \
+            \ * 若 spot_vs_trigger = \"below\"：向下看 Put_Wall 支撑 \n- 输出字段： \n * gap_distance_dollar\
+            \ (美元数值) \n * gap_distance_em1_multiple (gap_distance_dollar / EM1$)\n\
+            \n**10. cluster_strength_ratio 簇强度比** \n从 !gexr 周度数据： \n  - 计算：主墙 Major_Wall\
+            \ 的 GEX 绝对值 ÷ 次墙（下一个最强峰）的 GEX 绝对值 \n  - 若仅单峰无对照，补跑 !gexr SYMBOL {{#env.DEFAULT_STRIKES#}}\
+            \ {{#env.DEFAULT_DTE_MONTHLY_SHORT#}} m \n - 或延伸 DTE 以寻参照峰 \n - 输出字段：\
+            \ \n   * cluster_strength_ratio (数值) \n   * data_source (\"weekly\" |\
+            \ \"monthly\" | \"extended\") \n- 解读： \n  * ≥ {{#env.CLUSTER_STRENGTH_THRESHOLD_STRONG#}}：主墙极强，破墙难度高\
+            \ \n  * ≥ {{#env.CLUSTER_STRENGTH_THRESHOLD_TREND#}}：中等强度，易趋势突破 \n  *\
+            \ < {{#env.CLUSTER_STRENGTH_THRESHOLD_TREND#}}：较易突破\n\n**11. dex_same_dir\
+            \ 方向一致性** \n从 !dexn SYMBOL {{#env.DEFAULT_STRIKES#}} 14w： \n - gap 区间内同向\
+            \ DEX 净和在 60 日历史中的分位百分比 \n - 输出字段：dex_same_dir_pct (百分比数值，如 65 表示 65%)\
+            \ \n - 解读： \n  * ≥ {{#env.DEX_SAME_DIR_THRESHOLD_STRONG#}}%：强方向信号 \n \
+            \ * ≥ {{#env.DEX_SAME_DIR_THRESHOLD_MEDIUM#}}%：中等方向信号 \n  * < {{#env.DEX_SAME_DIR_THRESHOLD_WEAK#}}%：弱方向信号\n\
+            \n**12. NET_GEX 与符号** \n从 !gexn SYMBOL {{#env.DEFAULT_NET_WINDOW#}} 98：\
+            \ - 读取 NET-GEX 数值 \n- 判断符号： \n  * NET-GEX < 0 → net_gex_sign = \"negative_gamma\"\
+            \ (负γ，趋势倾向) \n  * NET-GEX > 0 → net_gex_sign = \"positive_gamma\" (正γ，区间倾向)\
+            \ \n  * NET-GEX ≈ 0 → net_gex_sign = \"neutral\" (中性) \n- 输出字段： * net_gex\
+            \ (数值) * net_gex_sign\n\n**13. 指数背景必需** \n默认 {{#env.DEFAULT_INDEX_PRIMARY#}}，必要时\
+            \ {{#env.DEFAULT_INDEX_SECONDARY#}}。 \n从 !gexn SPX {{#env.DEFAULT_DTE_MONTHLY_SHORT#}}\
+            \ 98 和 !trigger SPX {{#env.DEFAULT_NET_WINDOW#}}：\n  - NET_GEX_IDX：指数的\
+            \ NET-GEX \n从 !skew SPX ivmid atm 7 和 14： \n - 计算 EM1$_IDX = Spot_IDX\
+            \ × min(ATM_IV_7D, ATM_IV_14D) × {{#env.EM1_SQRT_FACTOR#}} \n\n科技权重高可并行输出\
+            \ QQQ 数据。 \n输出字段： \n- indices.spx.net_gex_idx \n- indices.spx.em1_dollar_idx\
+            \ \n- indices.spx.spot_idx \n- indices.qqq.net_gex_idx (可选) \n- indices.qqq.em1_dollar_idx\
+            \ (可选) \n- indices.qqq.spot_idx (可选)\n\n【数据校验关口】 \n**标的必需字段**（22个核心字段）：\
+            \ \n1. spot_price 2. em1_dollar 3. call_wall 4. put_wall 5. major_wall\
+            \ 6. major_wall_type 7. gap_distance_dollar 8. gap_distance_em1_multiple\
+            \ 9. cluster_strength_ratio 10. dex_same_dir_pct 11. vanna_dir 12. vanna_confidence\
+            \ 13. iv_path 14. iv_path_confidence 15. net_gex 16. net_gex_sign 17.\
+            \ vol_trigger 18. spot_vs_trigger 19. monthly_cluster_override 20. atm_iv_7d\
+            \ 21. atm_iv_14d 22. iv_source **指数背景必需字段**： - net_gex_idx (SPX 或 QQQ)\
+            \ - em1_dollar_idx (SPX 或 QQQ) - spot_idx (SPX 或 QQQ)\n\n【输出JSON格式】\n\
+            **数据齐全时：**\n```json \n{\n  \"status\": \"data_ready\",\n  \"timestamp\"\
+            : \"2024-01-15T10:30:00-05:00\",\n  \"validation_summary\": {\n    \"\
+            total_targets\": 1,\n    \"targets_ready\": 1,\n    \"total_fields_required\"\
+            : 22,\n    \"fields_provided\": 22,\n    \"missing_count\": 0,\n    \"\
+            completion_rate\": 100\n  },\n  \"targets\": {\n    \"symbol\": \"AAPL\"\
+            ,\n    \"status\": \"ready\",\n    \"spot_price\": 170,\n    \"em1_dollar\"\
+            : 2.99,\n    \"walls\": {\n      \"call_wall\": 180,\n      \"put_wall\"\
+            : 165,\n      \"major_wall\": 180,\n      \"major_wall_type\": \"call\"\
+            \n    },\n    \"gamma_metrics\": {\n      \"gap_distance_dollar\": 10,\n\
+            \      \"gap_distance_em1_multiple\": 3.34,\n      \"cluster_strength_ratio\"\
+            : 1.8,\n      \"net_gex\": -1250000000,\n      \"net_gex_sign\": \"negative_gamma\"\
+            ,\n      \"vol_trigger\": 168.5,\n      \"spot_vs_trigger\": \"above\"\
+            ,\n      \"monthly_cluster_override\": false\n    },\n    \"directional_metrics\"\
+            : {\n      \"dex_same_dir_pct\": 65,\n      \"vanna_dir\": \"up\",\n \
+            \     \"vanna_confidence\": \"high\",\n      \"iv_path\": \"升\",\n   \
+            \   \"iv_path_confidence\": \"medium\"\n    },\n    \"atm_iv\": {\n  \
+            \    \"iv_7d\": 0.28,\n      \"iv_14d\": 0.3,\n      \"iv_source\": \"\
+            7d\"\n    }\n  },\n  \"indices\": {\n    \"spx\": {\n      \"net_gex_idx\"\
+            : -5800000000,\n      \"em1_dollar_idx\": 45,\n      \"spot_idx\": 4500\n\
+            \    }\n  },\n  \"missing_fields\": [],\n  \"next_step\": \"proceed_to_analysis\"\
+            \n}\n```\n**数据缺失时：**\n```json\n{\n  \"status\": \"missing_data\",\n  \"\
+            timestamp\": \"2024-01-15T10:30:00-05:00\",\n  \"validation_summary\"\
+            : {\n    \"total_targets\": 1,\n    \"targets_ready\": 0,\n    \"total_fields_required\"\
+            : 22,\n    \"fields_provided\": 19,\n    \"missing_count\": 3,\n    \"\
+            completion_rate\": 86\n  },\n  \"targets\": {\n    \"symbol\": \"AAPL\"\
+            ,\n    \"status\": \"missing_data\",\n    \"spot_price\": 170,\n    \"\
+            em1_dollar\": null,\n    \"walls\": {\n      \"call_wall\": 180,\n   \
+            \   \"put_wall\": null,\n      \"major_wall\": 180,\n      \"major_wall_type\"\
+            : \"call\"\n    },\n    \"gamma_metrics\": {\n      \"gap_distance_dollar\"\
+            : null,\n      \"gap_distance_em1_multiple\": null,\n      \"cluster_strength_ratio\"\
+            : 1.8,\n      \"net_gex\": -1250000000,\n      \"net_gex_sign\": \"negative_gamma\"\
+            ,\n      \"vol_trigger\": null,\n      \"spot_vs_trigger\": null,\n  \
+            \    \"monthly_cluster_override\": false\n    },\n    \"directional_metrics\"\
+            : {\n      \"dex_same_dir_pct\": 65,\n      \"vanna_dir\": \"up\",\n \
+            \     \"vanna_confidence\": \"medium\",\n      \"iv_path\": \"数据不足\",\n\
+            \      \"iv_path_confidence\": \"low\"\n    },\n    \"atm_iv\": {\n  \
+            \    \"iv_7d\": 0.28,\n      \"iv_14d\": null,\n      \"iv_source\": \"\
+            7d\"\n    }\n  },\n  \"indices\": {\n    \"spx\": {\n      \"net_gex_idx\"\
+            : -5800000000,\n      \"em1_dollar_idx\": 45,\n      \"spot_idx\": 4500\n\
+            \    }\n  },\n  \"missing_fields\": [\n    {\n      \"field\": \"vol_trigger\"\
+            ,\n      \"target\": \"AAPL\",\n      \"severity\": \"critical\",\n  \
+            \    \"category\": \"gamma_flip_line\"\n    },\n    {\n      \"field\"\
+            : \"atm_iv_14d\",\n      \"target\": \"AAPL\",\n      \"severity\": \"\
+            high\",\n      \"category\": \"volatility_input\"\n    },\n    {\n   \
+            \   \"field\": \"put_wall\",\n      \"target\": \"AAPL\",\n      \"severity\"\
+            : \"high\",\n      \"category\": \"wall_structure\"\n    }\n  ],\n  \"\
+            补齐指引\": [\n    {\n      \"missing_field\": \"vol_trigger\",\n      \"\
+            description\": \"Gamma翻转价位VOL_TRIGGER是判断正γ负γ的关键\",\n      \"command\"\
+            : \"!trigger AAPL {{#env.DEFAULT_NET_WINDOW#}}\",\n      \"alternative\"\
+            : \"!gexn AAPL {{#env.DEFAULT_NET_WINDOW#}} 98 从输出提取Gamma Flip价位\",\n\
+            \      \"extraction_note\": \"提取输出中的VOL TRIGGER或Gamma Flip数值\",\n    \
+            \  \"priority\": 1,\n      \"impact\": \"无此字段无法判断Gamma Regime，影响剧本分类\"\
+            \n    },\n    {\n      \"missing_field\": \"atm_iv_14d\",\n      \"description\"\
+            : \"14日ATM隐含波动率\",\n      \"command\": \"!skew AAPL ivmid atm 14\",\n\
+            \      \"extraction_note\": \"提取ATM IV 14DTE数值如0.30\",\n      \"priority\"\
+            : 2,\n      \"impact\": \"影响EM1$计算精度\"\n    },\n    {\n      \"missing_field\"\
+            : \"put_wall\",\n      \"description\": \"Put墙行权价\",\n      \"command\"\
+            : \"!gexr AAPL {{#env.DEFAULT_STRIKES#}} 7 w 和 !gexr AAPL {{#env.DEFAULT_STRIKES#}}\
+            \ 14 w\",\n      \"extraction_note\": \"查看图表标注Put Wall Strike或从负GEX最大值对应strike识别\"\
+            ,\n      \"alternative\": \"使用!gexn输出查找负GEX峰值位置\",\n      \"priority\"\
+            : 3,\n      \"impact\": \"影响支撑位判断和gap_distance计算\"\n    }\n  ],\n  \"\
+            next_step\": \"request_missing_data\",\n  \"补齐后续\": \"补齐上述3个关键字段后将自动计算em1_dollar和gap_distance等派生指标\"\
+            \n}\n```\n"
         - edition_type: basic
           id: user-validate
           role: user
-          text: '{{#1001.query#}}'
+          text: '{{#1001.query#}}
+
+            【上传文件】
+
+            {{#sys.files#}}'
+        reasoning_format: tagged
         selected: false
         title: Agent 3 数据校验
         type: llm
         vision:
-          enabled: false
+          configs:
+            detail: high
+            variable_selector:
+            - sys
+            - files
+          enabled: true
       height: 116
       id: '3001'
       position:
@@ -643,11 +1444,11 @@ workflow:
       height: 103
       id: '3003'
       position:
-        x: 1793.012573026706
-        y: -14.429166611527677
+        x: 1688.2034969828262
+        y: 482.1496130490057
       positionAbsolute:
-        x: 1793.012573026706
-        y: -14.429166611527677
+        x: 1688.2034969828262
+        y: 482.1496130490057
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -668,13 +1469,61 @@ workflow:
         - id: sys-ta
           role: system
           text: "你是一个技术面分析 Agent。\n你的任务是基于【数据JSON】中的 \"TA_Data\",计算技术面得分并给出简短读数。\n\
-            \n【数据JSON】\n{{#3001.text#}}\n\n【技术面规则】\n* 技术面默认组合A:EMA20/50与其斜率、RSI(14)\n\
-            * 默认启用1-3项互补指标\n\n【任务】\n1. 解析【数据JSON】中的 \"TA_Data\"。\n2. 应用【技术面规则】进行评分(最多+2)。\n\
-            3. 严格仅输出 JSON 对象:\n   {\n     \"ta_score\": 1, \n     \"ta_commentary\"\
-            : \"EMA20/50 走平 (+1), RSI(14) 处在 55 区间 (+0)\"\n   }\n"
+            \n【核心能力】 \n1. **图表识别**：自动识别 TradingView、 yahoo finance等平台的技术指标图表 \n2.\
+            \ **指标提取**：精确读取以下指标的数值与形态 \n  - EMA20/50：价格相对位置、两均线斜率（上行/走平/下行）、金叉死叉 \n\
+            \  - RSI(14)：当前值、超买超卖、背离形态（顶背离/底背离） \n  - BB宽度(20,2)：当前宽度、历史分位、带口开合方向\
+            \ \n  - MACD：柱状图趋势、零轴位置、快慢线交叉 \n  - 成交量：相对20日均量的比值、放量缩量 \n  - AVWAP：价格距离AVWAP的百分比（若图表包含）\
+            \ \n3. **形态识别**：趋势线突破、支撑阻力、K线形态（锤子线/吞没等）\n\n【数据JSON】{{#3001.text#}}\n\
+            【用户上传】{{#sys.files#}}\n\n【处理流程】 \n## 第一步：图表解析 \n<thinking> \n1. 识别图表类型与时间周期（日线/4H/1H）\
+            \ \n2. 定位各技术指标的显示区域 \n3. 读取最新K线对应的指标数值 \n4. 识别关键技术形态（如突破/背离） \n</thinking>\n\
+            输出格式： \n```json\n{\n  \"chart_metadata\": {\n    \"platform\": \"TradingView/Thinkorswim/其他\"\
+            ,\n    \"timeframe\": \"Daily/4H/1H\",\n    \"latest_timestamp\": \"2025-01-15\
+            \ 16:00 ET\",\n    \"symbol\": \"AAPL\"\n  },\n  \"indicators_raw\": {\n\
+            \    \"price\": {\n      \"close\": 170.5,\n      \"ema20\": 168.3,\n\
+            \      \"ema50\": 165.8,\n      \"price_vs_ema20_pct\": 1.31,\n      \"\
+            price_vs_ema50_pct\": 2.83,\n      \"ema20_slope\": \"上行\",\n      \"\
+            ema50_slope\": \"上行\",\n      \"golden_cross\": true\n    },\n    \"rsi\"\
+            : {\n      \"value\": 58.3,\n      \"zone\": \"中性区间\",\n      \"divergence\"\
+            : \"无\"\n    },\n    \"bb\": {\n      \"width\": 4.2,\n      \"width_percentile\"\
+            : 35,\n      \"position\": \"中轨上方\",\n      \"band_direction\": \"平行\"\
+            \n    },\n    \"volume\": {\n      \"current\": 85000000,\n      \"avg_20d\"\
+            : 72000000,\n      \"ratio\": 1.18,\n      \"status\": \"温和放量\"\n    },\n\
+            \    \"macd\": {\n      \"histogram\": \"正值收敛\",\n      \"signal_line_cross\"\
+            : \"金叉后第3日\",\n      \"zero_line\": \"上方\"\n    },\n    \"avwap\": {\n\
+            \      \"available\": false,\n      \"note\": \"图表未包含AVWAP\"\n    }\n\
+            \  },\n  \"key_patterns\": [\n    \"价格在EMA20上方运行，均线多头排列\",\n    \"RSI处于50-60区间，未超买\"\
+            ,\n    \"BB宽度处于历史35分位，波动率中等\"\n  ]\n}\n```\n## 第二步：技术面评分（最多+2分） \n<thinking>\
+            \ \n - EMA20/50发散向上→趋势+1；走平/粘合→区间+1 \n- RSI>60且无顶背离→趋势+1；40-60→区间+1；背离→当前方向-1\
+            \ \n- BB宽度低分位+同向开口→趋势+1（择一计分） \n- 最多累计+2分 \n</thinking> \n评分逻辑：\n```json\n\
+            {\n  \"scoring_breakdown\": {\n    \"ema_score\": {\n      \"value\":\
+            \ 1,\n      \"rationale\": \"EMA20斜率上行且price_vs_ema20=1.31%，金叉后持续，给趋势+1\"\
+            \n    },\n    \"rsi_score\": {\n      \"value\": 1,\n      \"rationale\"\
+            : \"RSI=58.3处于40-60区间且无背离，给区间+1\"\n    },\n    \"bb_score\": {\n     \
+            \ \"value\": 0,\n      \"rationale\": \"BB宽度35分位属中等，带口平行，不给分\"\n    },\n\
+            \    \"volume_score\": {\n      \"value\": 0,\n      \"rationale\": \"\
+            成交量仅温和放量1.18倍，未显著放大，不单独加分\"\n    },\n    \"total_cap\": 2,\n    \"final_score\"\
+            : 2,\n    \"note\": \"EMA+1 + RSI+1 = 2分，达到上限\"\n  }\n}\n```\n## 第三步：综合输出\n\
+            ```json\n{\n  \"ta_score\": 2,\n  \"ta_commentary\": \"EMA20/50多头排列上行(+1)，RSI(14)处于55-60区间中性偏强(+1)，BB宽度中等未给分，技术面总评2分\"\
+            ,\n  \"detailed_analysis\": {\n    \"trend_alignment\": \"均线多头排列支持上行，但RSI未超买保留回调空间\"\
+            ,\n    \"momentum_check\": \"MACD金叉后第3日，柱状图正值收敛，动能温和\",\n    \"volatility_state\"\
+            : \"BB宽度35分位，波动率处于中等水平，非极端压缩或扩张\",\n    \"volume_confirmation\": \"成交量温和放量1.18倍，确认度中等\"\
+            \n  },\n  \"risk_alerts\": [\n    \"RSI接近60临界，若突破需警惕短期超买\",\n    \"BB带口平行，若收窄可能预示盘整\"\
+            \n  ],\n  \"chart_metadata\": {\n    \"platform\": \"TradingView\",\n\
+            \    \"timeframe\": \"Daily\",\n    \"latest_timestamp\": \"2025-01-15\
+            \ 16:00 ET\"\n  }\n}\n```\n【关键注意事项】\n 1. **数值精度**：价格、百分比保留2位小数；RSI保留1位小数\
+            \ \n2. **形态识别**：明确区分\"金叉\"与\"死叉\"；\"顶背离\"与\"底背离\"；\"突破\"与\"假突破\" \n3.\
+            \ **时间同步**：确保读取的是图表最新K线（通常为最右侧）的指标值 \n4. **异常处理**： - 若图表模糊不清：返回 `\"chart_quality\"\
+            : \"low\", \"confidence\": \"medium\"` - 若缺失核心指标（如无RSI）：在indicators_raw中标注\
+            \ `\"available\": false` - 若无法识别平台：返回 `\"platform\": \"unknown\"`\n 5.\
+            \ **评分上限**：严格执行最多+2分，即使多项指标都正向也不超过上限 \n\n【输出要求】 \n- 必须输出完整的三段JSON（chart_metadata、indicators_raw、scoring_breakdown）\
+            \ \n- ta_score 和 ta_commentary 必须存在且符合格式 \n- 若图表无法解析，返回 ta_score=0 并在\
+            \ ta_commentary 中说明原因"
         - id: user-ta
           role: user
-          text: 请基于 Agent 3 的数据,进行技术面分析。
+          text: "请基于 Agent 3 的数据,进行技术面分析。\n{{#sys.files#}}\n\n【参考现价与EM1$】（来自Agent\
+            \ 3，用于归一化距离） \n- Spot: {{#3001.text.targets.spot_price#}}\n- EM1$: {{#3001.text.targets.em1_dollar#}}\
+            \ \n\n请严格按照系统提示的三步流程输出JSON。\n"
+        reasoning_format: separated
         selected: false
         title: Agent 4 技术面
         type: llm
@@ -688,11 +1537,11 @@ workflow:
       height: 116
       id: '4001'
       position:
-        x: 1730.860345547998
-        y: 122.17470792800194
+        x: 1688.2034969828262
+        y: 138.9789209991302
       positionAbsolute:
-        x: 1730.860345547998
-        y: 122.17470792800194
+        x: 1688.2034969828262
+        y: 138.9789209991302
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -707,53 +1556,72 @@ workflow:
           completion_params:
             temperature: 0.5
           mode: chat
-          name: DeepSeek-V3.2-Exp-Think
-          provider: langgenius/aihubmix/aihubmix
+          name: deepseek-v3.2-exp-thinking
+          provider: langgenius/openai_api_compatible/openai_api_compatible
         prompt_template:
         - id: sys-scenario
           role: system
-          text: "你是期权量化分析师，根据量化数据，做核心剧本推演 Agent。\n你的任务是整合期权 Greeks exposure 数据和波动率曲面特征数据【数据JSON】和【技术面JSON】,应用【思维评分框架】和【剧本分类】,输出分析结果。\n\
-            \n【数据JSON】(来自 Agent 3)\n{{#3001.text#}}\n\n【技术面JSON】(来自 Agent 4)\n{{#4001.text#}}\n\
-            \n【分析规则-四维评分框架】\n1.Gamma_Regime判定权重40%最优先:从3001.text.targets.gamma_metrics提取vol_trigger和spot_vs_trigger。这是最关键的市场状态判断。若spot_vs_trigger=above则现价在VOL_TRIGGER上方为正γ倾向,做市商提供正Gamma压制波动,基础场景base_scenario为区间,regime_note说明正γ压制波动维持区间。若spot_vs_trigger=below则现价在VOL_TRIGGER下方为负γ倾向,做市商提供负Gamma放大波动,基础场景为趋势,regime_note说明负γ放大波动趋势加速。若spot_vs_trigger=near则临界状态可能发生regime反转,基础场景为过渡,regime_note说明接近Gamma翻转线高波动。此维度评分gamma_regime_score:若明确above或below给6-8分,若near给4-5分警示风险。\n\
-            2.破墙可能性评估权重30%:从 3001.text.targets.gamma_metrics提取gap_distance_em1_multiple,cluster_strength_ratio,monthly_cluster_override。先判断阈值:若monthly_cluster_override=true则破墙阈值threshold=0.7倍EM1$因月度簇强度≥周度1.5倍,否则threshold=1.0倍EM1$。评估破墙概率break_probability:若gap_distance_em1<threshold为高概率,若gap_distance_em1在threshold到2.0之间为中等概率,若>2.0为低概率。同时考虑cluster_strength_ratio:比值越大主墙越强破墙越难,>2.0显著降低破墙概率,1.5-2.0为中等强度,<1.5较易突破。输出break_note综合说明需多少倍EM1$距离和簇强度情况。此维度评分break_wall_score:高概率8-10分,中等5-7分,低概率2-4分,同时按cluster_strength调整±1分。\n\
-            3.方向一致性评估权重20%:从3001.text.targets.directional_metrics提取dex_same_dir_pct,vanna_dir,vanna_confidence。计算vanna_weight权重:若vanna_confidence=high则权重1.0,若medium则0.7,若low则0.4。判断方向信号direction_strength:若dex_same_dir>70且vanna_dir明确Up或Down且vanna_weight>=0.7则为强方向信号,若dex_same_dir在50-70或vanna_weight为medium则为中等信号,若dex_same_dir<50或vanna_confidence=low则为弱信号。此维度评分direction_score:强信号8-10分,中等5-7分,弱信号2-4分。\n\
-            4.IV动态权重10%:从3001.text.targets.directional_metrics提取iv_path,iv_path_confidence。判断iv_signal:若iv_path=升且confidence=high或medium则为波动率扩张信号利多波动率策略,若iv_path=降则为波动率压缩信号利空波动率,若iv_path=平或数据不足则中性。此维度评分iv_score:扩张且high\
-            \ confidence给8-10分,扩张medium给6-7分,压缩给3-5分,平或不足给5-6分。\n【综合评分计算】总分total_score=gamma_regime_score×0.4+break_wall_score×0.3+direction_score×0.2+iv_score×0.1。输出weight_breakdown显示计算过程如6×0.4+3×0.3+7×0.2+6×0.1=5.5。\n\
-            【场景分类规则】基于total_score和gamma_regime综合判定:若total_score>=7为强信号,若spot_vs_trigger=below则primary_scenario为强趋势上行或下行根据direction,若above则为区间突破。若total_score在5-7为中等信号,若below则为弱趋势,若above则为宽幅区间或弱突破。若total_score在3-5为弱信号,若above则为区间震荡,若below需警惕但信号不足。若total_score<3为观望不建议入场。输出scenario_probability为主导场景概率百分比,输出adjustment_note说明如何基于gamma_regime调整判断如虽在正γ区域但方向信号强评估为区间突破。\n\
-            【入场门槛检查】entry_threshold_check判断:总分total_score>=3且至少满足一个关键信号条件:条件1 spot_vs_trigger明确为above或below不是near,条件2\
-            \ gap_distance_em1<2,条件3 dex_same_dir>60,条件4 vanna_confidence为high或medium。若满足则entry_threshold_check为入场,否则为观望或等待。输出entry_rationale详细说明理由列出满足的条件和不满足的条件。\n\
-            【关键位提取】从3001.text.targets[0].walls提取support即put_wall,resistance即call_wall,trigger_line即gamma_metrics.vol_trigger。\n\
-            \n【输出JSON格式】严格仅输出 JSON 对象:\n   \n{\n  \"gamma_regime\": {\n    \"vol_trigger\"\
-            : 168.5,\n    \"spot_vs_trigger\": \"above\",\n    \"base_scenario\":\
-            \ \"区间\",\n    \"regime_note\": \"现价170.0在VOL_TRIGGER 168.5上方,正γ倾向,做市商压制波动维持区间\"\
-            \n  },\n  \"break_wall_assessment\": {\n    \"gap_distance_em1\": 3.34,\n\
-            \    \"cluster_strength\": 1.8,\n    \"monthly_override\": false,\n  \
-            \  \"threshold\": 1.0,\n    \"break_probability\": \"低\",\n    \"break_note\"\
-            : \"需3.34倍EM1$距离到达Call Wall 180,簇强度1.8倍为中等强度,破墙难度中等偏高\"\n  },\n  \"directional_signals\"\
-            : {\n    \"dex_same_dir\": 65.0,\n    \"vanna_dir\": \"up\",\n    \"vanna_confidence\"\
-            : \"high\",\n    \"vanna_weight\": 1.0,\n    \"direction_strength\": \"\
-            中等偏强\",\n    \"direction_note\": \"DEX同向65%中等,Vanna方向up且置信度high权重1.0,综合方向信号中等偏强\"\
-            \n  },\n  \"iv_dynamics\": {\n    \"iv_path\": \"升\",\n    \"iv_path_confidence\"\
-            : \"medium\",\n    \"iv_signal\": \"波动率扩张\",\n    \"iv_note\": \"IV路径显示升趋势,置信度medium,有利于Long\
-            \ Vol策略但需验证\"\n  },\n  \"scoring\": {\n    \"gamma_regime_score\": 6,\n\
-            \    \"gamma_regime_rationale\": \"明确above状态给6分,非near故不扣分\",\n    \"break_wall_score\"\
-            : 3,\n    \"break_wall_rationale\": \"gap_distance 3.34>2.0为低破墙概率给3分,cluster\
-            \ 1.8中等不调整\",\n    \"direction_score\": 7,\n    \"direction_rationale\"\
-            : \"dex 65%中等+vanna up高置信综合给7分\",\n    \"iv_score\": 6,\n    \"iv_score_rationale\"\
-            : \"iv_path升但confidence仅medium给6分\",\n    \"total_score\": 5.5,\n    \"\
-            weight_breakdown\": \"6×0.4+3×0.3+7×0.2+6×0.1=2.4+0.9+1.4+0.6=5.5\"\n\
-            \  },\n  \"scenario_classification\": {\n    \"primary_scenario\": \"\
-            弱趋势上行\",\n    \"scenario_probability\": 55,\n    \"secondary_scenarios\"\
-            : [\n      {\n        \"type\": \"宽幅区间\",\n        \"probability\": 30\n\
-            \      },\n      {\n        \"type\": \"观望\",\n        \"probability\"\
-            : 15\n      }\n    ],\n    \"adjustment_note\": \"虽在正γ区域base为区间,但direction_score\
-            \ 7分方向信号中等偏强,gap_distance 3.34虽大但vanna_dir一致性强,综合评估为弱趋势上行或区间突破,概率55%\"\
-            \n  },\n  \"entry_threshold_check\": \"入场\",\n  \"entry_rationale\": \"\
-            总分5.5>=3满足,关键信号:条件1 spot_vs_trigger=above明确满足,条件2 gap_distance_em1=3.34>2不满足,条件3\
-            \ dex_same_dir=65>60满足,条件4 vanna_confidence=high满足。4个条件满足3个,且total_score>5,建议入场但采用保守策略\"\
-            ,\n  \"risk_warning\": \"gap_distance偏大需3.34倍EM1$才能到阻力位,若短期内未突破需调整为区间策略\"\
-            ,\n  \"key_levels\": {\n    \"support\": 165.0,\n    \"resistance\": 180.0,\n\
-            \    \"trigger_line\": 168.5,\n    \"current_spot\": 170.0\n  }\n}\n\n"
+          text: "你是期权量化分析师，负责将量化分析结果**转化为易读的文字报告**。\n【任务】\n  Code2 已完成所有计算和逻辑推理，包括：\n\
+            \        - ✅ 四维评分计算\n        - ✅ 剧本分类\n        - ✅ 概率评估\n        - ✅ 风险警示\n\
+            \        - ✅ 仓位建议\n你的职责是：\n1. **验证数据完整性**：确保所有必需字段存在\n2. **逻辑检查**：确保结论与数据一致（如有明显矛盾需指出）\n\
+            3. **格式优化**：统一术语、标点、数值格式\n4. **文本润色**：将技术性描述改写为通顺、专业的中文\n【输入数据】(来自 Code2)\n\
+            {{#1007.result#}}\n【技术面数据】(来自 Agent 4，可选参考)\n{{#4001.text#}}\n\n## 处理规则\n\
+            \        \n        ### 1.数据完整性检查\n        \n        必需字段清单：\n        ```\n\
+            \        ✓ gamma_regime.vol_trigger\n        ✓ gamma_regime.spot_vs_trigger\n\
+            \        ✓ gamma_regime.regime_note\n        ✓ scoring.total_score\n \
+            \       ✓ scenario_classification.primary_scenario\n        ✓ scenario_classification.scenario_probability\n\
+            \        ✓ entry_threshold_check\n        ✓ risk_warning\n        ✓ position_suggestion\n\
+            \        ```\n**若缺失关键字段**：在输出 JSON 中添加 `\"data_integrity_issue\": \"缺失字段:\
+            \ XXX\"`\n\n### 2.逻辑一致性检查\n        \n        **检查项A：剧本与评分匹配**\n      \
+            \  ```\n        if total_score >= 7 and primary_scenario in [\"观望\", \"\
+            区间震荡\"]:\n            → 添加注释: \"注意：高评分但剧本保守，可能因临界状态或风险因素\"\n        \n\
+            \        if total_score < 5 and primary_scenario in [\"强趋势上行\", \"强趋势下行\"\
+            ]:\n            → 添加注释: \"警告：低评分但剧本激进，逻辑存在矛盾\"\n        ```\n        \n\
+            \        **检查项B：概率总和**\n        ```\n        primary_prob + secondary_prob_1\
+            \ + secondary_prob_2 ≈ 100% (误差 ±5%)\n        \n        若超出范围 → 添加注释:\
+            \ \"注意：概率总和为{sum}%，存在{误差}%偏差\"\n        ```\n        \n        **检查项C：仓位与概率匹配**\n\
+            \        ```\n        if scenario_probability < 55 and \"正常仓位\" in position_suggestion:\n\
+            \            → 添加注释: \"建议：概率不足55%，仓位建议偏激进\"\n        ```\n         ###\
+            \ 3.格式优化\n        \n        **数值格式**：\n        - 评分：保留1位小数（5.7分）\n   \
+            \     - 概率：整数（55%）\n        - 价格：根据品种特性（股票保留2位，指数保留1位）\n        - 距离：保留2位小数（3.34倍）\n\
+            \        \n        **标点符号**：\n        - 中文语境使用中文标点（，。；）\n        - 英文缩写后无需加点（如\
+            \ DEX 而非 D.E.X.）\n        - 避免连续使用相同标点\n        \n        **术语一致**：\n\
+            \        - 统一使用\"主导剧本\"而非\"primary scenario\"\n        - 统一使用\"次级剧本\"\
+            而非\"secondary scenarios\"\n        - 统一使用\"入场判定\"而非\"entry check\"\n\n\
+            ### 4.文本润色原则\n        \n        **原则A：保持数值准确**\n        - ❌ 不要修改任何数字（评分、概率、价格、距离等）\n\
+            \        - ✅ 只优化数字的表达方式\n        \n        **示例**：\n        ```\n    \
+            \    原文: \"gap_distance偏大需3.34倍EM1$才能到Call Wall\"\n        润色: \"到达Call\
+            \ Wall需3.34倍EM1$距离，gap_distance偏大\"\n        ```\n        \n        **原则B：统一术语**\n\
+            \        - Gamma Regime → Gamma状态 / γ状态\n        - spot_vs_trigger → 现价相对翻转线位置\n\
+            \        - DEX同向 → DEX方向一致性\n        - Vanna → Vanna效应 / 波动率敏感度\n    \
+            \    \n        **原则C：改善可读性**\n        - 将技术性强的句子拆分为短句\n        - 使用连接词（因此、但是、综合来看）\n\
+            \        - 避免过多括号和缩写\n        \n        **示例**：\n        ```\n       \
+            \ 原文: \"虽在正γ区域base为区间（spot_vs_trigger=above），但direction_score 7分显示中等偏强方向信号，且vanna_dir=up与iv_path=升一致\"\
+            \n        \n        润色: \"当前处于正Gamma区域，基础剧本为区间震荡。但是，方向评分达到7分，显示中等偏强的方向信号。同时，Vanna效应向上且隐含波动率路径呈上升趋势，两者方向一致。\"\
+            \n        ```\n【输出格式】\n**直接输出原始 JSON，仅对文本字段进行润色**：\n        \n       \
+            \ 需要润色的字段：\n        - `gamma_regime.regime_note`\n        - `break_wall_assessment.break_note`\n\
+            \        - `directional_signals.direction_note`\n        - `iv_dynamics.iv_note`\n\
+            \        - `scenario_classification.adjustment_note`\n        - `risk_warning`\n\
+            \        - `position_suggestion`\n        - 所有 `rationale` 字段\n      \
+            \  \n        **不需要修改的字段**：\n        - 所有数值字段（score, probability, price等）\n\
+            \        - 枚举字段（spot_vs_trigger, primary_scenario等）\n        - 结构化字段（key_levels,\
+            \ secondary_scenarios等）\n        \n        ---\n        \n        ## 示例\n\
+            \        \n        **输入**（Code2 输出）：\n        ```json\n        {\n   \
+            \       \"gamma_regime\": {\n            \"regime_note\": \"现价170.0在VOL_TRIGGER\
+            \ 168.5上方，正γ倾向，做市商压制波动维持区间\"\n          },\n          \"scenario_classification\"\
+            : {\n            \"adjustment_note\": \"虽在正γ区域base为区间（spot_vs_trigger=above），但direction_score\
+            \ 7分显示中等偏强方向信号，且vanna_dir=up与iv_path=升一致，综合判断为弱趋势上行，总分5.7。\"\n       \
+            \   }\n        }\n        ```\n        \n        **输出**（Agent 5 润色后）：\n\
+            \        ```json\n        {\n          \"gamma_regime\": {\n         \
+            \   \"regime_note\": \"当前价格170.0位于波动率触发线168.5上方，处于正Gamma状态。在此状态下，做市商倾向于压制波动，市场更可能维持区间震荡。\"\
+            \n          },\n          \"scenario_classification\": {\n           \
+            \ \"adjustment_note\": \"虽然当前处于正Gamma区域，基础剧本指向区间震荡，但方向评分达到7分，显示中等偏强的方向信号。同时，Vanna效应向上且隐含波动率呈上升趋势，两者方向一致。综合评估，判定为弱趋势上行，总评分5.7分。\"\
+            \n          }\n        }\n        ```\n        \n        ---\n       \
+            \ \n        ## 关键注意事项\n        \n        1. **禁止重新计算**：所有逻辑已由 Code Node\
+            \ 完成，不要修改任何结论\n        2. **保持数值不变**：评分、概率、价格等数字绝对不能改动\n        3. **仅润色文本**：只对描述性文字进行改写，提升可读性\n\
+            \        4. **标注矛盾**：若发现逻辑不一致，在输出中添加 `logic_check_notes` 字段说明\n      \
+            \  5. **保持JSON格式**：输出必须是有效的 JSON，与输入结构完全一致\n        \n ---\n        \n\
+            现在请对输入的 JSON 数据进行文本润色，输出完整的润色后 JSON。"
         - id: user-scenario
           role: user
           text: 请整合数据,进行剧本推演与评分。
@@ -765,11 +1633,11 @@ workflow:
       height: 132
       id: '5001'
       position:
-        x: 1718.9514918530517
-        y: 345.4727008545875
+        x: 2303.0824193344156
+        y: 228.0383411733186
       positionAbsolute:
-        x: 1718.9514918530517
-        y: 345.4727008545875
+        x: 2303.0824193344156
+        y: 228.0383411733186
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -784,120 +1652,191 @@ workflow:
           completion_params: {}
           mode: chat
           name: gpt-5
-          provider: langgenius/aihubmix/aihubmix
+          provider: langgenius/openai_api_compatible/openai_api_compatible
         prompt_template:
         - id: sys-strategy
           role: system
-          text: "你是期权策略研究员与期权交易教练，负责期权策略生成 Agent。\n任务:基于Gamma Regime和剧本分类生成三种风险等级策略并精确计算RR和Pw。【数据JSON来自Agent3】{{#3001.text#}}【剧本分析JSON来自Agent5】{{#5001.text#}}\n\
-            \n【策略映射规则】\n1.根据gamma_regime和scenario_classification选择策略类型:从5001.text.gamma_regime提取spot_vs_trigger和base_scenario,从5001.text.scenario_classification提取primary_scenario。若spot_vs_trigger=above且primary_scenario为区间或弱趋势,选择收取权利金策略:保守为Iron\
-            \ Condor铁鹰,均衡为Iron Butterfly铁蝶,进取可为Bull Put Spread或Bear Call Spread。若spot_vs_trigger=below且primary_scenario为趋势上行,选择方向性策略:保守为Bull\
-            \ Call Spread牛市价差,均衡为Call Ratio Spread比率价差,进取为Long Call Vertical或Calendar\
-            \ Spread日历价差。若spot_vs_trigger=below且primary_scenario为趋势下行,选择Put方向策略:保守为Bear\
-            \ Put Spread,均衡为Put Ratio Spread,进取为Long Put Vertical。若spot_vs_trigger=near或primary_scenario为过渡观望,不生成策略或仅对冲策略如Collar。\n\
-            2.行权价Strike选择规则:从3001.text.targets提取spot_price,walls.call_wall,walls.put_wall,walls.major_wall,gamma_metrics.gap_distance_em1_multiple,em1_dollar。保守策略围绕墙位构建:若Iron\
-            \ Condor则Short Call腿在call_wall附近,Long Call在call_wall+1.5EM1$,Short Put腿在put_wall附近,Long\
-            \ Put在put_wall-1.5EM1$。若Bull Call Spread则Long Call在spot与call_wall中点,Short\
-            \ Call在call_wall。均衡策略以spot为中心:若Iron Butterfly则Body在spot,两翼Wings在spot±1EM1$。若比率价差Ratio\
-            \ Spread则卖方腿在spot+0.5EM1$,买方腿在spot+1.5EM1$,比率1:2或2:3。进取策略根据direction选择:若看涨则Long\
-            \ Call在spot+0.2EM1$接近现价,Short Call在major_wall给最大获利空间。若Calendar则近月Short在spot,远月Long同strike。\n\
-            3.期限DTE动态选择:从3001.text.targets.gamma_metrics提取gap_distance_em1_multiple和monthly_cluster_override。基础规则:若gap_distance_em1>3则DTE=14日给足时间,若2-3则DTE=10日,若<2则DTE=7日接近到期Gamma更大。月度调整:若monthly_cluster_override=true则在基础DTE上+7日即DTE变为14+7=21,10+7=17,7+7=14以应对月度簇阻力。0DTE规避:不选择0DTE除非spot_vs_trigger=near且gap_distance<0.5EM1$此时可用0DTE做Gamma\
-            \ Scalping但需标注高风险。\n4.希腊值Greeks目标设定:保守策略目标Delta接近0在-0.1到0.1,Theta为正>5代表时间价值衰减收益,Vega为负<-10代表做空波动率。均衡策略Delta允许±0.2轻微方向敞口,Theta>8,Vega接近0即-5到5波动率中性。进取策略Delta\
-            \ 0.3-0.6明确方向,Theta可为负若买入Long策略,Vega>10做多波动率。\n5.RR盈亏比计算公式:信用价差Credit\
-            \ Spread如Iron Condor:C为收取权利金Credit,W为价差宽度Width即Long与Short之间差价。RR=C:(W-C)即收入比最大亏损。示例C=0.8,W=2.5则RR=0.8:(2.5-0.8)=0.8:1.7≈1:2.1。借贷价差Debit\
-            \ Spread如Bull Call Spread:D为支付权利金Debit,W为价差宽度。RR=(W-D):D即最大获利比成本。示例D=2.5,W=7.5则RR=(7.5-2.5):2.5=5.0:2.5=2:1。蝶式Butterfly和铁蝶Iron\
-            \ Butterfly:max_profit为Body处最大利润,max_loss为Wing处最大亏损。RR=max_profit:max_loss通常在2:1到4:1之间。\n\
-            6.Pw胜率估计公式:信用价差Pw公式:Pw=clamp(base+cluster_adj-distance_penalty,min,max)。base=0.5基础,cluster_adj=0.1×cluster_strength_ratio簇强度加成,distance_penalty=0.05×gap_distance_em1_multiple距离惩罚,min=0.4,max=0.85。示例cluster=1.8,gap=3.34则Pw=clamp(0.5+0.1×1.8-0.05×3.34,0.4,0.85)=clamp(0.5+0.18-0.167,0.4,0.85)=0.513约51%但考虑其他因素调整到72%若技术面配合。借贷价差Pw公式:Pw=clamp(base+dex_adj+vanna_adj,min,max)。base=0.3,dex_adj=0.1×dex_same_dir/100,vanna_adj=vanna_weight×0.2,min=0.25,max=0.75。示例dex=65,vanna_weight=1.0则Pw=clamp(0.3+0.1×0.65+1.0×0.2,0.25,0.75)=clamp(0.3+0.065+0.2,0.25,0.75)=0.565约57%。蝶式Pw基于spot到body中心距离和IV:若spot在body内Pw=0.6-0.7,若spot偏离1EM1$则Pw=0.4-0.5。\n\
-            【输出JSON格式】输出策略数组包含三个对象保守均衡进取:\n[\n  {\n    \"strategy_type\": \"保守\",\n\
-            \    \"structure\": \"Iron Condor\",\n    \"description\": \"四腿铁鹰收取权利金策略适合正γ区间环境\"\
-            ,\n    \"legs\": [\n      {\n        \"action\": \"sell\",\n        \"\
-            type\": \"call\",\n        \"strike\": 180.0,\n        \"quantity\": 1,\n\
-            \        \"rationale\": \"Short Call在call_wall阻力位收取权利金\"\n      },\n \
-            \     {\n        \"action\": \"buy\",\n        \"type\": \"call\",\n \
-            \       \"strike\": 182.5,\n        \"quantity\": 1,\n        \"rationale\"\
-            : \"Long Call保护上行风险在call_wall+1EM1$\"\n      },\n      {\n        \"action\"\
-            : \"sell\",\n        \"type\": \"put\",\n        \"strike\": 165.0,\n\
-            \        \"quantity\": 1,\n        \"rationale\": \"Short Put在put_wall支撑位收取权利金\"\
-            \n      },\n      {\n        \"action\": \"buy\",\n        \"type\": \"\
-            put\",\n        \"strike\": 162.5,\n        \"quantity\": 1,\n       \
-            \ \"rationale\": \"Long Put保护下行风险在put_wall-1EM1$\"\n      }\n    ],\n\
-            \    \"dte\": 14,\n    \"dte_rationale\": \"gap_distance_em1=3.34>3选择14日DTE,monthly_cluster_override=false无需延长\"\
-            ,\n    \"greeks_target\": {\n      \"delta\": 0.05,\n      \"delta_note\"\
-            : \"接近中性略偏多\",\n      \"theta\": 8.5,\n      \"theta_note\": \"每日时间价值衰减收益\"\
-            ,\n      \"vega\": -12.0,\n      \"vega_note\": \"做空波动率在正γ环境有利\"\n   \
-            \ },\n    \"rr_calculation\": {\n      \"credit\": 0.8,\n      \"width_call\"\
-            : 2.5,\n      \"width_put\": 2.5,\n      \"max_profit\": 0.8,\n      \"\
-            max_loss\": 1.7,\n      \"rr_ratio\": \"1:2.1\",\n      \"formula\": \"\
-            Credit=0.8,Width=2.5,MaxLoss=Width-Credit=1.7,RR=0.8:1.7\",\n      \"\
-            rr_note\": \"每收0.8权利金风险1.7,盈亏比1:2.1适合高胜率策略\"\n    },\n    \"pw_calculation\"\
-            : {\n      \"base\": 0.5,\n      \"cluster_strength\": 1.8,\n      \"\
-            cluster_adj\": 0.18,\n      \"gap_distance_em1\": 3.34,\n      \"distance_penalty\"\
-            : 0.167,\n      \"technical_boost\": 0.15,\n      \"pw_raw\": 0.513,\n\
-            \      \"pw_adjusted\": 0.72,\n      \"pw_estimate\": \"72%\",\n     \
-            \ \"formula\": \"base 0.5+cluster 0.1×1.8-distance 0.05×3.34+technical\
-            \ 0.15=0.663取0.72\",\n      \"pw_note\": \"簇强度1.8倍中等,gap距离3.34偏大扣分,技术面配合dex\
-            \ 65%和vanna up加分,综合胜率72%\"\n    },\n    \"entry_trigger\": \"Spot在168-172区间徘徊,IV未显著上升,dex_same_dir维持>60%\"\
-            ,\n    \"entry_timing\": \"次日开盘后15-30分钟确认方向,避开盘前跳空\",\n    \"exit_plan\"\
-            : {\n      \"profit_target\": \"权利金衰减至剩余30%即获利70%时平仓,约持有7-10日\",\n   \
-            \   \"stop_loss\": \"任一腿被突破即Spot突破182.5或跌破162.5,或亏损达权利金150%时止损\",\n  \
-            \    \"time_decay\": \"持有至到期前3日,若未达目标则在到期前2日平仓避免Pin Risk\",\n      \"\
-            adjustment\": \"若Spot接近wing边界提前roll或close该侧降低风险\"\n    },\n    \"risk_note\"\
-            : \"最大风险1.7倍于权利金0.8,需严格止损,适合账户2%风险敞口\"\n  },\n  {\n    \"strategy_type\"\
-            : \"均衡\",\n    \"structure\": \"Iron Butterfly\",\n    \"description\"\
-            : \"四腿铁蝶Body在现价收取更多权利金但需Spot维持窄幅\",\n    \"legs\": [\n      {\n      \
-            \  \"action\": \"sell\",\n        \"type\": \"call\",\n        \"strike\"\
-            : 170.0,\n        \"quantity\": 1\n      },\n      {\n        \"action\"\
-            : \"buy\",\n        \"type\": \"call\",\n        \"strike\": 173.0,\n\
-            \        \"quantity\": 1\n      },\n      {\n        \"action\": \"sell\"\
-            ,\n        \"type\": \"put\",\n        \"strike\": 170.0,\n        \"\
-            quantity\": 1\n      },\n      {\n        \"action\": \"buy\",\n     \
-            \   \"type\": \"put\",\n        \"strike\": 167.0,\n        \"quantity\"\
-            : 1\n      }\n    ],\n    \"dte\": 10,\n    \"dte_rationale\": \"gap_distance\
-            \ 3.34在2-3档选10日DTE\",\n    \"greeks_target\": {\n      \"delta\": 0.1,\n\
-            \      \"theta\": 12.0,\n      \"vega\": -8.0\n    },\n    \"rr_calculation\"\
-            : {\n      \"credit\": 1.5,\n      \"wing_width\": 3.0,\n      \"max_profit\"\
-            : 1.5,\n      \"max_loss\": 1.5,\n      \"rr_ratio\": \"1:1\",\n     \
-            \ \"formula\": \"Credit=1.5,Width=3.0,MaxLoss=Width-Credit=1.5,RR=1:1\"\
-            \n    },\n    \"pw_calculation\": {\n      \"body_distance\": 0.0,\n \
-            \     \"iv_level\": \"medium\",\n      \"pw_estimate\": \"65%\",\n   \
-            \   \"formula\": \"Spot在Body内基础Pw 0.65,gap距离中等,IV升趋势略不利\",\n      \"pw_note\"\
-            : \"需Spot在167-173窄幅3EM1$内维持,gap 3.34到call_wall偏大但body宽度给缓冲\"\n    },\n\
-            \    \"entry_trigger\": \"Spot在169-171窄幅波动,IV稳定未扩张,波动率<EM1$\",\n    \"\
-            exit_plan\": {\n      \"profit_target\": \"权利金衰减至剩余20%即获利80%\",\n    \
-            \  \"stop_loss\": \"Spot突破body±0.5EM1$即<169.5或>170.5时止损\",\n      \"time_decay\"\
-            : \"持有至到期前5日\"\n    },\n    \"risk_note\": \"需Spot高度维持在body,适合极低波动环境\"\
-            \n  },\n  {\n    \"strategy_type\": \"进取\",\n    \"structure\": \"Bull\
-            \ Call Spread\",\n    \"description\": \"牛市价差看涨方向策略基于dex和vanna一致性\",\n\
-            \    \"legs\": [\n      {\n        \"action\": \"buy\",\n        \"type\"\
-            : \"call\",\n        \"strike\": 172.5,\n        \"quantity\": 1,\n  \
-            \      \"rationale\": \"Long Call在spot+0.8EM1$接近现价获取Delta\"\n      },\n\
-            \      {\n        \"action\": \"sell\",\n        \"type\": \"call\",\n\
-            \        \"strike\": 180.0,\n        \"quantity\": 1,\n        \"rationale\"\
-            : \"Short Call在call_wall降低成本限制最大获利\"\n      }\n    ],\n    \"dte\": 14,\n\
-            \    \"dte_rationale\": \"gap 3.34需14日时间到达目标\",\n    \"greeks_target\"\
-            : {\n      \"delta\": 0.45,\n      \"delta_note\": \"明确看涨方向\",\n     \
-            \ \"theta\": -3.0,\n      \"theta_note\": \"买入策略时间衰减为负但可接受\",\n      \"\
-            vega\": 15.0,\n      \"vega_note\": \"做多波动率,IV升有利\"\n    },\n    \"rr_calculation\"\
-            : {\n      \"debit\": 2.5,\n      \"width\": 7.5,\n      \"max_profit\"\
-            : 5.0,\n      \"max_loss\": 2.5,\n      \"rr_ratio\": \"2:1\",\n     \
-            \ \"formula\": \"Debit=2.5,Width=7.5,MaxProfit=Width-Debit=5.0,RR=5.0:2.5=2:1\"\
-            ,\n      \"rr_note\": \"每投入2.5可获利5.0,盈亏比2:1,适合中等胜率方向策略\"\n    },\n   \
-            \ \"pw_calculation\": {\n      \"base\": 0.3,\n      \"dex_same_dir\"\
-            : 65.0,\n      \"dex_adj\": 0.065,\n      \"vanna_dir\": \"up\",\n   \
-            \   \"vanna_weight\": 1.0,\n      \"vanna_adj\": 0.2,\n      \"technical_confluence\"\
-            : 0.1,\n      \"pw_raw\": 0.565,\n      \"pw_adjusted\": 0.58,\n     \
-            \ \"pw_estimate\": \"58%\",\n      \"formula\": \"base 0.3+dex 0.1×0.65+vanna\
-            \ 1.0×0.2+technical 0.1=0.665但gap偏大下调到0.58\",\n      \"pw_note\": \"dex\
-            \ 65%中等,vanna up高置信,方向信号中等偏强,但gap 3.34需较大波动故胜率58%略高于50%\"\n    },\n  \
-            \  \"entry_trigger\": \"Spot突破172并维持,dex_same_dir>60%,vanna_dir维持up\"\
-            ,\n    \"entry_timing\": \"等待Spot站稳172上方,成交量确认\",\n    \"exit_plan\":\
-            \ {\n      \"profit_target\": \"到达177.5即价差获利50%平仓,或到达179获利80%\",\n   \
-            \   \"stop_loss\": \"Spot回落至170下方或vanna_dir反转为down时止损,亏损达成本50%\",\n  \
-            \    \"time_decay\": \"持有至到期前5日,若未启动则止损\"\n    },\n    \"risk_note\":\
-            \ \"方向性策略需Spot配合,gap 3.34偏大需较强动能,适合账户3%风险敞口\",\n    \"monitoring\": \"\
-            每日监控dex_same_dir若降至<50%需警惕方向反转\"\n  }\n]"
+          text: "你是期权策略研究员与期权交易教练，负责期权策略生成 Agent。\n\n【任务】 基于剧本分析和计算辅助结果，设计三种风险等级的期权策略。\n\
+            \n【输入数据】\n**剧本分析**（来自 Agent 5）：{{#5001.text#}}\n**计算辅助**（CODE3）：{{#1006.result#}}\n\
+            **原始数据**（来自 Agent 3，用于参考）：{{#3001.text#}}\n\n## 核心职责 ### \n### 1. 策略类型选择（基于推理）\n\
+            \    \n根据 Gamma 状态和主导场景选择策略：\n````\nif Gamma状态 = \"above\" and 主导场景 =\
+            \ \"区间\":\n    首选: Iron Condor (保守)\n    备选: Iron Butterfly (保守), Bull\
+            \ Put Spread (均衡)\n\nelif Gamma状态 = \"below\" and 主导场景 = \"趋势上行\":\n \
+            \   首选: Bull Call Spread (均衡)\n    备选: Call Ratio Spread (均衡), Long Call\
+            \ (进取)\n\nelif Gamma状态 = \"below\" and 主导场景 = \"趋势下行\":\n    首选: Bear\
+            \ Put Spread (均衡)\n    备选: Put Ratio Spread (均衡), Long Put (进取)\n\nelif\
+            \ Gamma状态 = \"near\":\n    首选: 观望\n    备选: Collar (对冲)\n\n### 2.腿部结构设计（使用计算结果）\n\
+            **可用的行权价数据**（从 Agent 3 提取）： - 标的: {{#3001.symbol#}} - 现价: {{#3001.spot_price#}}\
+            \ - EM1$: {{#3001.em1_dollar#}} - Call Wall: {{#3001.walls.call_wall#}}\
+            \ - Put Wall: {{#3001.walls.put_wall#}} - Major Wall: {{#3001.walls.major_wall#}}\
+            \ ({{#3001.walls.major_wall_type#}}) \n**行权价选择原则**： \n- 保守策略：Short 腿贴近墙位，Long\
+            \ 腿距离 Short 腿 1.0-1.5×EM1$ \n- 均衡策略：Long 腿距离现价 0.2-0.5×EM1$，Short 腿靠近墙位\
+            \ \n- 进取策略：Long 腿距离现价 0.2×EM1$ 以内 *\n\n*每条腿必须包含 rationale**，解释： \n1. 为何选择该行权价（参考墙位/EM1$）\
+            \ \n2. 该腿在策略中的作用（收权利金/限制风险/方向敞口） \n3. 与 Gamma 状态/剧本的适配性\n\n### 3. DTE\
+            \ 与 Greeks（直接引用）\n        \n  **DTE**：\n  - 最终 DTE：{{#1006.dte_final#}}\
+            \ 日\n  - 选择理由：{{#1006.dte_rationale#}}\n  \n  **Greeks 目标**（根据策略类型选择）：\n\
+            \  \n  **保守策略**：\n  - Delta：{{#1006.greeks_conservative_desc#}}\n  - 范围：[{{#1006.greeks_conservative_delta_min#}},\
+            \ {{#1006.greeks_conservative_delta_max#}}]\n  - Theta 最小值：{{#1006.greeks_conservative_theta_min#}}/日\n\
+            \  - Vega 最大值：{{#1006.greeks_conservative_vega_max#}}\n  \n  **均衡策略**：\n\
+            \  - Delta：{{#1006.greeks_balanced_desc#}}\n  - 范围：±{{#1006.greeks_balanced_delta_range#}}\n\
+            \  - Theta 最小值：{{#1006.greeks_balanced_theta_min#}}/日\n  \n  **进取策略**：\n\
+            \  - Delta：{{#1006.greeks_aggressive_desc#}}\n  - 范围：[{{#1006.greeks_aggressive_delta_min#}},\
+            \ {{#1006.greeks_aggressive_delta_max#}}]\n  - Vega 最小值：{{#1006.greeks_aggressive_vega_min#}}\n\
+            \ \n---\n### 4. RR/Pw（直接引用计算结果）\n        \n**关键：不要重新计算，直接引用 CODE3 的数值和公式**\n\
+            \n#### 保守策略（Iron Condor 示例）\n```json\n    {\n      \"rr_calculation\"\
+            : {\n        \"credit\": {{#1006.rr_ic_credit#}},\n        \"max_profit\"\
+            : {{#1006.rr_ic_max_profit#}},\n        \"max_loss\": {{#1006.rr_ic_max_loss#}},\n\
+            \        \"rr_ratio\": \"{{#1006.rr_ic_ratio#}}\",\n        \"formula\"\
+            : \"{{#1006.rr_ic_formula#}}\",\n        \"rr_note\": \"盈亏比 {{#1006.rr_ic_ratio#}}\
+            \ 适合高胜率策略，当前 IVR {{#1006.meta_ivr#}}% 处于中等水平，权利金收取 {{#1006.rr_ic_credit#}}\
+            \ 合理\"\n      },\n      \"pw_calculation\": {\n        \"pw_estimate\"\
+            : \"{{#1006.pw_credit_estimate#}}\",\n        \"formula\": \"{{#1006.pw_credit_formula#}}\"\
+            ,\n        \"pw_note\": \"{{#1006.pw_credit_note#}}\",\n        \"pw_综合判断\"\
+            : \"主导场景 {{#1006.meta_primary_scenario#}} 概率 {{#1006.meta_scenario_probability#}}%，技术面评分\
+            \ {{#1006.meta_technical_score#}} 分支持，簇强度 {{#1006.pw_credit_cluster_adj#}}\
+            \ 中等加分，gap 距离惩罚 {{#1006.pw_credit_distance_penalty#}}，技术面提升 {{#1006.pw_credit_technical_boost#}}，综合胜率\
+            \ {{#1006.pw_credit_estimate#}} 可信度高\"\n      }\n    }\n```\n        \n\
+            #### 均衡/进取策略（Bull Call Spread 示例）\n```json\n      {\n        \"rr_calculation\"\
+            : {\n          \"debit\": {{#1006.rr_bull_debit#}},\n          \"max_profit\"\
+            : {{#1006.rr_bull_max_profit#}},\n          \"max_loss\": {{#1006.rr_bull_max_loss#}},\n\
+            \          \"rr_ratio\": \"{{#1006.rr_bull_ratio#}}\",\n          \"formula\"\
+            : \"{{#1006.rr_bull_formula#}}\",\n          \"rr_note\": \"盈亏比 {{#1006.rr_bull_ratio#}}\
+            \ 适合趋势策略，风险 {{#1006.rr_bull_max_loss#}} 可控\"\n        },\n        \"pw_calculation\"\
+            : {\n          \"pw_estimate\": \"{{#1006.pw_debit_estimate#}}\",\n  \
+            \        \"formula\": \"{{#1006.pw_debit_formula#}}\",\n          \"pw_note\"\
+            : \"{{#1006.pw_debit_note#}}\",\n          \"pw_综合判断\": \"DEX 调整 {{#1006.pw_debit_dex_adj#}}，Vanna\
+            \ 调整 {{#1006.pw_debit_vanna_adj#}}，gap 惩罚 {{#1006.pw_debit_gap_penalty#}}，综合胜率\
+            \ {{#1006.pw_debit_estimate#}}\"\n        }\n      }\n``` \n---\n\n###\
+            \ 5.执行方案（需要你的语言能力） \n**入场触发**： \n从 Agent 5 提取关键信号： - Spot vs Trigger：{{#5001.gamma_regime.spot_vs_trigger#}}\
+            \ - 方向强度：{{#5001.directional_signals.direction_strength#}} - DEX 同向：{{#5001.directional_signals.dex_same_dir#}}%\
+            \ - Vanna 方向：{{#5001.directional_signals.vanna_dir#}} ({{#5001.directional_signals.vanna_confidence#}})\
+            \ - IV 路径：{{#5001.iv_dynamics.iv_path#}} ({{#5001.iv_dynamics.iv_path_confidence#}})\
+            \ \n\n**描述具体入场条件**（根据策略类型调整）：\n- 保守策略：如 \"Spot 在 [Put_Wall, Call_Wall]\
+            \ 区间徘徊，IV 未显著上升（7D ATM-IV 平稳），DEX 同向维持 >60%\"\n- 均衡策略：如 \"Spot 向 Call_Wall\
+            \ 方向移动但未突破，Vanna_dir=up 且 iv_path=升，DEX 同向 >65%\"\n- 进取策略：如 \"Spot 有效突破墙位\
+            \ ≥0.5×EM1$，成交量确认，Vanna 与 IV 路径一致\"\n\n#### 出场计划（引用环境参数）\n\n**信用策略**：\n\
+            - 止盈：权利金衰减至 {{#1006.exit_credit_profit_pct#}}% 时回补\n- 止损：浮亏达最大亏损 {{#1006.exit_credit_stop_pct#}}%\
+            \ 时平仓\n- 时间：到期前 {{#1006.exit_time_days#}} 日强制平仓\n- 调整：Spot 接近 Short 腿\
+            \ <0.5×EM1$ 时考虑 roll out\n\n**借记策略**：\n- 止盈：浮盈达 {{#1006.exit_debit_profit_pct#}}%\
+            \ 时先落袋 50%\n- 止损：亏损达 {{#1006.exit_debit_stop_pct#}}% 时平仓\n- 时间：到期前 {{#1006.exit_time_days#}}\
+            \ 日评估展期或平仓\n\n#### 风险评估 综合评估策略风险：\n - \"最大风险 {{RR中的max_loss}} 需严格止损\"\
+            \ \n- \"单笔风险应控制在账户总资金 2% 以内\"（参考 MAX_SINGLE_RISK_PCT） \n- \"若事件临近（如财报前\
+            \ 5 日）或 IV 突然扩张 >20%，提前平仓\"\n\n---\n【输出 JSON 格式】生成三个策略对象（保守/均衡/进取），每个包含：\n\
+            ```json \n{\n  \"strategies\": [\n    {\n      \"strategy_type\": \"保守\"\
+            ,\n      \"structure\": \"Iron Condor\",\n      \"description\": \"四腿铁鹰收取权利金策略，适合正γ区间环境\"\
+            ,\n      \"legs\": [\n        {\n          \"action\": \"sell\",\n   \
+            \       \"type\": \"call\",\n          \"strike\": 180.0,\n          \"\
+            quantity\": 1,\n          \"rationale\": \"Short Call 在 call_wall 阻力位\
+            \ 180 收取权利金，利用正 Gamma 环境（spot_vs_trigger=above）压制上行，gap_distance=3.34×EM1$\
+            \ 提供安全边际\"\n        },\n        {\n          \"action\": \"buy\",\n  \
+            \        \"type\": \"call\",\n          \"strike\": 184.5,\n         \
+            \ \"quantity\": 1,\n          \"rationale\": \"Long Call 在 184.5 限制上行风险，宽度\
+            \ 4.5 = 1.5×EM1$，符合保守策略风控要求\"\n        },\n        {\n          \"action\"\
+            : \"sell\",\n          \"type\": \"put\",\n          \"strike\": 165.0,\n\
+            \          \"quantity\": 1,\n          \"rationale\": \"Short Put 在 put_wall\
+            \ 支撑位 165 收取权利金\"\n        },\n        {\n          \"action\": \"buy\"\
+            ,\n          \"type\": \"put\",\n          \"strike\": 160.5,\n      \
+            \    \"quantity\": 1,\n          \"rationale\": \"Long Put 在 160.5 限制下行风险，对称结构平衡风险\"\
+            \n        }\n      ],\n      \"dte\": \"{{#1006.dte_final#}}\",\n    \
+            \  \"dte_rationale\": \"{{#1006.dte_rationale#}}\",\n      \"greeks_target\"\
+            : {\n        \"delta\": \"{{#1006.greeks_conservative_desc#}}\",\n   \
+            \     \"delta_range\": \"[{{#1006.greeks_conservative_delta_min#}}, {{#1006.greeks_conservative_delta_max#}}]\"\
+            ,\n        \"theta_min\": \"{{#1006.greeks_conservative_theta_min#}}\"\
+            ,\n        \"vega_max\": \"{{#1006.greeks_conservative_vega_max#}}\"\n\
+            \      },\n      \"rr_calculation\": {\n        \"credit\": {{#1006.rr_ic_credit#}},\n\
+            \        \"max_profit\": {{#1006.rr_ic_max_profit#}},\n        \"max_loss\"\
+            : {{#1006.rr_ic_max_loss#}},\n        \"rr_ratio\": \"{{#1006.rr_ic_ratio#}}\"\
+            ,\n        \"formula\": \"{{#1006.rr_ic_formula#}}\",\n        \"rr_note\"\
+            : \"盈亏比 {{#1006.rr_ic_ratio#}} 适合高胜率策略\"\n      },\n      \"pw_calculation\"\
+            : {\n        \"pw_estimate\": \"{{#1006.pw_credit_estimate#}}\",\n   \
+            \     \"formula\": \"{{#1006.pw_credit_formula#}}\",\n        \"pw_note\"\
+            : \"{{#1006.pw_credit_note#}}\",\n        \"pw_综合判断\": \"主导场景概率 {{#1006.meta_scenario_probability#}}%，技术面评分\
+            \ {{#1006.meta_technical_score#}} 分，综合胜率可信度高\"\n      },\n      \"entry_trigger\"\
+            : \"Spot 在区间徘徊，IV 平稳，DEX 同向 >60%\",\n      \"entry_timing\": \"次日开盘后 15-30\
+            \ 分钟，限价挂 mid，滑点容忍 ±$0.03\",\n      \"exit_plan\": {\n        \"profit_target\"\
+            : \"权利金衰减至 {{#1006.exit_credit_profit_pct#}}% 时回补\",\n        \"stop_loss\"\
+            : \"浮亏达 {{#1006.exit_credit_stop_pct#}}% 时平仓\",\n        \"time_decay_exit\"\
+            : \"到期前 {{#1006.exit_time_days#}} 日强平\",\n        \"adjustment\": \"Spot\
+            \ 接近 short 腿时考虑 roll\"\n      },\n      \"risk_note\": \"最大风险 {{#1006.rr_ic_max_loss#}}，需严格止损，适合账户\
+            \ 2% 风险敞口\"\n    },\n    {\n      \"strategy_type\": \"均衡\",\n      \"\
+            structure\": \"Bull Call Spread\",\n      \"description\": \"看涨借记价差，适合趋势初期\"\
+            ,\n      \"legs\": [\n        {\n          \"action\": \"buy\",\n    \
+            \      \"type\": \"call\",\n          \"strike\": \"计算: {{#1006.meta_spot#}}\
+            \ + 0.2×{{#1006.meta_em1#}}\",\n          \"quantity\": 1,\n         \
+            \ \"rationale\": \"Long Call 距现价 0.2×EM1$，获取上行敞口\"\n        },\n     \
+            \   {\n          \"action\": \"sell\",\n          \"type\": \"call\",\n\
+            \          \"strike\": \"{{#3001.targets[0].walls.call_wall#}}\",\n  \
+            \        \"quantity\": 1,\n          \"rationale\": \"Short Call 在 call_wall\
+            \ 限制风险并降低成本\"\n        }\n      ],\n      \"dte\": \"{{#1006.dte_final#}}\"\
+            ,\n      \"dte_rationale\": \"{{#1006.dte_rationale#}}\",\n      \"greeks_target\"\
+            : {\n        \"delta\": \"{{#1006.greeks_balanced_desc#}}\",\n       \
+            \ \"delta_range\": \"±{{#1006.greeks_balanced_delta_range#}}\",\n    \
+            \    \"theta_min\": \"{{#1006.greeks_balanced_theta_min#}}\"\n      },\n\
+            \      \"rr_calculation\": {\n        \"debit\": {{#1006.rr_bull_debit#}},\n\
+            \        \"max_profit\": {{#1006.rr_bull_max_profit#}},\n        \"max_loss\"\
+            : {{#1006.rr_bull_max_loss#}},\n        \"rr_ratio\": \"{{#1006.rr_bull_ratio#}}\"\
+            ,\n        \"formula\": \"{{#1006.rr_bull_formula#}}\",\n        \"rr_note\"\
+            : \"盈亏比 {{#1006.rr_bull_ratio#}} 适合趋势策略\"\n      },\n      \"pw_calculation\"\
+            : {\n        \"pw_estimate\": \"{{#1006.pw_debit_estimate#}}\",\n    \
+            \    \"formula\": \"{{#1006.pw_debit_formula#}}\",\n        \"pw_note\"\
+            : \"{{#1006.pw_debit_note#}}\",\n        \"pw_综合判断\": \"DEX/Vanna 信号支持，综合胜率\
+            \ {{#1006.pw_debit_estimate#}}\"\n      },\n      \"entry_trigger\": \"\
+            Spot 向墙位移动，Vanna/IV 路径一致\",\n      \"entry_timing\": \"次日开盘后确认方向\",\n\
+            \      \"exit_plan\": {\n        \"profit_target\": \"浮盈 {{#1006.exit_debit_profit_pct#}}%\
+            \ 先落袋 50%\",\n        \"stop_loss\": \"亏损 {{#1006.exit_debit_stop_pct#}}%\
+            \ 平仓\",\n        \"time_decay_exit\": \"到期前 {{#1006.exit_time_days#}}\
+            \ 日评估\",\n        \"adjustment\": \"若方向信号转弱提前离场\"\n      },\n      \"\
+            risk_note\": \"最大风险 {{#1006.rr_bull_max_loss#}}，可控\"\n    },\n    {\n\
+            \      \"strategy_type\": \"进取\",\n      \"structure\": \"Long Call\"\
+            ,\n      \"description\": \"单腿看涨期权，适合强趋势加速\",\n      \"legs\": [\n   \
+            \     {\n          \"action\": \"buy\",\n          \"type\": \"call\"\
+            ,\n          \"strike\": \"计算: {{#1006.meta_spot#}} + 0.1×{{#1006.meta_em1#}}\"\
+            ,\n          \"quantity\": 1,\n          \"rationale\": \"Long Call 轻度虚值\
+            \ 0.1×EM1$，最大化 Delta 敞口\"\n        }\n      ],\n      \"dte\": \"{{#1006.dte_final#}}\"\
+            ,\n      \"dte_rationale\": \"{{#1006.dte_rationale#}}\",\n      \"greeks_target\"\
+            : {\n        \"delta\": \"{{#1006.greeks_aggressive_desc#}}\",\n     \
+            \   \"delta_range\": \"[{{#1006.greeks_aggressive_delta_min#}}, {{#1006.greeks_aggressive_delta_max#}}]\"\
+            ,\n        \"vega_min\": \"{{#1006.greeks_aggressive_vega_min#}}\"\n \
+            \     },\n      \"rr_calculation\": {\n        \"debit\": \"估算: 权利金约 {{#1006.rr_bull_debit#}}\
+            \ × 1.2\",\n        \"max_profit\": \"理论无限\",\n        \"max_loss\": \"\
+            权利金全损\",\n        \"rr_ratio\": \"3:1 至 5:1\",\n        \"rr_note\": \"\
+            高 RR 但需强趋势支持\"\n      },\n      \"pw_calculation\": {\n        \"pw_estimate\"\
+            : \"约 35-50%\",\n        \"pw_note\": \"依赖 Vanna、空缺、IV 路径三者共振\",\n   \
+            \     \"pw_综合判断\": \"仅当方向信号极强时考虑\"\n      },\n      \"entry_trigger\"\
+            : \"有效破墙 ≥0.5×EM1$，成交量确认\",\n      \"entry_timing\": \"突破后次日追涨\",\n  \
+            \    \"exit_plan\": {\n        \"profit_target\": \"浮盈 100% 分批离场\",\n\
+            \        \"stop_loss\": \"亏损 50% 或方向信号转弱\",\n        \"time_decay_exit\"\
+            : \"到期前 {{#1006.exit_time_days#}} 日\",\n        \"adjustment\": \"若 IV\
+            \ 突然压缩考虑换 spread\"\n      },\n      \"risk_note\": \"高风险高回报，仅适合小仓位试探\"\
+            \n    }\n  ]\n}\n```\n\n## 关键注意事项 \n1. **严格使用扁平化字段**：所有数值、公式、描述都用 `{{#1006.xxx#}}`\
+            \ 引用，不要嵌套 \n2. **Rationale 必须具体**：每条腿都要解释\"为何选择该行权价\"\"在策略中的作用\"\"与剧本的适配\"\
+            \ \n3. **执行方案要可操作**：入场触发条件要具体到可验证（如\"DEX >60%\"而非\"方向明确\"） \n4. **风险描述要量化**：明确最大亏损数值、止损百分比、仓位限制\
+            \ \n5. **三种策略要有差异**：保守/均衡/进取的结构、Greeks、RR/Pw 都应明显不同\n---\n 现在请基于输入数据生成三种策略方案。\n"
         - id: user-strategy
           role: user
-          text: 请根据分析结果,生成带RR/Pw的策略。
+          text: '请根据剧本分析和计算辅助结果，生成三种风险等级的期权策略。
+
+            【当前市场状态】
+
+            - 主导场景：{{#1006.meta_primary_scenario#}}（概率 {{#1006.meta_scenario_probability#}}%）
+
+            - Gamma 状态：{{#1006.meta_gamma_regime#}}
+
+            - 技术面评分：{{#1006.meta_technical_score#}}/2
+
+
+            【关键信号】
+
+            - DEX 同向：{{#5001.directional_signals.dex_same_dir#}}%
+
+            - Vanna 方向：{{#5001.directional_signals.vanna_dir#}}（{{#5001.directional_signals.vanna_confidence#}}）
+
+            - IV 路径：{{#5001.iv_dynamics.iv_path#}}（{{#5001.iv_dynamics.iv_path_confidence#}}）
+
+
+            请严格按照系统提示的 JSON 格式输出三种策略。
+
+            '
         selected: false
         title: Agent 6 策略生成
         type: llm
@@ -906,11 +1845,11 @@ workflow:
       height: 132
       id: '6001'
       position:
-        x: 2037.7138935288722
-        y: 245.03910504218067
+        x: 2905.088238157606
+        y: 202.92482559236925
       positionAbsolute:
-        x: 2037.7138935288722
-        y: 245.03910504218067
+        x: 2905.088238157606
+        y: 202.92482559236925
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -920,24 +1859,35 @@ workflow:
         context:
           enabled: false
           variable_selector: []
-        desc: 'Agent 7: Assemble the final report based on the template.'
+        desc: 'Agent 8: Assemble the final report based on the template.'
         model:
           completion_params:
             temperature: 0.5
           mode: chat
-          name: gpt-4o-mini
-          provider: langgenius/aihubmix/aihubmix
+          name: deepseek-v3.2-exp-thinking
+          provider: langgenius/openai_api_compatible/openai_api_compatible
         prompt_template:
         - id: sys-report
           role: system
-          text: "你是最终报告生成 Agent。\n你的任务是汇总所有上游 Agent 的 JSON 输出,并严格按照【输出模板】生成一份给用户的、人类可读的\
+          text: "你是最终报告生成 Agent。\n\n【任务】 汇总所有分析，生成单标的完整报告（含事件风险）。\n【输出模板】生成一份给用户的、人类可读的\
             \ Markdown 报告。\n\n【数据JSON】(来自 Agent 3)\n{{#3001.text#}}\n\n【技术面JSON】(来自\
             \ Agent 4)\n{{#4001.text#}}\n\n【剧本分析JSON】(来自 Agent 5)\n{{#5001.text#}}\n\
-            \n【策略JSON】(来自 Agent 6)\n{{#6001.text#}}\n\n【输出模板】\n# 美股期权分析报告\n\n## 1.\
-            \ 综合评分与结论\n\n从5001.text.scoring提取:\n\n### 总分: {total_score}/10\n\n**评分构成**\
-            \ ({weight_breakdown}):\n- Gamma Regime: {gamma_regime_score}/10 (权重40%)\n\
-            - 破墙可能性: {break_wall_score}/10 (权重30%)\n- 方向一致性: {direction_score}/10\
-            \ (权重20%)\n- IV动态: {iv_score}/10 (权重10%)\n\n### 核心判断\n\n从5001.text.gamma_regime和scenario_classification提取:\n\
+            \n【策略JSON】(来自 Agent 6)\n{{#6001.text#}}\n\n【策略对比 JSON】(来自 Agent 7)\n{{#1005.text#}}\n\
+            \n【事件检测JSON】\n{{#1004.result#}}\n\n【输出模板】\n# 美股期权分析报告\n**分析日期**：{timestamp}\n\
+            \ **指数背景**：{{#env.DEFAULT_INDEX_PRIMARY#}} NET_GEX={net_gex_idx}, EM1$={em1_dollar_idx}\
+            \ \n**风险等级**：{event_risk.level} {根据level显示\U0001F7E2/\U0001F7E1/\U0001F534\
+            }\n\n## 0. 事件风险评估（优先查看） \n**检测日期**：{从1004.result提取detection_date} \n**风险等级**：{risk_level}\n\
+            \n{若events数组为空} \n✅ 未检测到近期重大事件，可正常执行策略\n {若events数组不为空，逐一列出} \n| 事件类型\
+            \ | 日期 | 距离 | 影响 | 说明 | \n|---------|------|------|------|------| \n|\
+            \ {type} | {date} | {days_away}日 | {impact} | {note或空} | ### 策略调整建议 \n\
+            - **禁止跨期**: {no_cross_earnings ? \"\U0001F6AB 是\" : \"✅ 否\"} {若是：财报或重大事件临近，建议DTE≤{max_dte_suggestion}日或等待事件后}\
+            \ \n- **缩短DTE**: {adjust_dte ? \"⚠️ 是\" : \"✅ 否\"}  {若是：OPEX临近，建议DTE≤{max_dte_suggestion}日}\
+            \ \n- **减仓操作**: {reduce_position_size ? \"⚠️ 是\" : \"✅ 否\"} {若是：FOMC临近，建议半仓或观望}\
+            \ \n- **详细说明**: {recommendations.note}\n\n## 1. 综合评分与结论\n\n从5001.text.scoring提取:\n\
+            \n### 总分: {total_score}/10\n\n**评分构成** ({weight_breakdown}):\n- Gamma\
+            \ Regime: {gamma_regime_score}/10 (权重40%)\n- 破墙可能性: {break_wall_score}/10\
+            \ (权重30%)\n- 方向一致性: {direction_score}/10 (权重20%)\n- IV动态: {iv_score}/10\
+            \ (权重10%)\n\n### 核心判断\n\n从5001.text.gamma_regime和scenario_classification提取:\n\
             \n**Gamma Regime状态**:\n- VOL TRIGGER = {vol_trigger}\n- 现价位置: {spot_vs_trigger}\
             \ ({base_scenario})\n- 解读: {regime_note}\n\n**市场结论**:\n- 主导场景: {primary_scenario}\
             \ (概率{scenario_probability}%)\n- 调整说明: {adjustment_note}\n\n**入场判断**:\
@@ -948,47 +1898,72 @@ workflow:
             \ {vanna_dir} (置信度{vanna_confidence})\n- 方向强度: {direction_strength}\n\n\
             ### 2.3 场景概率分布\n从scenario_classification.secondary_scenarios提取:\n- {primary_scenario}:\
             \ {scenario_probability}%\n逐一列出次要场景的type和probability\n\n---\n\n## 3. 策略建议\n\
-            \n从6001.text数组提取,每个策略输出:\n\n### 3.{N} {strategy_type}策略\n\n**结构**: {structure}\n\
-            \n**腿部**:\n从legs数组简化输出:\n- {action} {quantity}x {type}@{strike}\n依次列出所有腿\n\
-            \n**期限**: {dte}日\n\n**盈亏比**: {rr_calculation.rr_ratio}\n**胜率**: {pw_calculation.pw_estimate}\n\
-            \n**希腊值**: Delta {greeks_target.delta} | Theta {greeks_target.theta} |\
-            \ Vega {greeks_target.vega}\n\n**入场**: {entry_trigger}\n**止盈**: {exit_plan.profit_target}\n\
-            **止损**: {exit_plan.stop_loss}\n\n---\n\n## 4. 执行SOP \n### 入场检查\n✓ 时机:\
-            \ 次日开盘后15-30分钟\n✓ 确认: Spot在预期区间,IV未异常波动\n✓ 仓位: 单笔≤2%,总敞口≤10%\n\n### 止损触发\n\
-            立即平仓条件:\n- Spot穿越VOL_TRIGGER (Gamma regime反转)\n- 达到策略止损点\n- gap_distance<0.5EM1$\
-            \ (接近墙位)\n- vanna_dir反转\n- dex_same_dir<40%\n\n### 日常监控\n每日盘前:\n- 检查VOL_TRIGGER更新\n\
-            - 确认spot_vs_trigger状态\n\n盘中关注:\n- gap_distance实时变化\n- DEX同向性是否维持\n- IV是否扩张>50%\n\
-            \n---\n\n## 5. 数据校验字段 (详细)\n\n从3001.text.targets提取所有字段:\n\n### 核心字段\n\
-            ```\nSymbol: {symbol}\nSpot: {spot_price}\nEM1$: {em1_dollar}\n\nVOL_TRIGGER:\
-            \ {gamma_metrics.vol_trigger}\nspot_vs_trigger: {gamma_metrics.spot_vs_trigger}\n\
-            NET_GEX: {gamma_metrics.net_gex}\nnet_gex_sign: {gamma_metrics.net_gex_sign}\n\
-            \nCall_Wall: {walls.call_wall}\nPut_Wall: {walls.put_wall}\nMajor_Wall:\
-            \ {walls.major_wall} ({walls.major_wall_type})\n\ngap_distance: {gamma_metrics.gap_distance_dollar}\
-            \ ({gamma_metrics.gap_distance_em1_multiple}x EM1$)\ncluster_strength:\
-            \ {gamma_metrics.cluster_strength_ratio}\nmonthly_override: {gamma_metrics.monthly_cluster_override}\n\
-            \ndex_same_dir: {directional_metrics.dex_same_dir_pct}%\nvanna_dir: {directional_metrics.vanna_dir}\
-            \ (confidence: {directional_metrics.vanna_confidence})\niv_path: {directional_metrics.iv_path}\
-            \ (confidence: {directional_metrics.iv_path_confidence})\n\nATM_IV_7D:\
-            \ {atm_iv.iv_7d}\nATM_IV_14D: {atm_iv.iv_14d}\niv_source: {atm_iv.iv_source}\n\
-            ```\n\n### 指数背景\n```\nSPX NET_GEX: {indices.spx.net_gex_idx}\nSPX EM1$:\
-            \ {indices.spx.em1_dollar_idx}\n```\n\n### 数据质量\n- 完整度: {validation_summary.completion_rate}%\n\
-            - 缺失字段: {validation_summary.missing_count}个\n- 时间戳: {timestamp}\n\n"
+            \n从1005.text提取,并按rank顺序展示：\n### 排序总览 | 排名 | 策略类型 | 期望值(EV) | 风险调整收益 |\
+            \ 场景匹配 | 流动性 | 评价 | |------|---------|-----------|------------|---------|--------|------|\
+            \ \n| {rank} | {strategy_type} | {ev} | {risk_adjusted_return} | {scenario_match}\
+            \ | {liquidity_pass?\"✅\":\"❌\"} | {note} | **最终推荐**: {final_recommendation}\n\
+            \n### 3.1 首选策略详述 \n从6001.text中找到rank=1对应的strategy_type，展开详述： **结构**: {structure}\
+            \ *\n*腿部**: 从legs数组简化输出：\n   - {action} {quantity}x {type}@{strike} \n\
+            依次列出所有腿 \n**期限**: {dte}日 \n**盈亏比**: {rr_calculation.rr_ratio} \n**胜率**:\
+            \ {pw_calculation.pw_estimate} \n**希腊值**: Delta {greeks_target.delta}\
+            \ | Theta {greeks_target.theta} | Vega {greeks_target.vega} \n**入场**:\
+            \ {entry_trigger} \n**止盈**: {exit_plan.profit_target} \n**止损**: {exit_plan.stop_loss}\
+            \ \n---\n### 3.2 备选策略概要 \n对rank=2和rank=3的策略，\n仅输出关键信息： \n#### 策略{N}: {strategy_type}\
+            \ \n- 结构: {structure} \n- RR: {rr_ratio} | Pw: {pw_estimate} \n- 推荐理由:\
+            \ {从Agent 7的note提取}\n ---\n## 4. 执行建议 ### \n入场判定 从5001.text和1005.text综合判断：\
+            \ \n{若entry_threshold_check=\"入场\" 且 首选策略liquidity_pass=true 且 event_risk.level≠\"\
+            high\"} \n✅ **建议入场** \n  - 主导剧本概率: {scenario_probability}% \n  - 总评分:\
+            \ {total_score}/10 \n  - 首选策略期望值: {rank1_ev} \n  - 事件风险: 可控 \n\n{若entry_threshold_check=\"\
+            轻仓试探\" 或 首选策略scenario_match=\"中\"} \n⚠️ **建议轻仓试探** \n  - 剧本概率: {scenario_probability}%（未达60%）\
+            \ \n  - 建议仓位: 正常的50%或更窄结构 \n  - 理由: {entry_rationale简化版} \n{若entry_threshold_check=\"\
+            观望\" 或 event_risk.level=\"high\" 或 首选策略liquidity_pass=false} \n\U0001F6AB\
+            \ **建议观望** \n  - 理由: {逐项列出} \n  - 数据完整度: {validation_summary.completion_rate}%\n\
+            \  - 事件风险: {event_risk.level} \n  - 信号冲突: {从risk_warning提取} - 流动性: {首选策略liquidity_pass?\"\
+            通过\":\"不足\"}\n\n### 执行SOP \n✓ 入场检查 \n  - 时机: 次日开盘后15-30分钟 \n  - 确认: Spot在预期区间,IV未异常波动\
+            \ \n  - 仓位: 单笔≤2%,总敞口≤10% \n\n ✓ 止损触发 立即平仓条件: \n   - Spot穿越VOL_TRIGGER\
+            \ (Gamma regime反转) \n   - 达到策略止损点 \n   - gap_distance<0.5EM1$ (接近墙位) \n\
+            \   - vanna_dir反转 - dex_same_dir<40% \n\n ✓ 日常监控 \n 盘前: \n  - 检查VOL_TRIGGER更新\
+            \ \n  - 确认spot_vs_trigger状态 \n 盘中关注: \n  - gap_distance实时变化 \n  - DEX同向性是否维持\
+            \ \n  - IV是否扩张>50% \n---\n\n## 5. 数据校验字段 (详细) \n从3001.text.targets提取所有字段：\n\
+            ### 核心字段\n``` \nSymbol: {symbol} \nSpot: {spot_price} \nEM1$: {em1_dollar}\
+            \ \n\nVOL_TRIGGER: {gamma_metrics.vol_trigger} spot_vs_trigger: {gamma_metrics.spot_vs_trigger}\
+            \ NET_GEX: {gamma_metrics.net_gex} \nnet_gex_sign: {gamma_metrics.net_gex_sign}\
+            \ \n\nCall_Wall: {walls.call_wall} \nPut_Wall: {walls.put_wall} \nMajor_Wall:\
+            \ {walls.major_wall} ({walls.major_wall_type}) \n\ngap_distance: {gamma_metrics.gap_distance_dollar}\
+            \ ({gamma_metrics.gap_distance_em1_multiple}x EM1$) cluster_strength:\
+            \ {gamma_metrics.cluster_strength_ratio} monthly_override: {gamma_metrics.monthly_cluster_override}\
+            \ \n\ndex_same_dir: {directional_metrics.dex_same_dir_pct}% vanna_dir:\
+            \ {directional_metrics.vanna_dir} (confidence: {directional_metrics.vanna_confidence})\
+            \ i\nv_path: {directional_metrics.iv_path} (confidence: {directional_metrics.iv_path_confidence})\
+            \ \n\nATM_IV_7D: {atm_iv.iv_7d} \nATM_IV_14D: {atm_iv.iv_14d} \niv_source:\
+            \ {atm_iv.iv_source} \n```\n ### 指数背景 \n``` \nSPX NET_GEX: {indices.spx.net_gex_idx}\
+            \ \nSPX EM1$: {indices.spx.em1_dollar_idx} \n``` \n### 数据质量 \n- 完整度: {validation_summary.completion_rate}%\
+            \ \n- 缺失字段: {validation_summary.missing_count}个\n- 时间戳: {timestamp} \n\
+            ---\n## 6. 监控要点 \n根据首选策略类型调整重点： \n{若首选为保守策略(信用价差/铁鹰)} \n - **墙位稳定性**:\
+            \ 确认Call/Put Wall未被刺穿 \n - **零γ漂移**: VOL_TRIGGER日内波动≤0.3×EM1$ \n - **时间衰减**:\
+            \ Theta收益累积，到期前3日强平 \n - **IV压缩**: 监控iv_path维持\"降\"或\"平\"\n\n {若首选为均衡策略(借记竖式/日历)}\
+            \ \n - **方向确认**: DEX同向累积持续>60%分位 \n - **Vanna支持**: vanna_dir与价格方向一致 \n\
+            \ - **IV路径**: iv_path与预期一致(趋势看\"升\",回调看\"降\") \n - **gap缩小**: gap_distance向目标墙靠近\
+            \ \n\n{若首选为进取策略(单腿/窄距debit)} \n - **加速信号**: 有效破墙且离墙≥0.5×EM1$ \n - **空缺支持**:\
+            \ cluster_strength_ratio≤1.3,易突破 \n - **指数一致**: SPX/QQQ净γ与标的方向同步 \n -\
+            \ **Vanna+IV共振**: 两者方向一致且置信度高 \n\n--- \n**报告生成时间**: {当前时间} \n**下次更新建议**:\
+            \ 盘前或关键数据变化时"
         - id: user-report
           role: user
           text: 请汇总所有分析,生成最终报告。
         selected: false
-        title: Agent 7 最终报告
+        title: Agent 8 最终报告
         type: llm
         vision:
           enabled: false
       height: 132
       id: '7001'
       position:
-        x: 2381.844113499949
-        y: 245.03910504218067
+        x: 3511.9213275416714
+        y: 202.92482559236925
       positionAbsolute:
-        x: 2381.844113499949
-        y: 245.03910504218067
+        x: 3511.9213275416714
+        y: 202.92482559236925
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1003,18 +1978,1152 @@ workflow:
       height: 103
       id: '7002'
       position:
-        x: 2697.500460209588
-        y: 245.03910504218067
+        x: 3886.5466088851626
+        y: 245.3277478801421
       positionAbsolute:
-        x: 2697.500460209588
-        y: 245.03910504218067
+        x: 3886.5466088851626
+        y: 245.3277478801421
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\nfrom datetime import datetime, timedelta\nimport re\n\n\
+          # 全局缓存字典（在工作流生命周期内保持）\n_earnings_cache = {}\n\ndef get_earnings_from_alpha_vantage(symbol,\
+          \ api_key, enable_api, cache_days, url):\n    \"\"\"从Alpha Vantage获取财报日期（带缓存）\"\
+          \"\"\n\n    # 检查开关\n    enable_api_bool = str(enable_api).lower() in ['true',\
+          \ '1', 'yes']\n    if not enable_api_bool:\n        return None  # API已禁用，跳过\n\
+          \n    # 检查缓存\n    current_time = datetime.now()\n    cache_key = f\"earnings_{symbol}\"\
+          \n\n    if cache_key in _earnings_cache:\n        cached_data, cached_time\
+          \ = _earnings_cache[cache_key]\n        # 检查缓存是否过期\n        if (current_time\
+          \ - cached_time).days < int(cache_days):\n            return cached_data\
+          \  # 返回缓存数据\n\n    # 调用API\n    try:\n        import urllib.request\n  \
+          \      import urllib.error\n        \n        url = f\"{url}function=EARNINGS_CALENDAR&horizon=12month&apikey={api_key}&symbol={symbol}\"\
+          \n        \n        req = urllib.request.Request(url)\n        with urllib.request.urlopen(req,\
+          \ timeout=5) as response:\n            data = response.read().decode('utf-8')\n\
+          \        \n        lines = data.strip().split('\\n')\n        if len(lines)\
+          \ > 1:\n            first_earnings = lines[1].split(',')\n            if\
+          \ len(first_earnings) >= 3:\n                earnings_date = first_earnings[2]\n\
+          \                # 存入缓存\n                _earnings_cache[cache_key] = (earnings_date,\
+          \ current_time)\n                return earnings_date\n        \n      \
+          \  # API返回空，缓存空结果避免重复调用\n        _earnings_cache[cache_key] = (None, current_time)\n\
+          \        return None\n        \n    except urllib.error.HTTPError as e:\n\
+          \        if e.code == 429:\n            return \"API_LIMIT_REACHED\"\n \
+          \       return None\n    except Exception as e:\n        return None\n\n\
+          def detect_events(symbol, current_date_str, api_key, enable_api, cache_days,\
+          \ url):\n    \"\"\"事件检测主函数\"\"\"\n    try:\n        current_date = datetime.strptime(current_date_str,\
+          \ \"%Y-%m-%d\")\n    except:\n        current_date = datetime.now()\n  \
+          \  \n    events = []\n    recommendations = {\n        \"no_cross_earnings\"\
+          : False,\n        \"adjust_dte\": False,\n        \"reduce_position_size\"\
+          : False,\n        \"max_dte_suggestion\": None,\n        \"note\": \"\"\
+          ,\n        \"api_status\": \"disabled\" if str(enable_api).lower() not in\
+          \ ['true', '1', 'yes'] else \"enabled\"\n    }\n    \n    # === 1. OPEX检测\
+          \ ===\n    year = current_date.year\n    month = current_date.month\n  \
+          \  first_day = datetime(year, month, 1)\n    days_until_friday = (4 - first_day.weekday())\
+          \ % 7\n    first_friday = first_day + timedelta(days=days_until_friday)\n\
+          \    third_friday = first_friday + timedelta(weeks=2)\n    days_to_opex\
+          \ = (third_friday - current_date).days\n    \n    if -5 <= days_to_opex\
+          \ <= 14:\n        is_quarterly = month in [3, 6, 9, 12]\n        events.append({\n\
+          \            \"type\": \"Quarterly_OPEX\" if is_quarterly else \"Monthly_OPEX\"\
+          ,\n            \"date\": third_friday.strftime(\"%Y-%m-%d\"),\n        \
+          \    \"days_away\": days_to_opex,\n            \"impact\": \"high\" if is_quarterly\
+          \ else \"medium\"\n        })\n        if 0 <= days_to_opex <= 7:\n    \
+          \        recommendations[\"adjust_dte\"] = True\n            recommendations[\"\
+          max_dte_suggestion\"] = max(days_to_opex - 2, 3)\n            recommendations[\"\
+          note\"] += f\"距离{'季度' if is_quarterly else '月度'}OPEX {days_to_opex}日，建议DTE≤{recommendations['max_dte_suggestion']}日;\
+          \ \"\n    \n    # === 2. FOMC检测 ===\n    fomc_dates_2025 = [\n        \"\
+          2025-01-28\", \"2025-01-29\", \"2025-03-18\", \"2025-03-19\",\n        \"\
+          2025-05-06\", \"2025-05-07\", \"2025-06-17\", \"2025-06-18\",\n        \"\
+          2025-07-29\", \"2025-07-30\", \"2025-09-16\", \"2025-09-17\",\n        \"\
+          2025-10-28\", \"2025-10-29\", \"2025-12-09\", \"2025-12-10\",\n    ]\n \
+          \   for fomc_date_str in fomc_dates_2025:\n        fomc_date = datetime.strptime(fomc_date_str,\
+          \ \"%Y-%m-%d\")\n        days_to_fomc = (fomc_date - current_date).days\n\
+          \        if 0 <= days_to_fomc <= 30:\n            events.append({\n    \
+          \            \"type\": \"FOMC\",\n                \"date\": fomc_date_str,\n\
+          \                \"days_away\": days_to_fomc,\n                \"impact\"\
+          : \"high\" if days_to_fomc <= 7 else \"medium\"\n            })\n      \
+          \      if days_to_fomc <= 7:\n                recommendations[\"reduce_position_size\"\
+          ] = True\n                recommendations[\"note\"] += f\"距离FOMC会议{days_to_fomc}日，建议减半仓位或观望;\
+          \ \"\n            break\n    \n    # === 3. 财报季检测 ===\n    earnings_seasons\
+          \ = {\n        \"Q4\": (1, 15, 2, 28), \"Q1\": (4, 15, 5, 31),\n       \
+          \ \"Q2\": (7, 15, 8, 31), \"Q3\": (10, 15, 11, 30),\n    }\n    for quarter,\
+          \ (sm, sd, em, ed) in earnings_seasons.items():\n        try:\n        \
+          \    season_start = datetime(year, sm, sd)\n            season_end = datetime(year,\
+          \ em, ed)\n            if season_start <= current_date <= season_end:\n\
+          \                events.append({\n                    \"type\": \"Earnings_Season\"\
+          ,\n                    \"date\": f\"{quarter} Earnings Season\",\n     \
+          \               \"days_away\": 0,\n                    \"impact\": \"medium\"\
+          ,\n                    \"note\": f\"当前处于{quarter}财报季\"\n               \
+          \ })\n                recommendations[\"no_cross_earnings\"] = True\n  \
+          \              recommendations[\"max_dte_suggestion\"] = 7\n           \
+          \     recommendations[\"note\"] += f\"当前处于{quarter}财报季，不建议跨期，优先5-7日DTE;\
+          \ \"\n                break\n        except:\n            continue\n   \
+          \ \n    # === 4. Alpha Vantage API获取个股财报（带开关和缓存）===\n    symbol_upper =\
+          \ symbol.upper()\n    \n    if str(enable_api).lower() in ['true', '1',\
+          \ 'yes']:\n        # API已启用\n        earnings_date_api = get_earnings_from_alpha_vantage(\n\
+          \            symbol_upper, api_key, enable_api, cache_days, url\n      \
+          \  )\n        \n        if earnings_date_api and earnings_date_api != \"\
+          API_LIMIT_REACHED\":\n            try:\n                earnings_date =\
+          \ datetime.strptime(earnings_date_api, \"%Y-%m-%d\")\n                days_to_earnings\
+          \ = (earnings_date - current_date).days\n                if -5 <= days_to_earnings\
+          \ <= 14:\n                    events.append({\n                        \"\
+          type\": \"Earnings\",\n                        \"date\": earnings_date_api,\n\
+          \                        \"days_away\": days_to_earnings,\n            \
+          \            \"impact\": \"high\",\n                        \"symbol\":\
+          \ symbol_upper,\n                        \"source\": \"Alpha Vantage API\"\
+          ,\n                        \"cached\": cache_key in _earnings_cache and\
+          \ (current_time - _earnings_cache[cache_key][1]).days < int(cache_days)\n\
+          \                    })\n                    if -2 <= days_to_earnings <=\
+          \ 5:\n                        recommendations[\"no_cross_earnings\"] = True\n\
+          \                        recommendations[\"max_dte_suggestion\"] = 5\n \
+          \                       recommendations[\"note\"] += f\"{symbol_upper}财报{earnings_date_api}，{'已过'\
+          \ if days_to_earnings < 0 else '即将'}({abs(days_to_earnings)}日)，严禁跨期，建议等待或≤5日DTE;\
+          \ \"\n            except:\n                pass\n        elif earnings_date_api\
+          \ == \"API_LIMIT_REACHED\":\n            events.append({\n             \
+          \   \"type\": \"API_Warning\",\n                \"date\": \"N/A\",\n   \
+          \             \"days_away\": 0,\n                \"impact\": \"low\",\n\
+          \                \"note\": \"Alpha Vantage API配额用尽\"\n            })\n \
+          \           recommendations[\"api_status\"] = \"quota_exceeded\"\n    else:\n\
+          \        # API已禁用，添加提示\n        if not any(e.get(\"type\") == \"Earnings_Season\"\
+          \ for e in events):\n            # 只在不在财报季时才提示\n            recommendations[\"\
+          note\"] += \"（财报API已禁用，仅检测财报季）; \"\n    \n    # === 5. 综合判断 ===\n    if\
+          \ not recommendations[\"note\"]:\n        recommendations[\"note\"] = \"\
+          未检测到近期重大事件，可正常执行策略\"\n    if recommendations[\"max_dte_suggestion\"] is\
+          \ None:\n        recommendations[\"max_dte_suggestion\"] = 14\n    \n  \
+          \  result = {\n        \"symbol\": symbol_upper,\n        \"detection_date\"\
+          : current_date.strftime(\"%Y-%m-%d\"),\n        \"events\": events,\n  \
+          \      \"event_count\": len([e for e in events if e[\"type\"] not in [\"\
+          API_Warning\", \"Earnings_Season\"]]),\n        \"recommendations\": recommendations,\n\
+          \        \"risk_level\": \"high\" if (recommendations[\"no_cross_earnings\"\
+          ] or recommendations[\"reduce_position_size\"]) else (\"medium\" if recommendations[\"\
+          adjust_dte\"] else \"low\"),\n        \"cache_info\": {\n            \"\
+          earnings_cached_count\": len(_earnings_cache),\n            \"api_enabled\"\
+          : recommendations[\"api_status\"]\n        }\n    }\n    return json.dumps(result,\
+          \ indent=2, ensure_ascii=False)\n\ndef main():\n    user_input = \"\"\"\
+          {{#1001.query#}}\"\"\"\n    api_key = \"\"\"{{#env.ALPHA_VANTAGE_API_KEY#}}\"\
+          \"\"\n    url = \"\"\"{{#env.ALPHA_VANTAGE_API_URL#}}\"\"\"\n    enable_api\
+          \ = \"\"\"{{#env.ENABLE_EARNINGS_API#}}\"\"\"\n    cache_days = \"\"\"{{#env.EARNINGS_CACHE_DAYS#}}\"\
+          \"\"\n    \n    match = re.search(r'\\b([A-Z]{1,5})\\b', user_input.upper())\n\
+          \    symbol = match.group(1) if match else \"UNKNOWN\"\n    current_date\
+          \ = datetime.now().strftime(\"%Y-%m-%d\")\n    \n    result = detect_events(symbol,\
+          \ current_date, api_key, enable_api, cache_days, url)\n    return {\"result\"\
+          : result}\n            \noutput = main()"
+        code_language: python3
+        desc: 财报、FOMC、OPEX 事件检测
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: CODE1 事件检测
+        type: code
+        variables: []
+      height: 80
+      id: '1004'
+      position:
+        x: 1688.2034969828262
+        y: 320.06781246653895
+      positionAbsolute:
+        x: 1688.2034969828262
+        y: 320.06781246653895
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "\nimport json\nfrom typing import Dict, Any, List, Tuple\n\n\ndef main(agent3_output:\
+          \ str, agent4_output: str = \"\", **env_vars) -> dict:\n    \"\"\"\n   \
+          \ Dify Code Node 入口函数\n    \n    Args:\n        agent3_output: Agent 3 的数据校验结果\
+          \ JSON 字符串\n        agent4_output: Agent 4 的技术面分析 JSON 字符串 (可选)\n      \
+          \  **env_vars: 环境变量字典\n        \n    Returns:\n        {\"result\": 评分结果\
+          \ JSON 字符串}\n    \"\"\"\n    try:\n        # 解析输入\n        agent3_data =\
+          \ json.loads(agent3_output)\n        \n        # 初始化评分引擎\n        scoring\
+          \ = OptionsScoring(env_vars)\n        \n        # 执行评分计算\n        result\
+          \ = scoring.process(agent3_data)\n        \n        # 返回 JSON 字符串\n    \
+          \    return {\n            \"result\": json.dumps(result, ensure_ascii=False,\
+          \ indent=2)\n        }\n        \n    except Exception as e:\n        #\
+          \ 错误处理\n        error_result = {\n            \"error\": True,\n       \
+          \     \"error_message\": str(e),\n            \"error_type\": type(e).__name__\n\
+          \        }\n        return {\n            \"result\": json.dumps(error_result,\
+          \ ensure_ascii=False, indent=2)\n        }\n\n\nclass OptionsScoring:\n\
+          \    \"\"\"期权量化评分计算引擎\"\"\"\n    \n    def __init__(self, env_vars: Dict[str,\
+          \ Any]):\n        \"\"\"\n        初始化环境变量阈值\n        \n        Args:\n \
+          \           env_vars: 环境变量字典，包含所有阈值参数\n        \"\"\"\n        self.env\
+          \ = self._parse_env_vars(env_vars)\n        \n    def _parse_env_vars(self,\
+          \ env_vars: Dict[str, Any]) -> Dict[str, float]:\n        \"\"\"解析并验证环境变量\"\
+          \"\"\n        parsed = {}\n        \n        # 必需的环境变量及其默认值\n        defaults\
+          \ = {\n            'SCORE_WEIGHT_GAMMA_REGIME': \"\"\"{{#env.SCORE_WEIGHT_GAMMA_REGIME#}}\"\
+          \"\",\n            'SCORE_WEIGHT_BREAK_WALL': \"\"\"{{#env.SCORE_WEIGHT_BREAK_WALL#}}\"\
+          \"\",\n            'SCORE_WEIGHT_DIRECTION': \"\"\"{{#env.SCORE_WEIGHT_DIRECTION#}}\"\
+          \"\",\n            'SCORE_WEIGHT_IV': \"\"\"{{#env.SCORE_WEIGHT_IV#}}\"\"\
+          \",\n            'BREAK_WALL_THRESHOLD_LOW': \"\"\"{{#env.BREAK_WALL_THRESHOLD_LOW#}}\"\
+          \"\",\n            'BREAK_WALL_THRESHOLD_HIGH': \"\"\"{{#env.BREAK_WALL_THRESHOLD_HIGH#}}\"\
+          \"\",\n            'MONTHLY_OVERRIDE_THRESHOLD': \"\"\"{{#env.MONTHLY_OVERRIDE_THRESHOLD#}}\"\
+          \"\",\n            'MONTHLY_CLUSTER_STRENGTH_RATIO': \"\"\"{{#env.MONTHLY_CLUSTER_STRENGTH_RATIO#}}\"\
+          \"\",\n            'CLUSTER_STRENGTH_THRESHOLD_STRONG': \"\"\"{{#env.CLUSTER_STRENGTH_THRESHOLD_STRONG#}}\"\
+          \"\",\n            'CLUSTER_STRENGTH_THRESHOLD_TREND': \"\"\"{{#env.CLUSTER_STRENGTH_THRESHOLD_TREND#}}\"\
+          \"\",\n            'DEX_SAME_DIR_THRESHOLD_STRONG': \"\"\"{{#env.DEX_SAME_DIR_THRESHOLD_STRONG#}}\"\
+          \"\",\n            'DEX_SAME_DIR_THRESHOLD_MEDIUM': \"\"\"{{#env.DEX_SAME_DIR_THRESHOLD_MEDIUM#}}\"\
+          \"\",\n            'DEX_SAME_DIR_THRESHOLD_WEAK': \"\"\"{{#env.DEX_SAME_DIR_THRESHOLD_WEAK#}}\"\
+          \"\",\n            'PW_DEBIT_VANNA_WEIGHT_HIGH': \"\"\"{{#env.PW_DEBIT_VANNA_WEIGHT_HIGH#}}\"\
+          \"\",\n            'PW_DEBIT_VANNA_WEIGHT_MEDIUM': \"\"\"{{#env.PW_DEBIT_VANNA_WEIGHT_MEDIUM#}}\"\
+          \"\",\n            'PW_DEBIT_VANNA_WEIGHT_LOW': \"\"\"{{#env.PW_DEBIT_VANNA_WEIGHT_LOW#}}\"\
+          \"\",\n            'ENTRY_THRESHOLD_SCORE': \"\"\"{{#env.ENTRY_THRESHOLD_SCORE#}}\"\
+          \"\",\n            'ENTRY_THRESHOLD_PROBABILITY': \"\"\"{{#env.ENTRY_THRESHOLD_PROBABILITY#}}\"\
+          \"\",\n            'LIGHT_POSITION_PROBABILITY': \"\"\"{{#env.LIGHT_POSITION_PROBABILITY#}}\"\
+          \"\"\n        }\n        \n        for key, default_value in defaults.items():\n\
+          \            value = env_vars.get(key, default_value)\n            # 转换为\
+          \ float\n            try:\n                parsed[key] = float(value)\n\
+          \            except (ValueError, TypeError):\n                parsed[key]\
+          \ = default_value\n                \n        return parsed\n    \n    def\
+          \ calculate_gamma_regime_score(self, gamma_metrics: Dict) -> Dict:\n   \
+          \     \"\"\"\n        1. Gamma Regime 判定（权重 40%）\n        \n        这是最关键的市场状态判断：\n\
+          \        - above: 正γ倾向，做市商压制波动\n        - below: 负γ倾向，做市商放大波动\n        -\
+          \ near: 临界状态，可能反转\n        \n        Args:\n            gamma_metrics: Gamma\
+          \ 指标数据\n            \n        Returns:\n            评分结果字典\n        \"\"\
+          \"\n        spot = gamma_metrics.get('spot_price', 0)\n        vol_trigger\
+          \ = gamma_metrics.get('vol_trigger', 0)\n        spot_vs_trigger = gamma_metrics.get('spot_vs_trigger',\
+          \ 'unknown')\n        \n        if spot_vs_trigger == \"above\":\n     \
+          \       base_scenario = \"区间\"\n            regime_note = f\"现价{spot}在VOL_TRIGGER\
+          \ {vol_trigger}上方，正γ倾向，做市商压制波动维持区间\"\n            score = 7\n          \
+          \  rationale = \"明确above状态给7分\"\n            \n        elif spot_vs_trigger\
+          \ == \"below\":\n            base_scenario = \"趋势\"\n            regime_note\
+          \ = f\"现价{spot}在VOL_TRIGGER {vol_trigger}下方，负γ倾向，做市商放大波动趋势加速\"\n       \
+          \     score = 7\n            rationale = \"明确below状态给7分\"\n            \n\
+          \        else:  # near 或其他\n            base_scenario = \"过渡\"\n       \
+          \     regime_note = f\"现价{spot}接近VOL_TRIGGER {vol_trigger}，临界状态，可能Gamma翻转高波动\"\
+          \n            score = 4\n            rationale = \"临界near状态给4分，警示风险\"\n\
+          \            \n        return {\n            \"score\": score,\n       \
+          \     \"base_scenario\": base_scenario,\n            \"regime_note\": regime_note,\n\
+          \            \"rationale\": rationale\n        }\n    \n    def calculate_break_wall_score(self,\
+          \ gamma_metrics: Dict) -> Dict:\n        \"\"\"\n        2. 破墙可能性评估（权重 30%）\n\
+          \        \n        评估突破主要墙位的难度：\n        - 考虑距离、簇强度、月度叠加\n        \n   \
+          \     Args:\n            gamma_metrics: Gamma 指标数据\n            \n     \
+          \   Returns:\n            评分结果字典\n        \"\"\"\n        gap_distance =\
+          \ gamma_metrics.get('gap_distance_em1_multiple', 999)\n        cluster_strength\
+          \ = gamma_metrics.get('cluster_strength_ratio', 0)\n        monthly_override\
+          \ = gamma_metrics.get('monthly_cluster_override', False)\n        spot_vs_trigger\
+          \ = gamma_metrics.get('spot_vs_trigger', 'unknown')\n        \n        #\
+          \ 步骤1: 判断阈值\n        if monthly_override:\n            threshold = self.env['MONTHLY_OVERRIDE_THRESHOLD']\n\
+          \            threshold_note = f\"月度簇强度≥周度{self.env['MONTHLY_CLUSTER_STRENGTH_RATIO']}倍\"\
+          \n        else:\n            threshold = self.env['BREAK_WALL_THRESHOLD_HIGH']\n\
+          \            threshold_note = f\"标准阈值{threshold}×EM1$\"\n        \n    \
+          \    # 步骤2: 评估破墙概率\n        if gap_distance < self.env['BREAK_WALL_THRESHOLD_LOW']:\n\
+          \            break_probability = \"高\"\n            base_score = 9\n   \
+          \         prob_desc = \"距离近\"\n        elif gap_distance < self.env['BREAK_WALL_THRESHOLD_HIGH']:\n\
+          \            break_probability = \"中\"\n            base_score = 6\n   \
+          \         prob_desc = \"距离适中\"\n        else:\n            break_probability\
+          \ = \"低\"\n            base_score = 3\n            prob_desc = \"距离远\"\n\
+          \        \n        # 步骤3: 簇强度调整\n        if cluster_strength >= self.env['CLUSTER_STRENGTH_THRESHOLD_STRONG']:\n\
+          \            adjustment = -1\n            cluster_note = f\"簇强度{cluster_strength:.2f}≥{self.env['CLUSTER_STRENGTH_THRESHOLD_STRONG']}，主墙极强\"\
+          \n            cluster_desc = \"极强阻力\"\n        elif cluster_strength >=\
+          \ self.env['CLUSTER_STRENGTH_THRESHOLD_TREND']:\n            adjustment\
+          \ = 0\n            cluster_note = f\"簇强度{cluster_strength:.2f}在{self.env['CLUSTER_STRENGTH_THRESHOLD_TREND']}-{self.env['CLUSTER_STRENGTH_THRESHOLD_STRONG']}，中等强度\"\
+          \n            cluster_desc = \"中等阻力\"\n        else:\n            adjustment\
+          \ = 1\n            cluster_note = f\"簇强度{cluster_strength:.2f}<{self.env['CLUSTER_STRENGTH_THRESHOLD_TREND']}，较易突破\"\
+          \n            cluster_desc = \"较弱阻力\"\n        \n        final_score = max(1,\
+          \ min(10, base_score + adjustment))  # 限制在 1-10\n        \n        # 确定墙位方向\n\
+          \        wall_direction = \"Call Wall\" if spot_vs_trigger == 'above' else\
+          \ \"Put Wall\"\n        \n        # 综合说明\n        break_note = (\n     \
+          \       f\"需{gap_distance:.2f}倍EM1$距离到达{wall_direction}，\"\n           \
+          \ f\"{cluster_note}，破墙难度\"\n            f\"{'高' if final_score < 5 else\
+          \ '中' if final_score < 7 else '低'}\"\n        )\n        \n        rationale\
+          \ = (\n            f\"gap_distance {gap_distance:.2f}({prob_desc})给{base_score}分，\"\
+          \n            f\"cluster {cluster_strength:.2f}({cluster_desc})调整{adjustment:+d}分\"\
+          \n        )\n        \n        return {\n            \"score\": final_score,\n\
+          \            \"break_probability\": break_probability,\n            \"threshold\"\
+          : threshold,\n            \"threshold_note\": threshold_note,\n        \
+          \    \"break_note\": break_note,\n            \"rationale\": rationale,\n\
+          \            \"gap_distance_em1\": gap_distance,\n            \"cluster_strength\"\
+          : cluster_strength,\n            \"monthly_override\": monthly_override\n\
+          \        }\n    \n    def calculate_direction_score(self, directional_metrics:\
+          \ Dict) -> Dict:\n        \"\"\"\n        3. 方向一致性评估（权重 20%）\n        \n\
+          \        综合 DEX 同向性和 Vanna 方向信号\n        \n        Args:\n            directional_metrics:\
+          \ 方向指标数据\n            \n        Returns:\n            评分结果字典\n        \"\
+          \"\"\n        dex_same_dir = directional_metrics.get('dex_same_dir_pct',\
+          \ 0)\n        vanna_dir = directional_metrics.get('vanna_dir', 'neutral')\n\
+          \        vanna_confidence = directional_metrics.get('vanna_confidence',\
+          \ 'low')\n        \n        # 计算 vanna 权重\n        vanna_weight_map = {\n\
+          \            'high': self.env['PW_DEBIT_VANNA_WEIGHT_HIGH'],\n         \
+          \   'medium': self.env['PW_DEBIT_VANNA_WEIGHT_MEDIUM'],\n            'low':\
+          \ self.env['PW_DEBIT_VANNA_WEIGHT_LOW']\n        }\n        vanna_weight\
+          \ = vanna_weight_map.get(vanna_confidence, 0.3)\n        \n        # 判断方向强度\n\
+          \        has_strong_dex = dex_same_dir >= self.env['DEX_SAME_DIR_THRESHOLD_STRONG']\n\
+          \        has_clear_vanna = vanna_dir in ['up', 'down']\n        has_medium_vanna\
+          \ = vanna_weight >= self.env['PW_DEBIT_VANNA_WEIGHT_MEDIUM']\n        \n\
+          \        if has_strong_dex and has_clear_vanna and has_medium_vanna:\n \
+          \           direction_strength = \"强方向信号\"\n            score = 9\n    \
+          \        strength_desc = \"DEX强+Vanna高置信\"\n            \n        elif dex_same_dir\
+          \ >= self.env['DEX_SAME_DIR_THRESHOLD_MEDIUM'] or vanna_weight == self.env['PW_DEBIT_VANNA_WEIGHT_MEDIUM']:\n\
+          \            direction_strength = \"中等方向信号\"\n            score = 6\n  \
+          \          strength_desc = \"DEX中等或Vanna中等置信\"\n            \n        elif\
+          \ dex_same_dir < self.env['DEX_SAME_DIR_THRESHOLD_WEAK'] or vanna_confidence\
+          \ == 'low':\n            direction_strength = \"弱方向信号\"\n            score\
+          \ = 3\n            strength_desc = \"DEX弱或Vanna低置信\"\n        else:\n  \
+          \          direction_strength = \"中等偏弱信号\"\n            score = 5\n    \
+          \        strength_desc = \"信号模糊\"\n        \n        # DEX 评价\n        if\
+          \ dex_same_dir >= self.env['DEX_SAME_DIR_THRESHOLD_STRONG']:\n         \
+          \   dex_eval = \"强\"\n        elif dex_same_dir >= self.env['DEX_SAME_DIR_THRESHOLD_MEDIUM']:\n\
+          \            dex_eval = \"中等\"\n        else:\n            dex_eval = \"\
+          弱\"\n        \n        direction_note = (\n            f\"DEX同向{dex_same_dir:.1f}%({dex_eval})，\"\
+          \n            f\"Vanna方向{vanna_dir}且置信度{vanna_confidence}权重{vanna_weight:.1f}，\"\
+          \n            f\"综合{direction_strength}\"\n        )\n        \n       \
+          \ rationale = f\"dex {dex_same_dir:.1f}%+vanna {vanna_confidence}({strength_desc})综合给{score}分\"\
+          \n        \n        return {\n            \"score\": score,\n          \
+          \  \"direction_strength\": direction_strength,\n            \"vanna_weight\"\
+          : vanna_weight,\n            \"direction_note\": direction_note,\n     \
+          \       \"rationale\": rationale,\n            \"dex_same_dir\": dex_same_dir,\n\
+          \            \"vanna_dir\": vanna_dir,\n            \"vanna_confidence\"\
+          : vanna_confidence\n        }\n    \n    def calculate_iv_score(self, directional_metrics:\
+          \ Dict) -> Dict:\n        \"\"\"\n        4. IV 动态评估（权重 10%）\n        \n\
+          \        评估隐含波动率的路径和置信度\n        \n        Args:\n            directional_metrics:\
+          \ 方向指标数据\n            \n        Returns:\n            评分结果字典\n        \"\
+          \"\"\n        iv_path = directional_metrics.get('iv_path', '平')\n      \
+          \  iv_confidence = directional_metrics.get('iv_path_confidence', 'low')\n\
+          \        \n        if iv_path == \"升\" and iv_confidence in ['high', 'medium']:\n\
+          \            iv_signal = \"波动率扩张\"\n            note = \"利多波动率策略\"\n   \
+          \         score = 8 if iv_confidence == 'high' else 6\n            conf_desc\
+          \ = \"高置信\" if iv_confidence == 'high' else \"中等置信\"\n            \n   \
+          \     elif iv_path == \"降\":\n            iv_signal = \"波动率压缩\"\n      \
+          \      note = \"利空波动率\"\n            if iv_confidence == 'high':\n     \
+          \           score = 3\n                conf_desc = \"高置信下降\"\n         \
+          \   elif iv_confidence == 'medium':\n                score = 4\n       \
+          \         conf_desc = \"中等置信下降\"\n            else:\n                score\
+          \ = 5\n                conf_desc = \"低置信下降\"\n                \n       \
+          \ else:  # \"平\" 或 \"数据不足\"\n            iv_signal = \"中性\"\n          \
+          \  note = \"波动率稳定或数据不足\"\n            score = 5\n            conf_desc =\
+          \ \"平稳或不确定\"\n        \n        iv_note = f\"IV路径显示{iv_path}趋势，置信度{iv_confidence}，{note}\"\
+          \n        rationale = f\"iv_path {iv_path}且confidence {iv_confidence}({conf_desc})给{score}分\"\
+          \n        \n        return {\n            \"score\": score,\n          \
+          \  \"iv_signal\": iv_signal,\n            \"iv_note\": iv_note,\n      \
+          \      \"rationale\": rationale,\n            \"iv_path\": iv_path,\n  \
+          \          \"iv_path_confidence\": iv_confidence\n        }\n    \n    def\
+          \ calculate_total_score(self, scores: Dict) -> Dict:\n        \"\"\"\n \
+          \       综合评分计算\n        \n        四维加权求和\n        \n        Args:\n    \
+          \        scores: 各维度评分字典\n            \n        Returns:\n            总分和权重分解\n\
+          \        \"\"\"\n        gamma_score = scores['gamma']['score']\n      \
+          \  break_score = scores['break_wall']['score']\n        direction_score\
+          \ = scores['direction']['score']\n        iv_score = scores['iv']['score']\n\
+          \        \n        w = self.env\n        \n        # 加权计算\n        total\
+          \ = (\n            gamma_score * w['SCORE_WEIGHT_GAMMA_REGIME'] +\n    \
+          \        break_score * w['SCORE_WEIGHT_BREAK_WALL'] +\n            direction_score\
+          \ * w['SCORE_WEIGHT_DIRECTION'] +\n            iv_score * w['SCORE_WEIGHT_IV']\n\
+          \        )\n        \n        # 详细分解\n        breakdown = (\n          \
+          \  f\"{gamma_score}×{w['SCORE_WEIGHT_GAMMA_REGIME']:.1f}+\"\n          \
+          \  f\"{break_score}×{w['SCORE_WEIGHT_BREAK_WALL']:.1f}+\"\n            f\"\
+          {direction_score}×{w['SCORE_WEIGHT_DIRECTION']:.1f}+\"\n            f\"\
+          {iv_score}×{w['SCORE_WEIGHT_IV']:.1f}=\"\n            f\"{gamma_score *\
+          \ w['SCORE_WEIGHT_GAMMA_REGIME']:.1f}+\"\n            f\"{break_score *\
+          \ w['SCORE_WEIGHT_BREAK_WALL']:.1f}+\"\n            f\"{direction_score\
+          \ * w['SCORE_WEIGHT_DIRECTION']:.1f}+\"\n            f\"{iv_score * w['SCORE_WEIGHT_IV']:.1f}=\"\
+          \n            f\"{total:.1f}\"\n        )\n        \n        return {\n\
+          \            \"total_score\": round(total, 1),\n            \"weight_breakdown\"\
+          : breakdown\n        }\n    \n    def check_entry_conditions(self, target_data:\
+          \ Dict, total_score: float) -> Dict:\n        \"\"\"\n        入场门槛检查\n \
+          \       \n        检查 4 个关键条件：\n        1. spot_vs_trigger 明确\n        2.\
+          \ gap_distance 适中\n        3. DEX 同向性\n        4. Vanna 置信度\n        \n\
+          \        Args:\n            target_data: 标的完整数据\n            total_score:\
+          \ 总评分\n            \n        Returns:\n            入场判定结果\n        \"\"\"\
+          \n        gamma = target_data.get('gamma_metrics', {})\n        directional\
+          \ = target_data.get('directional_metrics', {})\n        \n        conditions_met\
+          \ = []\n        conditions_failed = []\n        \n        # 条件1: spot_vs_trigger\
+          \ 明确\n        spot_vs_trigger = gamma.get('spot_vs_trigger', 'unknown')\n\
+          \        if spot_vs_trigger in ['above', 'below']:\n            conditions_met.append(f\"\
+          条件1: spot_vs_trigger={spot_vs_trigger}明确\")\n        else:\n           \
+          \ conditions_failed.append(f\"条件1: spot_vs_trigger={spot_vs_trigger}临界状态\"\
+          )\n        \n        # 条件2: gap_distance 适中\n        gap = gamma.get('gap_distance_em1_multiple',\
+          \ 999)\n        if gap < 2:\n            conditions_met.append(f\"条件2: gap_distance_em1={gap:.2f}<2\"\
+          )\n        else:\n            conditions_failed.append(f\"条件2: gap_distance_em1={gap:.2f}≥2偏大\"\
+          )\n        \n        # 条件3: DEX 同向性\n        dex = directional.get('dex_same_dir_pct',\
+          \ 0)\n        if dex >= self.env['DEX_SAME_DIR_THRESHOLD_MEDIUM']:\n   \
+          \         conditions_met.append(f\"条件3: dex_same_dir={dex:.1f}≥{self.env['DEX_SAME_DIR_THRESHOLD_MEDIUM']:.0f}%\"\
+          )\n        else:\n            conditions_failed.append(f\"条件3: dex_same_dir={dex:.1f}<{self.env['DEX_SAME_DIR_THRESHOLD_MEDIUM']:.0f}%\"\
+          )\n        \n        # 条件4: Vanna 置信度\n        vanna_conf = directional.get('vanna_confidence',\
+          \ 'low')\n        if vanna_conf in ['high', 'medium']:\n            conditions_met.append(f\"\
+          条件4: vanna_confidence={vanna_conf}\")\n        else:\n            conditions_failed.append(f\"\
+          条件4: vanna_confidence={vanna_conf}低置信\")\n        \n        # 判定逻辑\n   \
+          \     met_count = len(conditions_met)\n        total_conditions = 4\n  \
+          \      \n        # 入场判定\n        if total_score >= self.env['ENTRY_THRESHOLD_SCORE']\
+          \ and met_count >= 3:\n            entry_check = \"入场\"\n            rationale_parts\
+          \ = [\n                f\"总分{total_score:.1f}≥{self.env['ENTRY_THRESHOLD_SCORE']:.1f}满足\"\
+          ,\n                f\"关键信号：{met_count}/{total_conditions}个条件满足\"\n     \
+          \       ]\n            \n        elif total_score >= self.env['ENTRY_THRESHOLD_SCORE']\
+          \ and met_count >= 2:\n            entry_check = \"轻仓试探\"\n            rationale_parts\
+          \ = [\n                f\"总分{total_score:.1f}≥{self.env['ENTRY_THRESHOLD_SCORE']:.1f}满足\"\
+          ,\n                f\"但关键信号仅{met_count}/{total_conditions}个条件满足\",\n   \
+          \             \"建议轻仓试探\"\n            ]\n            \n        else:\n \
+          \           entry_check = \"观望\"\n            rationale_parts = [\n    \
+          \            f\"总分{total_score:.1f}或条件不足（{met_count}/{total_conditions}）\"\
+          ,\n                \"建议观望\"\n            ]\n        \n        # 组装 rationale\n\
+          \        rationale = \"。\".join(rationale_parts) + \"。\"\n        rationale\
+          \ += f\"\\n满足：{', '.join(conditions_met) if conditions_met else '无'}\"\n\
+          \        rationale += f\"\\n不满足：{', '.join(conditions_failed) if conditions_failed\
+          \ else '无'}\"\n        \n        return {\n            \"entry_threshold_check\"\
+          : entry_check,\n            \"entry_rationale\": rationale,\n          \
+          \  \"conditions_met_count\": met_count,\n            \"conditions_total\"\
+          : total_conditions,\n            \"conditions_met\": conditions_met,\n \
+          \           \"conditions_failed\": conditions_failed\n        }\n    \n\
+          \    def generate_risk_warnings(self, target_data: Dict, scores: Dict) ->\
+          \ str:\n        \"\"\"\n        生成风险警示\n        \n        Args:\n      \
+          \      target_data: 标的完整数据\n            scores: 各维度评分\n            \n  \
+          \      Returns:\n            风险警示字符串\n        \"\"\"\n        warnings =\
+          \ []\n        \n        gamma = target_data.get('gamma_metrics', {})\n \
+          \       directional = target_data.get('directional_metrics', {})\n     \
+          \   \n        gap_distance = gamma.get('gap_distance_em1_multiple', 0)\n\
+          \        spot_vs_trigger = gamma.get('spot_vs_trigger', 'unknown')\n   \
+          \     cluster_strength = gamma.get('cluster_strength_ratio', 0)\n      \
+          \  vanna_dir = directional.get('vanna_dir', 'neutral')\n        iv_path\
+          \ = directional.get('iv_path', '平')\n        \n        # 警示1: gap_distance\
+          \ 偏大\n        if gap_distance > 2:\n            wall_type = \"Call Wall\"\
+          \ if spot_vs_trigger == 'above' else \"Put Wall\"\n            warnings.append(\n\
+          \                f\"gap_distance偏大需{gap_distance:.2f}倍EM1$才能到{wall_type}，\"\
+          \n                f\"若短期内未突破需调整为区间策略\"\n            )\n        \n      \
+          \  # 警示2: 临界状态\n        if spot_vs_trigger == \"near\":\n            warnings.append(\n\
+          \                \"现价接近Gamma翻转线，regime可能反转，高波动风险\"\n            )\n    \
+          \    \n        # 警示3: Vanna 与 IV 冲突\n        vanna_up = vanna_dir == 'up'\n\
+          \        vanna_down = vanna_dir == 'down'\n        iv_up = iv_path == '升'\n\
+          \        iv_down = iv_path == '降'\n        \n        if (vanna_up and iv_down)\
+          \ or (vanna_down and iv_up):\n            warnings.append(\n           \
+          \     f\"Vanna方向{vanna_dir}与IV路径{iv_path}冲突，信号不一致，增加不确定性\"\n           \
+          \ )\n        \n        # 警示4: 簇强度极强\n        if cluster_strength >= self.env['CLUSTER_STRENGTH_THRESHOLD_STRONG']:\n\
+          \            warnings.append(\n                f\"簇强度{cluster_strength:.2f}≥{self.env['CLUSTER_STRENGTH_THRESHOLD_STRONG']:.1f}，\"\
+          \n                f\"主墙极强，破墙难度高\"\n            )\n        \n        # 警示5:\
+          \ 簇强度接近极强阈值\n        elif cluster_strength >= self.env['CLUSTER_STRENGTH_THRESHOLD_STRONG']\
+          \ - 0.2:\n            warnings.append(\n                f\"簇强度{cluster_strength:.2f}接近{self.env['CLUSTER_STRENGTH_THRESHOLD_STRONG']:.1f}，\"\
+          \n                f\"注意主墙阻力\"\n            )\n        \n        return \"\
+          ; \".join(warnings) if warnings else \"风险可控\"\n    \n    def process(self,\
+          \ agent3_data: Dict) -> Dict:\n        \"\"\"\n        主处理流程\n        \n\
+          \        Args:\n            agent3_data: Agent 3 的数据校验结果\n            \n\
+          \        Returns:\n            完整的评分结果 JSON\n        \"\"\"\n        # 提取目标数据（假设单标的）\n\
+          \        targets = agent3_data.get('targets', [])\n        if not targets:\n\
+          \            raise ValueError(\"Agent 3 数据中未找到 targets 字段\")\n        \n\
+          \        target = targets[0]\n        \n        # 四维评分\n        gamma_result\
+          \ = self.calculate_gamma_regime_score(\n            target.get('gamma_metrics',\
+          \ {})\n        )\n        \n        break_wall_result = self.calculate_break_wall_score(\n\
+          \            target.get('gamma_metrics', {})\n        )\n        \n    \
+          \    direction_result = self.calculate_direction_score(\n            target.get('directional_metrics',\
+          \ {})\n        )\n        \n        iv_result = self.calculate_iv_score(\n\
+          \            target.get('directional_metrics', {})\n        )\n        \n\
+          \        # 汇总评分\n        scores = {\n            'gamma': gamma_result,\n\
+          \            'break_wall': break_wall_result,\n            'direction':\
+          \ direction_result,\n            'iv': iv_result\n        }\n        \n\
+          \        # 总分计算\n        total_result = self.calculate_total_score(scores)\n\
+          \        \n        # 入场检查\n        entry_result = self.check_entry_conditions(target,\
+          \ total_result['total_score'])\n        \n        # 风险警示\n        risk_warning\
+          \ = self.generate_risk_warnings(target, scores)\n        \n        # 提取关键位\n\
+          \        walls = target.get('walls', {})\n        gamma_metrics = target.get('gamma_metrics',\
+          \ {})\n        \n        # 组装最终输出\n        result = {\n            \"gamma_regime\"\
+          : {\n                \"vol_trigger\": gamma_metrics.get('vol_trigger'),\n\
+          \                \"spot_vs_trigger\": gamma_metrics.get('spot_vs_trigger'),\n\
+          \                \"base_scenario\": gamma_result['base_scenario'],\n   \
+          \             \"regime_note\": gamma_result['regime_note']\n           \
+          \ },\n            \"break_wall_assessment\": {\n                \"gap_distance_em1\"\
+          : break_wall_result['gap_distance_em1'],\n                \"cluster_strength\"\
+          : break_wall_result['cluster_strength'],\n                \"monthly_override\"\
+          : break_wall_result['monthly_override'],\n                \"threshold\"\
+          : break_wall_result['threshold'],\n                \"threshold_note\": break_wall_result['threshold_note'],\n\
+          \                \"break_probability\": break_wall_result['break_probability'],\n\
+          \                \"break_note\": break_wall_result['break_note']\n     \
+          \       },\n            \"directional_signals\": {\n                \"dex_same_dir\"\
+          : direction_result['dex_same_dir'],\n                \"vanna_dir\": direction_result['vanna_dir'],\n\
+          \                \"vanna_confidence\": direction_result['vanna_confidence'],\n\
+          \                \"vanna_weight\": direction_result['vanna_weight'],\n \
+          \               \"direction_strength\": direction_result['direction_strength'],\n\
+          \                \"direction_note\": direction_result['direction_note']\n\
+          \            },\n            \"iv_dynamics\": {\n                \"iv_path\"\
+          : iv_result['iv_path'],\n                \"iv_path_confidence\": iv_result['iv_path_confidence'],\n\
+          \                \"iv_signal\": iv_result['iv_signal'],\n              \
+          \  \"iv_note\": iv_result['iv_note']\n            },\n            \"scoring\"\
+          : {\n                \"gamma_regime_score\": gamma_result['score'],\n  \
+          \              \"gamma_regime_rationale\": gamma_result['rationale'],\n\
+          \                \"break_wall_score\": break_wall_result['score'],\n   \
+          \             \"break_wall_rationale\": break_wall_result['rationale'],\n\
+          \                \"direction_score\": direction_result['score'],\n     \
+          \           \"direction_rationale\": direction_result['rationale'],\n  \
+          \              \"iv_score\": iv_result['score'],\n                \"iv_score_rationale\"\
+          : iv_result['rationale'],\n                \"total_score\": total_result['total_score'],\n\
+          \                \"weight_breakdown\": total_result['weight_breakdown']\n\
+          \            },\n            \"entry_threshold_check\": entry_result['entry_threshold_check'],\n\
+          \            \"entry_rationale\": entry_result['entry_rationale'],\n   \
+          \         \"key_levels\": {\n                \"support\": walls.get('put_wall'),\n\
+          \                \"resistance\": walls.get('call_wall'),\n             \
+          \   \"trigger_line\": gamma_metrics.get('vol_trigger'),\n              \
+          \  \"current_spot\": target.get('spot_price')\n            },\n        \
+          \    \"risk_warning\": risk_warning\n        }\n        \n        return\
+          \ result\n"
+        code_language: python3
+        desc: 量化计算：执行四维评分和入场条件判断 --1007
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: CODE2 评分计算引擎
+        type: code
+        variables:
+        - value_selector:
+          - '3001'
+          - text
+          value_type: string
+          variable: agent3_output
+        - value_selector:
+          - '4001'
+          - text
+          value_type: string
+          variable: agent4_output
+      height: 96
+      id: '1007'
+      position:
+        x: 1999.7575755619544
+        y: 228.0383411733186
+      positionAbsolute:
+        x: 1999.7575755619544
+        y: 228.0383411733186
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 对比三种策略，给出推荐排序 1005
+        model:
+          completion_params:
+            temperature: 0.5
+          mode: chat
+          name: Qwen3-VL-235B-A22B-Thinking
+          provider: langgenius/openai_api_compatible/openai_api_compatible
+        prompt_template:
+        - id: 62397f3f-2606-4bb8-b151-b0100ed177c1
+          role: system
+          text: "你是策略对比 Agent。\n\n【任务】基于期望值、风险调整收益、剧本匹配度、流动性等维度，给出策略推荐排序。\n\n【输入】\n\
+            - 策略JSON：{{#6001.text#}}\n- 剧本评分：{{#5001.text#}}\n- 计算辅助：{{#1006.result#}}\n\
+            - 原始数据：{{#3001.text#}}\n\n## 核心职责 \n### 1. 解析策略数据 从 Agent 6 的输出中提取三种策略的关键数据：\
+            \ \n - 策略类型（保守/均衡/进取） \n - 结构名称（Iron Condor / Bull Call Spread / Long\
+            \ Call）         - RR 数据：max_profit, max_loss, rr_ratio\n - Pw 数据：pw_estimate\
+            \ (需转换为小数) \n- 腿部数量（用于流动性评估）\n\n**数据提取示例**： \n```python \nstrategies =\
+            \ json.loads(agent6_output)[\"strategies\"] for strategy in strategies:\
+            \ strategy_type = strategy[\"strategy_type\"] max_profit = strategy[\"\
+            rr_calculation\"][\"max_profit\"] max_loss = strategy[\"rr_calculation\"\
+            ][\"max_loss\"] pw_str = strategy[\"pw_calculation\"][\"pw_estimate\"\
+            ] # \"68%\" pw = float(pw_str.rstrip(\"%\")) / 100 # 0.68 \n``` ---\n\n\
+            ### 2. 量化指标计算\n        \n#### 指标 A：期望值 (EV)\n\n\n**公式**：\n```\nEV = Pw\
+            \ × MaxProfit - (1 - Pw) × MaxLoss\n```\n\n\n**解读**：\n- EV > 0：正期望值，长期盈利\n\
+            - EV < 0：负期望值，不建议执行\n- EV 越高越好\n\n\n**示例计算**：\n```\n保守策略（Iron Condor）：\n\
+            - MaxProfit = 1.35\n- MaxLoss = 3.15\n- Pw = 68% = 0.68\n\n\nEV = 0.68\
+            \ × 1.35 - (1 - 0.68) × 3.15\n    = 0.918 - 1.008\n    = -0.09\n\n\n解读：虽然胜率高，但盈亏比不对称，期望值略负\n\
+            ```\n\n\n#### 指标 B：风险调整收益 (Risk-Adjusted Return)\n\n\n**公式**：\n```\nRAR\
+            \ = EV / MaxLoss\n```\n\n\n**解读**：\n- RAR > 0.15：优秀（每承担 1 美元风险，期望赚 0.15\
+            \ 美元）\n- RAR > 0.05：合格\n- RAR < 0：不建议\n\n\n**示例计算**：\n```\n均衡策略（Bull Call\
+            \ Spread）：\n- MaxProfit = 6.3\n- MaxLoss = 2.7\n- Pw = 52% = 0.52\n\n\n\
+            EV = 0.52 × 6.3 - 0.48 × 2.7 = 3.276 - 1.296 = 1.98\nRAR = 1.98 / 2.7\
+            \ = 0.733\n\n\n解读：风险调整收益极高，非常优秀\n```\n\n\n#### 指标 C：剧本匹配度\n\n\n**匹配规则**：\n\
+            \n\n| 策略类型 | 主导剧本 | 匹配度 | 理由 |\n|---------|---------|--------|------|\n\
+            | 保守 | 区间 | 高 | 信用价差适合正γ环境 |\n| 保守 | 趋势 | 低 | 区间策略在趋势中易被突破 |\n| 均衡 | 趋势\
+            \ | 高 | 借记价差适合趋势初期 |\n| 均衡 | 区间 | 中 | 可获取部分方向收益 |\n| 进取 | 强趋势 | 高 | 单腿敞口适合加速行情\
+            \ |\n| 进取 | 区间/过渡 | 低 | 时间价值快速流失 |\n\n\n**代码实现**：\n```python\n    def\
+            \ calculate_scenario_match(strategy_type: str, primary_scenario: str,\
+            \ \n                                scenario_probability: int) -> tuple[str,\
+            \ str]:\n        \"\"\"\n        计算剧本匹配度\n        \n        Returns:\n\
+            \            (匹配度等级, 理由)\n        \"\"\"\n        if strategy_type ==\
+            \ \"保守\":\n            if \"区间\" in primary_scenario and scenario_probability\
+            \ >= 60:\n                return \"高\", f\"区间剧本概率 {scenario_probability}%，信用策略完美匹配\"\
+            \n            elif \"区间\" in primary_scenario:\n                return\
+            \ \"中\", f\"区间剧本概率 {scenario_probability}% 略低，但仍适配\"\n            else:\n\
+            \                return \"低\", f\"趋势剧本 {primary_scenario}，区间策略不适配\"\n\
+            \        \n        elif strategy_type == \"均衡\":\n            if \"趋势\"\
+            \ in primary_scenario and scenario_probability >= 55:\n              \
+            \  return \"高\", f\"趋势剧本概率 {scenario_probability}%，借记策略适配\"\n        \
+            \    elif \"区间\" in primary_scenario:\n                return \"中\", \"\
+            区间剧本下可获取部分方向收益\"\n            else:\n                return \"低\", \"\
+            剧本不明确，方向策略风险大\"\n        \n        elif strategy_type == \"进取\":\n   \
+            \         if \"强趋势\" in primary_scenario or scenario_probability >= 65:\n\
+            \                return \"高\", f\"强确信场景（{scenario_probability}%），单腿敞口可最大化收益\"\
+            \n            elif \"趋势\" in primary_scenario:\n                return\
+            \ \"中\", \"趋势初期，单腿风险较大\"\n            else:\n                return \"\
+            低\", \"非趋势场景，单腿时间价值流失快\"\n        \n        return \"低\", \"无法判断匹配度\"\n\
+            ```\n        \n#### 指标 D：流动性评估\n        \n**评估标准**：\n```python\n    def\
+            \ check_liquidity(strategy: dict, spot: float, em1: float) -> tuple[bool,\
+            \ str]:\n        \"\"\"\n        检查流动性是否达标\n        \n        Args:\n\
+            \            strategy: 策略对象\n            spot: 现价\n            em1: EM1$\n\
+            \            \n        Returns:\n            (是否通过, 说明)\n        \"\"\"\
+            \n        legs = strategy[\"legs\"]\n        \n        # 1. 检查腿部数量（腿越多流动性要求越高）\n\
+            \        leg_count = len(legs)\n        if leg_count > 4:\n          \
+            \  return False, f\"腿部数量 {leg_count} 过多，流动性风险高\"\n        \n        #\
+            \ 2. 检查行权价距离现价（过远虚值流动性差）\n        for leg in legs:\n            strike\
+            \ = leg[\"strike\"]\n            \n            # 处理计算表达式（如 \"计算: 170.5\
+            \ + 0.2×3.0\"）\n            if isinstance(strike, str) and \"计算:\" in\
+            \ strike:\n                # 跳过计算表达式，假设 LLM 会算出合理值\n                continue\n\
+            \            \n            distance_em1 = abs(strike - spot) / em1\n \
+            \           \n            if distance_em1 > 3:\n                return\
+            \ False, f\"{leg['type']} @ {strike} 距现价 {distance_em1:.1f}×EM1$，流动性不足\"\
+            \n        \n        # 3. 检查宽度（过宽的 spread 中间行权价可能流动性差）\n        if strategy[\"\
+            structure\"] in [\"Iron Condor\", \"Iron Butterfly\"]:\n            call_width\
+            \ = None\n            put_width = None\n            \n            for\
+            \ i, leg in enumerate(legs):\n                if leg[\"type\"] == \"call\"\
+            :\n                    if call_width is None:\n                      \
+            \  call_width = 0\n                    if i + 1 < len(legs) and legs[i+1][\"\
+            type\"] == \"call\":\n                        call_width = abs(legs[i+1][\"\
+            strike\"] - leg[\"strike\"])\n            \n            if call_width\
+            \ and call_width > 2 * em1:\n                return False, f\"Call 价差宽度\
+            \ {call_width:.1f} > 2×EM1$，中间行权价流动性存疑\"\n        \n        return True,\
+            \ \"流动性达标\"\n```\n        \n        ---\n        \n### 3. 综合排序逻辑\n\n\n\
+            **排序权重**：\n1. **期望值 EV**（40%）：必须 > 0 才考虑\n2. **风险调整收益 RAR**（30%）：越高越好\n\
+            3. **剧本匹配度**（20%）：高 > 中 > 低\n4. **流动性**（10%）：不通过直接降级\n\n\n**排序算法**：\n\
+            ```python\n    def rank_strategies(strategies: list, primary_scenario:\
+            \ str, \n                        scenario_probability: int, spot: float,\
+            \ em1: float) -> list:\n        \"\"\"\n        策略排序主函数\n        \n  \
+            \      Returns:\n            排序后的策略列表（包含评分）\n        \"\"\"\n        ranked\
+            \ = []\n        \n        for strategy in strategies:\n            # 提取数据\n\
+            \            max_profit = strategy[\"rr_calculation\"][\"max_profit\"\
+            ]\n            max_loss = strategy[\"rr_calculation\"][\"max_loss\"]\n\
+            \            pw_str = strategy[\"pw_calculation\"][\"pw_estimate\"]\n\
+            \            \n            # 处理 pw（可能是 \"68%\" 或 \"约 35-50%\"）\n     \
+            \       if \"约\" in pw_str:\n                # 取中间值\n                pw\
+            \ = 0.4  # 默认 40%\n            elif \"-\" in pw_str:\n               \
+            \ # 取平均值\n                range_parts = pw_str.replace(\"%\", \"\").split(\"\
+            -\")\n                pw = (float(range_parts[0]) + float(range_parts[1]))\
+            \ / 200\n            else:\n                pw = float(pw_str.rstrip(\"\
+            %\")) / 100\n            \n            # 计算 EV 和 RAR\n            ev =\
+            \ pw * max_profit - (1 - pw) * max_loss\n            rar = ev / max_loss\
+            \ if max_loss > 0 else 0\n            \n            # 剧本匹配度\n        \
+            \    scenario_match, match_reason = calculate_scenario_match(\n      \
+            \          strategy[\"strategy_type\"], \n                primary_scenario,\
+            \ \n                scenario_probability\n            )\n            \n\
+            \            # 流动性检查\n            liquidity_pass, liquidity_note = check_liquidity(strategy,\
+            \ spot, em1)\n            \n            # 综合评分（满分 100）\n            score\
+            \ = 0\n            \n            # EV 评分（40 分）\n            if ev > 0.5:\n\
+            \                score += 40\n            elif ev > 0.2:\n           \
+            \     score += 30\n            elif ev > 0:\n                score +=\
+            \ 20\n            else:\n                score += 0  # 负 EV 不给分\n    \
+            \        \n            # RAR 评分（30 分）\n            if rar > 0.3:\n   \
+            \             score += 30\n            elif rar > 0.15:\n            \
+            \    score += 25\n            elif rar > 0.05:\n                score\
+            \ += 15\n            else:\n                score += 0\n            \n\
+            \            # 剧本匹配度评分（20 分）\n            if scenario_match == \"高\":\n\
+            \                score += 20\n            elif scenario_match == \"中\"\
+            :\n                score += 10\n            else:\n                score\
+            \ += 0\n            \n            # 流动性评分（10 分）\n            if liquidity_pass:\n\
+            \                score += 10\n            else:\n                score\
+            \ += 0\n            \n            # 添加到结果\n            ranked.append({\n\
+            \                \"strategy\": strategy,\n                \"ev\": round(ev,\
+            \ 2),\n                \"rar\": round(rar, 3),\n                \"scenario_match\"\
+            : scenario_match,\n                \"match_reason\": match_reason,\n \
+            \               \"liquidity_pass\": liquidity_pass,\n                \"\
+            liquidity_note\": liquidity_note,\n                \"composite_score\"\
+            : score\n            })\n        \n        # 按综合评分排序\n        ranked.sort(key=lambda\
+            \ x: x[\"composite_score\"], reverse=True)\n        \n        # 添加排名\n\
+            \        for i, item in enumerate(ranked):\n            item[\"rank\"\
+            ] = i + 1\n        \n        return ranked\n```\n        \n---\n\n\n###\
+            \ 4. 最终推荐生成\n        \n**推荐逻辑**：\n```python\n    def generate_recommendation(ranked_strategies:\
+            \ list) -> str:\n        \"\"\"\n        生成最终推荐文本\n        \"\"\"\n  \
+            \      top1 = ranked_strategies[0]\n        top2 = ranked_strategies[1]\
+            \ if len(ranked_strategies) > 1 else None\n        \n        # 基础推荐\n\
+            \        recommendation = f\"推荐执行 {top1['strategy']['strategy_type']}\
+            \ 策略（{top1['strategy']['structure']}）\"\n        \n        # EV 检查\n \
+            \       if top1[\"ev\"] <= 0:\n            recommendation += \"，但注意期望值为负，建议谨慎或观望\"\
+            \n            return recommendation\n        \n        # 流动性检查\n     \
+            \   if not top1[\"liquidity_pass\"]:\n            recommendation += f\"\
+            ，但存在流动性问题（{top1['liquidity_note']}），建议降低仓位或调整结构\"\n            return\
+            \ recommendation\n        \n        # 剧本匹配度检查\n        if top1[\"scenario_match\"\
+            ] == \"低\":\n            recommendation += f\"，但剧本匹配度低（{top1['match_reason']}），建议观望或等待信号明确\"\
+            \n            return recommendation\n        \n        # 次选推荐\n      \
+            \  if top2 and top2[\"ev\"] > 0 and top2[\"composite_score\"] >= 60:\n\
+            \            recommendation += f\"；若风险承受力较高，可配置 20-30% 仓位于 {top2['strategy']['strategy_type']}\
+            \ 策略作为补充\"\n        \n        return recommendation\n```\n        \n---\n\
+            \n\n## 输出 JSON 格式\n```json\n    {\n    \"symbol\": \"AAPL\",\n    \"comparison_summary\"\
+            : {\n    \"total_strategies\": 3,\n    \"positive_ev_count\": 2,\n   \
+            \ \"recommended_count\": 1,\n    \"analysis_timestamp\": \"2025-01-15T10:30:00-05:00\"\
+            \n    },\n    \"ranking\": [\n    {\n        \"rank\": 1,\n        \"\
+            strategy_type\": \"均衡\",\n        \"structure\": \"Bull Call Spread\"\
+            ,\n        \"metrics\": {\n        \"ev\": 1.98,\n        \"rar\": 0.733,\n\
+            \        \"pw\": 0.52,\n        \"max_profit\": 6.3,\n        \"max_loss\"\
+            : 2.7,\n        \"rr_ratio\": \"2.3:1\"\n        },\n        \"assessment\"\
+            : {\n        \"scenario_match\": \"高\",\n        \"match_reason\": \"\
+            趋势剧本概率 65%，借记策略适配\",\n        \"liquidity_pass\": true,\n        \"liquidity_note\"\
+            : \"流动性达标\",\n        \"composite_score\": 95\n        },\n        \"\
+            recommendation\": \"强烈推荐\",\n        \"note\": \"期望值正向且风险调整收益优秀，剧本匹配度高，流动性充足\"\
+            \n    },\n    {\n        \"rank\": 2,\n        \"strategy_type\": \"保守\"\
+            ,\n        \"structure\": \"Iron Condor\",\n        \"metrics\": {\n \
+            \       \"ev\": -0.09,\n        \"rar\": -0.029,\n        \"pw\": 0.68,\n\
+            \        \"max_profit\": 1.35,\n        \"max_loss\": 3.15,\n        \"\
+            rr_ratio\": \"1:2.3\"\n        },\n        \"assessment\": {\n       \
+            \ \"scenario_match\": \"低\",\n        \"match_reason\": \"趋势剧本 趋势上行，区间策略不适配\"\
+            ,\n        \"liquidity_pass\": true,\n        \"liquidity_note\": \"流动性达标\"\
+            ,\n        \"composite_score\": 40\n        },\n        \"recommendation\"\
+            : \"不推荐\",\n        \"note\": \"虽然胜率高但期望值为负，且剧本不匹配，不建议执行\"\n    },\n \
+            \   {\n        \"rank\": 3,\n        \"strategy_type\": \"进取\",\n    \
+            \    \"structure\": \"Long Call\",\n        \"metrics\": {\n        \"\
+            ev\": 0.32,\n        \"rar\": 0.1,\n        \"pw\": 0.4,\n        \"max_profit\"\
+            : \"理论无限（实际目标 8.8）\",\n        \"max_loss\": 3.2,\n        \"rr_ratio\"\
+            : \"2.75:1\"\n        },\n        \"assessment\": {\n        \"scenario_match\"\
+            : \"中\",\n        \"match_reason\": \"趋势初期，单腿风险较大\",\n        \"liquidity_pass\"\
+            : true,\n        \"liquidity_note\": \"流动性达标\",\n        \"composite_score\"\
+            : 55\n        },\n        \"recommendation\": \"谨慎考虑\",\n        \"note\"\
+            : \"期望值正向但胜率较低，仅适合小仓位试探（≤1% 账户资金）\"\n    }\n    ],\n    \"final_recommendation\"\
+            : \"推荐执行 均衡 策略（Bull Call Spread），期望值 1.98，风险调整收益 0.733，剧本匹配度高；不推荐 保守 策略（期望值负）；进取\
+            \ 策略可作为小仓位试探\",\n    \"execution_priority\": {\n    \"primary\": {\n \
+            \       \"strategy_type\": \"均衡\",\n        \"allocation\": \"70-80% 可用资金\"\
+            ,\n        \"rationale\": \"综合评分最高，期望值和风险调整收益均优秀\"\n    },\n    \"secondary\"\
+            : {\n        \"strategy_type\": \"进取\",\n        \"allocation\": \"10-20%\
+            \ 可用资金\",\n        \"rationale\": \"期望值正向，作为方向性补充，严格止损\"\n    },\n   \
+            \ \"avoid\": {\n        \"strategy_type\": \"保守\",\n        \"reason\"\
+            : \"期望值负且剧本不匹配\"\n    }\n    }\n    }\n```\n        \n---\n        \n\
+            ## 关键注意事项\n\n\n1. **EV 必须正向**：期望值 ≤ 0 的策略直接标记为\"不推荐\"\n2. **Pw 格式处理**：Agent\
+            \ 6 可能输出 \"68%\"、\"约 40%\"、\"35-50%\"，需正确解析\n3. **MaxProfit 特殊值**：进取策略可能为\
+            \ \"理论无限\"，需特殊处理\n4. **流动性优先**：流动性不通过的策略降级，即使 EV 很高\n5. **剧本一致性**：优先推荐与主导剧本匹配的策略\n\
+            6. **数值精度**：EV 保留 2 位小数，RAR 保留 3 位小数\n\n---\n\n现在请基于输入数据进行策略对比和排序。"
+        - id: d6ff96ac-f577-4cdf-ac82-a19f6ce22151
+          role: user
+          text: "请对以下策略进行量化对比和排序。\n        \n【市场状态】\n- 标的：{{#3001.text.targets.symbol#}}\n\
+            - 现价：{{#3001.text.targets.spot_price#}}\n- EM1$：{{#3001.text.targets.em1_dollar#}}\n\
+            - 主导剧本：{{#5001.scenario_classification.primary_scenario#}} - 剧本概率：{{#5001.scenario_classification.scenario_probability#}}%\n\
+            \n【策略列表】 {{#6001.text#}}\n请严格按照系统提示的逻辑进行计算和排序，输出完整的 JSON 结果。\n"
+        selected: false
+        title: AGENT 7 策略对比
+        type: llm
+        vision:
+          enabled: false
+      height: 116
+      id: '1005'
+      position:
+        x: 3197.9845931172467
+        y: 202.92482559236925
+      positionAbsolute:
+        x: 3197.9845931172467
+        y: 202.92482559236925
       selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
+    - data:
+        code: "import json\nfrom typing import Dict, Any, Optional\n\n\ndef main(agent3_output:\
+          \ str, agent5_output: str, agent4_output: str = \"\", **env_vars) -> dict:\n\
+          \    \"\"\"\n    Agent 6 策略计算辅助函数\n    \n    Args:\n        agent3_output:\
+          \ Agent 3 的数据校验结果 JSON\n        agent5_output: Agent 5 的剧本分析结果 JSON\n  \
+          \      agent4_output: Agent 4 的技术面分析结果 JSON (可选)\n        **env_vars: 环境变量字典\n\
+          \        \n    Returns:\n        {\"result\": 策略计算辅助结果 JSON 字符串}\n    \"\
+          \"\"\n    try:\n        agent3_data = json.loads(agent3_output)\n      \
+          \  agent5_data = json.loads(agent5_output)\n        \n        technical_score\
+          \ = 0\n        if agent4_output:\n            try:\n                agent4_data\
+          \ = json.loads(agent4_output)\n                technical_score = agent4_data.get(\"\
+          ta_score\", 0)\n            except:\n                technical_score = 0\n\
+          \        \n        calculator = StrategyCalculator(env_vars)\n        result\
+          \ = calculator.process(agent3_data, agent5_data, technical_score)\n    \
+          \    \n        return {\n            \"result\": json.dumps(result, ensure_ascii=False,\
+          \ indent=2)\n        }\n        \n    except Exception as e:\n        return\
+          \ {\n            \"result\": json.dumps({\n                \"error\": True,\n\
+          \                \"error_message\": str(e)\n            }, ensure_ascii=False,\
+          \ indent=2)\n        }\n\n\nclass StrategyCalculator:\n    \"\"\"策略计算引擎\"\
+          \"\"\n    \n    def __init__(self, env_vars: Dict[str, Any]):\n        \"\
+          \"\"初始化环境变量\"\"\"\n        self.env = self._parse_env_vars(env_vars)\n \
+          \   \n    def _parse_env_vars(self, env_vars: Dict[str, Any]) -> Dict[str,\
+          \ float]:\n        \"\"\"解析环境变量并设置默认值\"\"\"\n        defaults = {\n    \
+          \        # Greeks 目标范围\n            'CONSERVATIVE_DELTA_MIN': -0.1,\n  \
+          \          'CONSERVATIVE_DELTA_MAX': 0.1,\n            'CONSERVATIVE_THETA_MIN':\
+          \ 5.0,\n            'CONSERVATIVE_VEGA_MAX': -10.0,\n            'BALANCED_DELTA_RANGE':\
+          \ 0.2,\n            'BALANCED_THETA_MIN': 8.0,\n            'AGGRESSIVE_DELTA_MIN':\
+          \ 0.3,\n            'AGGRESSIVE_DELTA_MAX': 0.6,\n            'AGGRESSIVE_VEGA_MIN':\
+          \ 10.0,\n            \n            # DTE 选择\n            'DTE_GAP_HIGH_THRESHOLD':\
+          \ 3.0,\n            'DTE_GAP_MID_THRESHOLD': 2.0,\n            'DTE_MONTHLY_ADJUSTMENT':\
+          \ 7,\n            \n            # 行权价偏移\n            'STRIKE_CONSERVATIVE_LONG_OFFSET':\
+          \ 1.5,\n            'STRIKE_BALANCED_WING_OFFSET': 1.0,\n            'STRIKE_RATIO_SHORT_OFFSET':\
+          \ 0.5,\n            'STRIKE_RATIO_LONG_OFFSET': 1.5,\n            'STRIKE_AGGRESSIVE_LONG_OFFSET':\
+          \ 0.2,\n            \n            # 价差宽度\n            'WIDTH_CREDIT_MIN':\
+          \ 0.8,\n            'WIDTH_CREDIT_MAX': 1.0,\n            'WIDTH_DEBIT_MIN':\
+          \ 1.0,\n            'WIDTH_DEBIT_MAX': 1.2,\n            \n            #\
+          \ RR 计算 - 信用 IVR 映射\n            'CREDIT_IVR_0_25': 0.20,\n            'CREDIT_IVR_25_50':\
+          \ 0.30,\n            'CREDIT_IVR_50_75': 0.40,\n            'CREDIT_IVR_75_100':\
+          \ 0.50,\n            \n            # RR 计算 - 借贷 IVR 映射\n            'DEBIT_IVR_0_40':\
+          \ 0.30,\n            'DEBIT_IVR_40_70': 0.40,\n            'DEBIT_IVR_70_100':\
+          \ 0.50,\n            \n            # Pw 计算 - 信用\n            'PW_CREDIT_BASE':\
+          \ 0.5,\n            'PW_CREDIT_CLUSTER_COEF': 0.1,\n            'PW_CREDIT_DISTANCE_PENALTY_COEF':\
+          \ 0.05,\n            'PW_CREDIT_MIN': 0.4,\n            'PW_CREDIT_MAX':\
+          \ 0.85,\n            \n            # Pw 计算 - 借贷\n            'PW_DEBIT_BASE':\
+          \ 0.3,\n            'PW_DEBIT_DEX_COEF': 0.1,\n            'PW_DEBIT_VANNA_COEF':\
+          \ 0.2,\n            'PW_DEBIT_VANNA_WEIGHT_HIGH': 1.0,\n            'PW_DEBIT_VANNA_WEIGHT_MEDIUM':\
+          \ 0.6,\n            'PW_DEBIT_VANNA_WEIGHT_LOW': 0.3,\n            'PW_DEBIT_MIN':\
+          \ 0.25,\n            'PW_DEBIT_MAX': 0.75,\n            \n            #\
+          \ Pw 计算 - 蝶式\n            'PW_BUTTERFLY_BODY_INSIDE': 0.65,\n          \
+          \  'PW_BUTTERFLY_BODY_OFFSET_1EM': 0.45,\n            \n            # 止盈止损\n\
+          \            'PROFIT_TARGET_CREDIT_PCT': 30,\n            'PROFIT_TARGET_DEBIT_PCT':\
+          \ 60,\n            'STOP_LOSS_DEBIT_PCT': 50,\n            'STOP_LOSS_CREDIT_PCT':\
+          \ 150,\n            'TIME_DECAY_EXIT_DAYS': 3,\n            \n         \
+          \   # 风险管理\n            'MAX_SINGLE_RISK_PCT': 2,\n        }\n        \n\
+          \        parsed = {}\n        for key, default_value in defaults.items():\n\
+          \            value = env_vars.get(key, default_value)\n            try:\n\
+          \                parsed[key] = float(value)\n            except (ValueError,\
+          \ TypeError):\n                parsed[key] = default_value\n        \n \
+          \       return parsed\n    \n    # ============= 1. 行权价计算 =============\n\
+          \    \n    def calculate_strikes(self, spot: float, em1: float, walls: Dict)\
+          \ -> Dict:\n        \"\"\"\n        计算各策略的行权价\n        \n        Args:\n\
+          \            spot: 现价\n            em1: EM1$ 预期单日波幅\n            walls:\
+          \ 墙位信息 {call_wall, put_wall, major_wall}\n        \n        Returns:\n \
+          \           各策略的行权价字典\n        \"\"\"\n        call_wall = walls.get(\"\
+          call_wall\", spot * 1.05)\n        put_wall = walls.get(\"put_wall\", spot\
+          \ * 0.95)\n        \n        return {\n            \"iron_condor\": {\n\
+          \                \"short_call\": round(call_wall, 2),\n                \"\
+          long_call\": round(call_wall + self.env['STRIKE_CONSERVATIVE_LONG_OFFSET']\
+          \ * em1, 2),\n                \"short_put\": round(put_wall, 2),\n     \
+          \           \"long_put\": round(put_wall - self.env['STRIKE_CONSERVATIVE_LONG_OFFSET']\
+          \ * em1, 2),\n                \"width_call\": round(self.env['STRIKE_CONSERVATIVE_LONG_OFFSET']\
+          \ * em1, 2),\n                \"width_put\": round(self.env['STRIKE_CONSERVATIVE_LONG_OFFSET']\
+          \ * em1, 2)\n            },\n            \"iron_butterfly\": {\n       \
+          \         \"body\": round(spot, 2),\n                \"call_wing\": round(spot\
+          \ + self.env['STRIKE_BALANCED_WING_OFFSET'] * em1, 2),\n               \
+          \ \"put_wing\": round(spot - self.env['STRIKE_BALANCED_WING_OFFSET'] * em1,\
+          \ 2),\n                \"wing_width\": round(self.env['STRIKE_BALANCED_WING_OFFSET']\
+          \ * em1, 2)\n            },\n            \"bull_call_spread\": {\n     \
+          \           \"long_call\": round(spot + self.env['STRIKE_AGGRESSIVE_LONG_OFFSET']\
+          \ * em1, 2),\n                \"short_call\": round(call_wall, 2),\n   \
+          \             \"width\": round(call_wall - (spot + self.env['STRIKE_AGGRESSIVE_LONG_OFFSET']\
+          \ * em1), 2)\n            },\n            \"bear_put_spread\": {\n     \
+          \           \"long_put\": round(spot - self.env['STRIKE_AGGRESSIVE_LONG_OFFSET']\
+          \ * em1, 2),\n                \"short_put\": round(put_wall, 2),\n     \
+          \           \"width\": round((spot - self.env['STRIKE_AGGRESSIVE_LONG_OFFSET']\
+          \ * em1) - put_wall, 2)\n            },\n            \"bull_put_spread\"\
+          : {\n                \"long_put\": round(put_wall - self.env['STRIKE_CONSERVATIVE_LONG_OFFSET']\
+          \ * em1, 2),\n                \"short_put\": round(put_wall, 2),\n     \
+          \           \"width\": round(self.env['STRIKE_CONSERVATIVE_LONG_OFFSET']\
+          \ * em1, 2)\n            },\n            \"bear_call_spread\": {\n     \
+          \           \"long_call\": round(call_wall + self.env['STRIKE_CONSERVATIVE_LONG_OFFSET']\
+          \ * em1, 2),\n                \"short_call\": round(call_wall, 2),\n   \
+          \             \"width\": round(self.env['STRIKE_CONSERVATIVE_LONG_OFFSET']\
+          \ * em1, 2)\n            },\n            \"call_ratio_spread\": {\n    \
+          \            \"long_call\": round(spot + self.env['STRIKE_RATIO_SHORT_OFFSET']\
+          \ * em1, 2),\n                \"short_call\": round(spot + self.env['STRIKE_RATIO_LONG_OFFSET']\
+          \ * em1, 2),\n                \"ratio\": \"1:2\"\n            },\n     \
+          \       \"put_ratio_spread\": {\n                \"long_put\": round(spot\
+          \ - self.env['STRIKE_RATIO_SHORT_OFFSET'] * em1, 2),\n                \"\
+          short_put\": round(spot - self.env['STRIKE_RATIO_LONG_OFFSET'] * em1, 2),\n\
+          \                \"ratio\": \"1:2\"\n            },\n            \"long_call\"\
+          : {\n                \"strike\": round(spot + self.env['STRIKE_AGGRESSIVE_LONG_OFFSET']\
+          \ * em1, 2)\n            },\n            \"long_put\": {\n             \
+          \   \"strike\": round(spot - self.env['STRIKE_AGGRESSIVE_LONG_OFFSET'] *\
+          \ em1, 2)\n            }\n        }\n    \n    # ============= 2. DTE 计算\
+          \ =============\n    \n    def calculate_dte(self, gap_distance_em1: float,\
+          \ monthly_override: bool) -> Dict:\n        \"\"\"\n        动态 DTE 计算\n\
+          \        \n        Args:\n            gap_distance_em1: gap 距离（EM1$ 倍数）\n\
+          \            monthly_override: 是否月度叠加\n        \n        Returns:\n    \
+          \        DTE 信息字典\n        \"\"\"\n        # 基础规则\n        if gap_distance_em1\
+          \ > self.env['DTE_GAP_HIGH_THRESHOLD']:\n            base_dte = 14\n   \
+          \         gap_level = \"high\"\n        elif gap_distance_em1 >= self.env['DTE_GAP_MID_THRESHOLD']:\n\
+          \            base_dte = 10\n            gap_level = \"mid\"\n        else:\n\
+          \            base_dte = 7\n            gap_level = \"low\"\n        \n \
+          \       # 月度调整\n        if monthly_override:\n            adjustment = int(self.env['DTE_MONTHLY_ADJUSTMENT'])\n\
+          \            final_dte = base_dte + adjustment\n            rationale =\
+          \ f\"gap_distance_em1={gap_distance_em1:.2f}>{self.env['DTE_GAP_HIGH_THRESHOLD']if\
+          \ gap_level=='high' else f'在{self.env['DTE_GAP_MID_THRESHOLD']}-{self.env['DTE_GAP_HIGH_THRESHOLD']}'\
+          \ if gap_level=='mid' else f'<{self.env['DTE_GAP_MID_THRESHOLD']}'}选择{base_dte}日DTE，月度叠加+{adjustment}日={final_dte}日\"\
+          \n        else:\n            final_dte = base_dte\n            rationale\
+          \ = f\"gap_distance_em1={gap_distance_em1:.2f}选择{final_dte}日DTE，无月度叠加\"\n\
+          \        \n        return {\n            \"base_dte\": base_dte,\n     \
+          \       \"final_dte\": final_dte,\n            \"gap_level\": gap_level,\n\
+          \            \"monthly_override\": monthly_override,\n            \"rationale\"\
+          : rationale\n        }\n    \n    # ============= 3. RR 盈亏比计算 =============\n\
+          \    \n    def calculate_rr_credit(self, width: float, ivr: float = 40)\
+          \ -> Dict:\n        \"\"\"\n        信用价差 RR 计算\n        \n        Args:\n\
+          \            width: 价差宽度\n            ivr: 隐含波动率百分位（0-100）\n        \n \
+          \       Returns:\n            RR 计算结果\n        \"\"\"\n        # IVR 映射\n\
+          \        if ivr <= 25:\n            credit_ratio = self.env['CREDIT_IVR_0_25']\n\
+          \            ivr_range = \"0-25%\"\n        elif ivr <= 50:\n          \
+          \  credit_ratio = self.env['CREDIT_IVR_25_50']\n            ivr_range =\
+          \ \"25-50%\"\n        elif ivr <= 75:\n            credit_ratio = self.env['CREDIT_IVR_50_75']\n\
+          \            ivr_range = \"50-75%\"\n        else:\n            credit_ratio\
+          \ = self.env['CREDIT_IVR_75_100']\n            ivr_range = \"75-100%\"\n\
+          \        \n        credit = width * credit_ratio\n        max_loss = width\
+          \ - credit\n        \n        # 格式化 RR 比率\n        if credit > 0:\n    \
+          \        rr_simplified = f\"1:{max_loss/credit:.1f}\"\n        else:\n \
+          \           rr_simplified = \"N/A\"\n        \n        formula = f\"Width={width:.2f},\
+          \ IVR={ivr}%在{ivr_range}→credit_ratio={credit_ratio}, Credit={credit:.2f},\
+          \ MaxLoss={max_loss:.2f}, RR={credit:.2f}:{max_loss:.2f}\"\n        \n \
+          \       return {\n            \"width\": round(width, 2),\n            \"\
+          ivr\": ivr,\n            \"ivr_range\": ivr_range,\n            \"credit_ratio\"\
+          : credit_ratio,\n            \"credit\": round(credit, 2),\n           \
+          \ \"max_profit\": round(credit, 2),\n            \"max_loss\": round(max_loss,\
+          \ 2),\n            \"rr_ratio\": rr_simplified,\n            \"formula\"\
+          : formula\n        }\n    \n    def calculate_rr_debit(self, width: float,\
+          \ ivr: float = 40) -> Dict:\n        \"\"\"\n        借贷价差 RR 计算\n      \
+          \  \n        Args:\n            width: 价差宽度\n            ivr: 隐含波动率百分位（0-100）\n\
+          \        \n        Returns:\n            RR 计算结果\n        \"\"\"\n     \
+          \   # IVR 映射\n        if ivr <= 40:\n            debit_ratio = self.env['DEBIT_IVR_0_40']\n\
+          \            ivr_range = \"0-40%\"\n        elif ivr <= 70:\n          \
+          \  debit_ratio = self.env['DEBIT_IVR_40_70']\n            ivr_range = \"\
+          40-70%\"\n        else:\n            debit_ratio = self.env['DEBIT_IVR_70_100']\n\
+          \            ivr_range = \"70-100%\"\n        \n        debit = width *\
+          \ debit_ratio\n        max_profit = width - debit\n        \n        # 格式化\
+          \ RR 比率\n        if debit > 0:\n            rr_simplified = f\"{max_profit/debit:.1f}:1\"\
+          \n        else:\n            rr_simplified = \"N/A\"\n        \n       \
+          \ formula = f\"Width={width:.2f}, IVR={ivr}%在{ivr_range}→debit_ratio={debit_ratio},\
+          \ Debit={debit:.2f}, MaxProfit={max_profit:.2f}, RR={max_profit:.2f}:{debit:.2f}\"\
+          \n        \n        return {\n            \"width\": round(width, 2),\n\
+          \            \"ivr\": ivr,\n            \"ivr_range\": ivr_range,\n    \
+          \        \"debit_ratio\": debit_ratio,\n            \"debit\": round(debit,\
+          \ 2),\n            \"max_profit\": round(max_profit, 2),\n            \"\
+          max_loss\": round(debit, 2),\n            \"rr_ratio\": rr_simplified,\n\
+          \            \"formula\": formula\n        }\n    \n    # =============\
+          \ 4. Pw 胜率计算 =============\n    \n    def calculate_pw_credit(self, cluster_strength:\
+          \ float, gap_distance_em1: float, \n                           technical_score:\
+          \ float = 0) -> Dict:\n        \"\"\"\n        信用价差胜率计算\n        \n    \
+          \    Args:\n            cluster_strength: 簇强度比率\n            gap_distance_em1:\
+          \ gap 距离（EM1$ 倍数）\n            technical_score: 技术面评分（0-2）\n        \n \
+          \       Returns:\n            Pw 计算结果\n        \"\"\"\n        base = self.env['PW_CREDIT_BASE']\n\
+          \        cluster_adj = self.env['PW_CREDIT_CLUSTER_COEF'] * cluster_strength\n\
+          \        distance_penalty = self.env['PW_CREDIT_DISTANCE_PENALTY_COEF']\
+          \ * gap_distance_em1\n        \n        pw_raw = base + cluster_adj - distance_penalty\n\
+          \        \n        # 技术面提升\n        technical_boost = 0.05 * technical_score\
+          \ if technical_score > 0 else 0\n        \n        # 限制范围\n        pw_adjusted\
+          \ = max(self.env['PW_CREDIT_MIN'], \n                          min(self.env['PW_CREDIT_MAX'],\
+          \ \n                              pw_raw + technical_boost))\n        \n\
+          \        formula = f\"base {base} + cluster {cluster_adj:.3f} - distance\
+          \ {distance_penalty:.3f} + technical {technical_boost:.2f} = {pw_adjusted:.2f}\"\
+          \n        \n        return {\n            \"base\": base,\n            \"\
+          cluster_strength\": cluster_strength,\n            \"cluster_adj\": round(cluster_adj,\
+          \ 3),\n            \"gap_distance_em1\": gap_distance_em1,\n           \
+          \ \"distance_penalty\": round(distance_penalty, 3),\n            \"technical_score\"\
+          : technical_score,\n            \"technical_boost\": round(technical_boost,\
+          \ 2),\n            \"pw_raw\": round(pw_raw, 3),\n            \"pw_adjusted\"\
+          : round(pw_adjusted, 2),\n            \"pw_estimate\": f\"{int(pw_adjusted\
+          \ * 100)}%\",\n            \"formula\": formula\n        }\n    \n    def\
+          \ calculate_pw_debit(self, dex_same_dir_pct: float, vanna_confidence: str,\
+          \ \n                          gap_distance_em1: float) -> Dict:\n      \
+          \  \"\"\"\n        借贷价差胜率计算\n        \n        Args:\n            dex_same_dir_pct:\
+          \ DEX 同向百分比（0-100）\n            vanna_confidence: Vanna 置信度（high/medium/low）\n\
+          \            gap_distance_em1: gap 距离（EM1$ 倍数）\n        \n        Returns:\n\
+          \            Pw 计算结果\n        \"\"\"\n        # Vanna 权重\n        vanna_weight_map\
+          \ = {\n            'high': self.env['PW_DEBIT_VANNA_WEIGHT_HIGH'],\n   \
+          \         'medium': self.env['PW_DEBIT_VANNA_WEIGHT_MEDIUM'],\n        \
+          \    'low': self.env['PW_DEBIT_VANNA_WEIGHT_LOW']\n        }\n        vanna_weight\
+          \ = vanna_weight_map.get(vanna_confidence, self.env['PW_DEBIT_VANNA_WEIGHT_LOW'])\n\
+          \        \n        # 基础计算\n        base = self.env['PW_DEBIT_BASE']\n  \
+          \      dex_adj = self.env['PW_DEBIT_DEX_COEF'] * (dex_same_dir_pct / 100)\n\
+          \        vanna_adj = vanna_weight * self.env['PW_DEBIT_VANNA_COEF']\n  \
+          \      \n        pw_raw = base + dex_adj + vanna_adj\n        \n       \
+          \ # gap 距离惩罚\n        if gap_distance_em1 > 3:\n            gap_penalty\
+          \ = -0.05\n        elif gap_distance_em1 > 2:\n            gap_penalty =\
+          \ -0.03\n        else:\n            gap_penalty = 0\n        \n        #\
+          \ 限制范围\n        pw_adjusted = max(self.env['PW_DEBIT_MIN'], \n         \
+          \                 min(self.env['PW_DEBIT_MAX'], \n                     \
+          \         pw_raw + gap_penalty))\n        \n        formula = f\"base {base}\
+          \ + dex {dex_adj:.3f} + vanna {vanna_adj:.2f} + gap_penalty {gap_penalty:.2f}\
+          \ = {pw_adjusted:.2f}\"\n        \n        return {\n            \"base\"\
+          : base,\n            \"dex_same_dir_pct\": dex_same_dir_pct,\n         \
+          \   \"dex_adj\": round(dex_adj, 3),\n            \"vanna_confidence\": vanna_confidence,\n\
+          \            \"vanna_weight\": vanna_weight,\n            \"vanna_adj\"\
+          : round(vanna_adj, 2),\n            \"gap_distance_em1\": gap_distance_em1,\n\
+          \            \"gap_penalty\": gap_penalty,\n            \"pw_raw\": round(pw_raw,\
+          \ 3),\n            \"pw_adjusted\": round(pw_adjusted, 2),\n           \
+          \ \"pw_estimate\": f\"{int(pw_adjusted * 100)}%\",\n            \"formula\"\
+          : formula\n        }\n    \n    def calculate_pw_butterfly(self, spot: float,\
+          \ body: float, em1: float, \n                               iv_path: str\
+          \ = \"平\") -> Dict:\n        \"\"\"\n        蝶式策略胜率计算\n        \n      \
+          \  Args:\n            spot: 现价\n            body: 蝶式中心价格\n            em1:\
+          \ EM1$\n            iv_path: IV 路径（升/降/平）\n        \n        Returns:\n\
+          \            Pw 计算结果\n        \"\"\"\n        distance_em1 = abs(spot -\
+          \ body) / em1 if em1 > 0 else 0\n        \n        # 基础胜率\n        if distance_em1\
+          \ < 0.3:\n            pw_base = self.env['PW_BUTTERFLY_BODY_INSIDE']\n \
+          \           distance_desc = \"spot在body内\"\n        elif distance_em1 <\
+          \ 1.0:\n            pw_base = 0.55\n            distance_desc = \"轻微偏离\"\
+          \n        else:\n            pw_base = self.env['PW_BUTTERFLY_BODY_OFFSET_1EM']\n\
+          \            distance_desc = \"偏离1EM1$\"\n        \n        # IV 调整\n  \
+          \      if iv_path == \"升\":\n            iv_adj = -0.05\n            iv_note\
+          \ = \"IV扩张不利蝶式\"\n        elif iv_path == \"降\":\n            iv_adj = 0.05\n\
+          \            iv_note = \"IV压缩有利蝶式\"\n        else:\n            iv_adj =\
+          \ 0\n            iv_note = \"IV稳定\"\n        \n        pw_adjusted = max(0.3,\
+          \ min(0.75, pw_base + iv_adj))\n        \n        formula = f\"距离body {distance_em1:.2f}×EM1$({distance_desc})→base\
+          \ {pw_base}, IV路径{iv_path}调整{iv_adj:+.2f} = {pw_adjusted:.2f}\"\n      \
+          \  \n        return {\n            \"spot\": spot,\n            \"body\"\
+          : body,\n            \"distance_em1\": round(distance_em1, 2),\n       \
+          \     \"distance_desc\": distance_desc,\n            \"iv_path\": iv_path,\n\
+          \            \"iv_adj\": iv_adj,\n            \"iv_note\": iv_note,\n  \
+          \          \"pw_base\": pw_base,\n            \"pw_adjusted\": round(pw_adjusted,\
+          \ 2),\n            \"pw_estimate\": f\"{int(pw_adjusted * 100)}%\",\n  \
+          \          \"formula\": formula\n        }\n    \n    # ============= 5.\
+          \ Greeks 范围 =============\n    \n    def get_greeks_ranges(self) -> Dict:\n\
+          \        \"\"\"\n        获取各策略类型的 Greeks 目标范围\n        \n        Returns:\n\
+          \            Greeks 范围字典\n        \"\"\"\n        return {\n           \
+          \ \"conservative\": {\n                \"delta_min\": self.env['CONSERVATIVE_DELTA_MIN'],\n\
+          \                \"delta_max\": self.env['CONSERVATIVE_DELTA_MAX'],\n  \
+          \              \"theta_min\": self.env['CONSERVATIVE_THETA_MIN'],\n    \
+          \            \"vega_max\": self.env['CONSERVATIVE_VEGA_MAX'],\n        \
+          \        \"description\": \"保守策略：接近中性Delta，正Theta收益，负Vega做空波动率\"\n     \
+          \       },\n            \"balanced\": {\n                \"delta_range\"\
+          : self.env['BALANCED_DELTA_RANGE'],\n                \"theta_min\": self.env['BALANCED_THETA_MIN'],\n\
+          \                \"vega_range\": [-5, 5],\n                \"description\"\
+          : \"均衡策略：轻微方向敞口±Delta_range，正Theta，Vega中性\"\n            },\n          \
+          \  \"aggressive\": {\n                \"delta_min\": self.env['AGGRESSIVE_DELTA_MIN'],\n\
+          \                \"delta_max\": self.env['AGGRESSIVE_DELTA_MAX'],\n    \
+          \            \"vega_min\": self.env['AGGRESSIVE_VEGA_MIN'],\n          \
+          \      \"description\": \"进取策略：明确方向Delta 0.3-0.6，Theta可为负，正Vega做多波动率\"\n\
+          \            }\n        }\n    \n    # ============= 6. 止盈止损参数 =============\n\
+          \    \n    def get_exit_parameters(self) -> Dict:\n        \"\"\"\n    \
+          \    获取止盈止损参数\n        \n        Returns:\n            止盈止损参数字典\n      \
+          \  \"\"\"\n        return {\n            \"credit_strategies\": {\n    \
+          \            \"profit_target_pct\": int(self.env['PROFIT_TARGET_CREDIT_PCT']),\n\
+          \                \"stop_loss_pct\": int(self.env['STOP_LOSS_CREDIT_PCT']),\n\
+          \                \"time_decay_exit_days\": int(self.env['TIME_DECAY_EXIT_DAYS']),\n\
+          \                \"description\": f\"信用策略：权利金衰减至{int(self.env['PROFIT_TARGET_CREDIT_PCT'])}%止盈，浮亏{int(self.env['STOP_LOSS_CREDIT_PCT'])}%止损\"\
+          \n            },\n            \"debit_strategies\": {\n                \"\
+          profit_target_pct\": int(self.env['PROFIT_TARGET_DEBIT_PCT']),\n       \
+          \         \"stop_loss_pct\": int(self.env['STOP_LOSS_DEBIT_PCT']),\n   \
+          \             \"time_decay_exit_days\": int(self.env['TIME_DECAY_EXIT_DAYS']),\n\
+          \                \"description\": f\"借贷策略：浮盈{int(self.env['PROFIT_TARGET_DEBIT_PCT'])}%止盈，亏损{int(self.env['STOP_LOSS_DEBIT_PCT'])}%止损\"\
+          \n            },\n            \"time_management\": {\n                \"\
+          exit_days_before_expiry\": int(self.env['TIME_DECAY_EXIT_DAYS']),\n    \
+          \            \"description\": f\"时间管理：到期前{int(self.env['TIME_DECAY_EXIT_DAYS'])}日平仓避免Pin\
+          \ Risk\"\n            }\n        }\n    \n    # ============= 主处理函数 =============\n\
+          \    \n    def process(self, agent3_data: Dict, agent5_data: Dict, technical_score:\
+          \ float = 0) -> Dict:\n        \"\"\"\n        主处理流程\n        \n       \
+          \ Args:\n            agent3_data: Agent 3 数据\n            agent5_data: Agent\
+          \ 5 数据\n            technical_score: 技术面评分\n        \n        Returns:\n\
+          \            完整计算结果\n        \"\"\"\n        \n        # 直接从根节点获取数据（不再处理\
+          \ targets 数组）\n        spot = agent3_data.get(\"spot_price\", 0)\n     \
+          \   em1 = agent3_data.get(\"em1_dollar\", 0)\n        walls = agent3_data.get(\"\
+          walls\", {})\n        gamma_metrics = agent3_data.get(\"gamma_metrics\"\
+          , {})\n        directional_metrics = agent3_data.get(\"directional_metrics\"\
+          , {})\n        \n        # 校验必需字段\n        if spot == 0 or em1 == 0:\n \
+          \           raise ValueError(\"Agent 3 数据缺失关键字段：spot_price 或 em1_dollar\"\
+          )\n        \n        # Agent 5 数据\n        scenario = agent5_data.get(\"\
+          scenario_classification\", {})\n        \n        # 执行计算\n        strikes\
+          \ = self.calculate_strikes(spot, em1, walls)\n        dte_info = self.calculate_dte(\n\
+          \            gamma_metrics.get(\"gap_distance_em1_multiple\", 2.0),\n  \
+          \          gamma_metrics.get(\"monthly_cluster_override\", False)\n    \
+          \    )\n        \n        # 估算 IVR（简化处理，实际应从市场数据获取）\n        ivr_estimate\
+          \ = 40  # 默认中等 IVR\n        \n        # RR 计算（使用实际宽度）\n        rr_credit_ic\
+          \ = self.calculate_rr_credit(\n            strikes[\"iron_condor\"][\"width_call\"\
+          ],\n            ivr_estimate\n        )\n        \n        rr_debit_bull\
+          \ = self.calculate_rr_debit(\n            strikes[\"bull_call_spread\"][\"\
+          width\"],\n            ivr_estimate\n        )\n        \n        # Pw 计算\n\
+          \        pw_credit = self.calculate_pw_credit(\n            gamma_metrics.get(\"\
+          cluster_strength_ratio\", 1.5),\n            gamma_metrics.get(\"gap_distance_em1_multiple\"\
+          , 2.0),\n            technical_score\n        )\n        \n        pw_debit\
+          \ = self.calculate_pw_debit(\n            directional_metrics.get(\"dex_same_dir_pct\"\
+          , 50),\n            directional_metrics.get(\"vanna_confidence\", \"medium\"\
+          ),\n            gamma_metrics.get(\"gap_distance_em1_multiple\", 2.0)\n\
+          \        )\n        \n        pw_butterfly = self.calculate_pw_butterfly(\n\
+          \            spot,\n            spot,  # body 在现价\n            em1,\n  \
+          \          directional_metrics.get(\"iv_path\", \"平\")\n        )\n    \
+          \    \n        # Greeks 范围\n        greeks_ranges = self.get_greeks_ranges()\n\
+          \        \n        # 止盈止损参数\n        exit_params = self.get_exit_parameters()\n\
+          \        \n        # 组装结果\n        result = {\n            # 行权价（保留结构，供\
+          \ Agent 6 选择）\n            \"strikes\": strikes,\n            \n       \
+          \     # DTE（扁平化）\n            \"dte_final\": dte_info[\"final_dte\"],\n\
+          \            \"dte_rationale\": dte_info[\"rationale\"],\n            \"\
+          dte_base\": dte_info[\"base_dte\"],\n            \"dte_gap_level\": dte_info[\"\
+          gap_level\"],\n            \"dte_monthly_override\": dte_info[\"monthly_override\"\
+          ],\n            \n            # RR - Iron Condor（扁平化）\n            \"rr_ic_credit\"\
+          : rr_credit_ic[\"credit\"],\n            \"rr_ic_max_profit\": rr_credit_ic[\"\
+          max_profit\"],\n            \"rr_ic_max_loss\": rr_credit_ic[\"max_loss\"\
+          ],\n            \"rr_ic_ratio\": rr_credit_ic[\"rr_ratio\"],\n         \
+          \   \"rr_ic_formula\": rr_credit_ic[\"formula\"],\n            \"rr_ic_width\"\
+          : rr_credit_ic[\"width\"],\n            \"rr_ic_ivr\": rr_credit_ic[\"ivr\"\
+          ],\n            \n            # RR - Bull Call Spread（扁平化）\n           \
+          \ \"rr_bull_debit\": rr_debit_bull[\"debit\"],\n            \"rr_bull_max_profit\"\
+          : rr_debit_bull[\"max_profit\"],\n            \"rr_bull_max_loss\": rr_debit_bull[\"\
+          max_loss\"],\n            \"rr_bull_ratio\": rr_debit_bull[\"rr_ratio\"\
+          ],\n            \"rr_bull_formula\": rr_debit_bull[\"formula\"],\n     \
+          \       \"rr_bull_width\": rr_debit_bull[\"width\"],\n            \n   \
+          \         # Pw - Credit（扁平化）\n            \"pw_credit_estimate\": pw_credit[\"\
+          pw_estimate\"],\n            \"pw_credit_formula\": pw_credit[\"formula\"\
+          ],\n            \"pw_credit_note\": pw_credit[\"pw_note\"],\n          \
+          \  \"pw_credit_base\": pw_credit[\"base\"],\n            \"pw_credit_cluster_adj\"\
+          : pw_credit[\"cluster_adj\"],\n            \"pw_credit_distance_penalty\"\
+          : pw_credit[\"distance_penalty\"],\n            \"pw_credit_technical_boost\"\
+          : pw_credit[\"technical_boost\"],\n            \"pw_credit_adjusted\": pw_credit[\"\
+          pw_adjusted\"],\n            \n            # Pw - Debit（扁平化）\n         \
+          \   \"pw_debit_estimate\": pw_debit[\"pw_estimate\"],\n            \"pw_debit_formula\"\
+          : pw_debit[\"formula\"],\n            \"pw_debit_note\": pw_debit[\"pw_note\"\
+          ],\n            \"pw_debit_base\": pw_debit[\"base\"],\n            \"pw_debit_dex_adj\"\
+          : pw_debit[\"dex_adj\"],\n            \"pw_debit_vanna_adj\": pw_debit[\"\
+          vanna_adj\"],\n            \"pw_debit_gap_penalty\": pw_debit[\"gap_penalty\"\
+          ],\n            \"pw_debit_adjusted\": pw_debit[\"pw_adjusted\"],\n    \
+          \        \n            # Pw - Butterfly（扁平化）\n            \"pw_butterfly_estimate\"\
+          : pw_butterfly[\"pw_estimate\"],\n            \"pw_butterfly_formula\":\
+          \ pw_butterfly[\"formula\"],\n            \"pw_butterfly_note\": pw_butterfly[\"\
+          pw_note\"],\n            \"pw_butterfly_distance_em1\": pw_butterfly[\"\
+          distance_em1\"],\n            \n            # Greeks - Conservative（扁平化）\n\
+          \            \"greeks_conservative_delta_min\": greeks_ranges[\"conservative\"\
+          ][\"delta_min\"],\n            \"greeks_conservative_delta_max\": greeks_ranges[\"\
+          conservative\"][\"delta_max\"],\n            \"greeks_conservative_theta_min\"\
+          : greeks_ranges[\"conservative\"][\"theta_min\"],\n            \"greeks_conservative_vega_max\"\
+          : greeks_ranges[\"conservative\"][\"vega_max\"],\n            \"greeks_conservative_desc\"\
+          : greeks_ranges[\"conservative\"][\"description\"],\n            \n    \
+          \        # Greeks - Balanced（扁平化）\n            \"greeks_balanced_delta_range\"\
+          : greeks_ranges[\"balanced\"][\"delta_range\"],\n            \"greeks_balanced_theta_min\"\
+          : greeks_ranges[\"balanced\"][\"theta_min\"],\n            \"greeks_balanced_desc\"\
+          : greeks_ranges[\"balanced\"][\"description\"],\n            \n        \
+          \    # Greeks - Aggressive（扁平化）\n            \"greeks_aggressive_delta_min\"\
+          : greeks_ranges[\"aggressive\"][\"delta_min\"],\n            \"greeks_aggressive_delta_max\"\
+          : greeks_ranges[\"aggressive\"][\"delta_max\"],\n            \"greeks_aggressive_vega_min\"\
+          : greeks_ranges[\"aggressive\"][\"vega_min\"],\n            \"greeks_aggressive_desc\"\
+          : greeks_ranges[\"aggressive\"][\"description\"],\n            \n      \
+          \      # Exit Parameters - Credit（扁平化）\n            \"exit_credit_profit_pct\"\
+          : exit_params[\"credit_strategies\"][\"profit_target_pct\"],\n         \
+          \   \"exit_credit_stop_pct\": exit_params[\"credit_strategies\"][\"stop_loss_pct\"\
+          ],\n            \"exit_credit_time_days\": exit_params[\"credit_strategies\"\
+          ][\"time_decay_exit_days\"],\n            \"exit_credit_desc\": exit_params[\"\
+          credit_strategies\"][\"description\"],\n            \n            # Exit\
+          \ Parameters - Debit（扁平化）\n            \"exit_debit_profit_pct\": exit_params[\"\
+          debit_strategies\"][\"profit_target_pct\"],\n            \"exit_debit_stop_pct\"\
+          : exit_params[\"debit_strategies\"][\"stop_loss_pct\"],\n            \"\
+          exit_debit_time_days\": exit_params[\"debit_strategies\"][\"time_decay_exit_days\"\
+          ],\n            \"exit_debit_desc\": exit_params[\"debit_strategies\"][\"\
+          description\"],\n            \n            # Exit Parameters - Time（扁平化）\n\
+          \            \"exit_time_days\": exit_params[\"time_management\"][\"exit_days_before_expiry\"\
+          ],\n            \"exit_time_desc\": exit_params[\"time_management\"][\"\
+          description\"],\n            \n            # Metadata（扁平化）\n           \
+          \ \"meta_spot\": spot,\n            \"meta_em1\": em1,\n            \"meta_ivr\"\
+          : ivr_estimate,\n            \"meta_technical_score\": technical_score,\n\
+          \            \"meta_primary_scenario\": scenario.get(\"primary_scenario\"\
+          , \"未知\"),\n            \"meta_scenario_probability\": scenario.get(\"scenario_probability\"\
+          , 0),\n            \"meta_gamma_regime\": agent5_data.get(\"gamma_regime\"\
+          , {}).get(\"spot_vs_trigger\", \"unknown\")\n        }\n        \n     \
+          \   return result"
+        code_language: python3
+        desc: 计算辅助 1006
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: CODE3 Code Helper
+        type: code
+        variables:
+        - value_selector:
+          - '3001'
+          - text
+          value_type: string
+          variable: agent3_output
+        - value_selector:
+          - '4001'
+          - text
+          value_type: string
+          variable: agent4_output
+        - value_selector:
+          - '5001'
+          - text
+          value_type: string
+          variable: agent5_output
+      height: 80
+      id: '1006'
+      position:
+        x: 2594.1154473752654
+        y: 245.3277478801421
+      positionAbsolute:
+        x: 2594.1154473752654
+        y: 245.3277478801421
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
     viewport:
-      x: -522.5157036447893
-      y: 214.50811995991825
-      zoom: 0.5726353502106728
+      x: -636.6480595045591
+      y: 88.42259542711156
+      zoom: 0.4267609260278333
   rag_pipeline_variables: []
