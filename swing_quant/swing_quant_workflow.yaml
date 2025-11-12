@@ -1151,7 +1151,7 @@ workflow:
           completion_params:
             temperature: 0.3
           mode: chat
-          name: deepseek-v3.2-exp-thinking
+          name: Qwen3-8B
           provider: langgenius/openai_api_compatible/openai_api_compatible
         prompt_template:
         - id: sys-cmdlist
@@ -2896,7 +2896,7 @@ workflow:
       positionAbsolute:
         x: 3637.3205297388795
         y: 332.41002500221094
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -3506,23 +3506,32 @@ workflow:
             \ - {{#1008.result.top1_structure#}}】,\n期望值 {{#1008.result.top1_ev#}}\
             \ 美元为正向,\n风险调整收益 {{#1008.result.top1_rar#}} 优秀,\n{{#1008.result.top1_match_reason#}},\n\
             综合评分 {{#1008.result.top1_composite_score#}} 分,\n强烈推荐执行。\"\n```\n\n###\
-            \ 3. 次选策略建议\n\n```\nif ranking[1].ev > 0 and ranking[1].composite_score\
-            \ >= 60:\n    → 提供次选方案: \"若风险承受力较高,可配置 20-30% 仓位于...\"\n```\n\n### 4.\
-            \ 执行优先级\n\n输出清晰的行动指南,包含:\n- **primary**: 首选策略 + 配置比例 + 理由\n- **secondary**:\
-            \ 次选策略 + 配置比例 + 理由\n- **avoid**: 避免策略 + 原因\n\n### 5. 策略对比总览\n\n生成一张排序表格,便于用户快速对比:\n\
-            \n| 排名 | 策略类型 | 期望值(EV) | 风险调整收益 | 剧本匹配 | 流动性 | 评价 |\n|------|---------|-----------|-------------|---------|--------|------|\n\
-            | 1 | 均衡 | 1.98 | 0.733 | 高 | ✅ | 强烈推荐 |\n| 2 | 进取 | 0.32 | 0.1 | 中 |\
-            \ ✅ | 谨慎考虑 |\n| 3 | 保守 | -0.09 | -0.029 | 低 | ✅ | 不推荐 |\n\n---\n\n## 关键原则\n\
-            \n1. **数据驱动**: 所有推荐都基于 CODE4 的计算结果\n2. **简洁明了**: 避免重复 CODE4 已计算的数值,只需解读\n\
-            3. **行动导向**: 给出明确的执行建议\n4. **风险透明**: 清晰说明每个策略的风险点\n5. **禁止重新计算**: 不要尝试验证或修改\
-            \ CODE4 的数值\n\n\n现在请基于输入数据进行策略对比和排序。"
+            \ 3. 次选策略建议\n**数据来源**: 必须从 {{#1008.result.ranking_json#}} 解析完整数组\n```\n\
+            # 解析 ranking_json 字符串得到完整排序数组\nranking = JSON.parse({{#1008.result.ranking_json#}})\n\
+            \n# 获取第2名策略（rank=2）\nsecond_strategy = ranking.find(s => s.rank === 2)\n\
+            \n# 判断条件\nif second_strategy.metrics.ev > 0 AND second_strategy.assessment.composite_score\
+            \ >= 60:\n    → 提供次选方案 (execution_priority.secondary):\n      - strategy_type:\
+            \ second_strategy.strategy_type + \" - \" + second_strategy.structure\n\
+            \      - allocation: \"20-30%配置\"\n      - rationale: 简述期望值、评分及适用场景\n\
+            else:\n    → 不输出 secondary 字段（或设为 null）\n```\n**注意**: \n  - 不能使用 {{#1008.result.top2_ev#}}\
+            \ 等扁平字段，这些仅为显示用\n  - 必须解析 ranking_json 获取第2名的完整 metrics 和 assessment 对象\n\
+            \  - 条件判断基于 ranking[1] (即rank=2的策略，因为数组索引从0开始)\n\n### 4. 执行优先级\n输出清晰的行动指南,包含:\n\
+            - **primary**: 首选策略 + 配置比例 + 理由\n- **secondary**: 次选策略 + 配置比例 + 理由\n-\
+            \ **avoid**: 避免策略 + 原因\n---\n\n## 关键原则\n\n1. **数据驱动**: 所有推荐都基于 CODE4 的计算结果\n\
+            2. **简洁明了**: 避免重复 CODE4 已计算的数值,只需解读\n3. **行动导向**: 给出明确的执行建议\n4. **风险透明**:\
+            \ 清晰说明每个策略的风险点\n5. **禁止重新计算**: 不要尝试验证或修改 CODE4 的数值\n\n\n现在请基于输入数据进行策略对比和排序。"
         - id: d6ff96ac-f577-4cdf-ac82-a19f6ce22151
           role: user
-          text: '请基于量化计算结果生成策略推荐。
-
-            **完整排序数据**(JSON字符串):
-
-            {{#1008.result.ranking_json#}}'
+          text: "【完整排序数据】\n  {{#1008.result.ranking_json#}}\n\n  【Top1 策略摘要】\n  -\
+            \ 排名: {{#1008.result.top1_rank#}}\n  - 类型: {{#1008.result.top1_strategy_type#}}\n\
+            \  - 结构: {{#1008.result.top1_structure#}}\n  - 期望值: {{#1008.result.top1_ev#}}\n\
+            \  - 风险调整收益: {{#1008.result.top1_rar#}}\n  - 胜率: {{#1008.result.top1_pw#}}\n\
+            \  - 剧本匹配度: {{#1008.result.top1_scenario_match#}}\n  - 匹配理由: {{#1008.result.top1_match_reason#}}\n\
+            \  - 流动性通过: {{#1008.result.top1_liquidity_pass#}}\n  - 流动性说明: {{#1008.result.top1_liquidity_note#}}\n\
+            \  - 综合评分: {{#1008.result.top1_composite_score#}}\n\n  【Top2 策略摘要】\n \
+            \ - 类型: {{#1008.result.top2_strategy_type#}}\n  - 期望值: {{#1008.result.top2_ev#}}\n\
+            \  - 综合评分: {{#1008.result.top2_composite_score#}}\n\n请严格按照 JSON Schema\
+            \ 输出策略推荐排序。"
         selected: false
         structured_output:
           schema:
@@ -3633,7 +3642,7 @@ workflow:
       positionAbsolute:
         x: 3342.950228515668
         y: 332.41002500221094
-      selected: false
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -4208,7 +4217,7 @@ workflow:
       type: custom
       width: 242
     viewport:
-      x: -1297.9171244133763
-      y: 154.73894465041883
-      zoom: 0.5343172029754297
+      x: -1468.8441189946616
+      y: 102.21419984100959
+      zoom: 0.5350584375669217
   rag_pipeline_variables: []
