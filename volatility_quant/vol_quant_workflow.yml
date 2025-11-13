@@ -1,20 +1,181 @@
 app:
-  description: '波动率与结构性供需分析师'
-  icon: '🤖'
-  icon_background: '#D5D9EB'
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
   mode: advanced-chat
-  name: '波动率量化分析师 V3'
+  name: vol-quantity
   use_icon_as_answer_icon: false
 dependencies:
 - current_identifier: null
   type: marketplace
   value:
-    marketplace_plugin_unique_identifier: langgenius/openai:0.2.5@373362a028986aae53a7baf73a7f11991ba3c22c69eaf97d6cde048cfd4a9f98
+    marketplace_plugin_unique_identifier: langgenius/openai_api_compatible:0.0.24@2266d6adfeafd3a161ba4a033553f4ff8a8b1d07be54f4b11ce9e68032889ac3
+    version: null
 kind: app
 version: 0.4.0
 workflow:
   conversation_variables: []
-  environment_variables: []
+  environment_variables:
+  - description: L>=1.0时做多波动率概率下限
+    id: 5525253a-c885-42c6-ad22-19699a917786
+    name: PROB_LONG_L1_0
+    selector:
+    - env
+    - PROB_LONG_L1_0
+    value: '0.55'
+    value_type: string
+  - description: L>=1.5时做多波动率概率
+    id: 23f5fd45-15c6-459b-8a80-bf541f4a201d
+    name: PROB_LONG_L1_5
+    selector:
+    - env
+    - PROB_LONG_L1_5
+    value: '0.60'
+    value_type: string
+  - description: L>=2.0时做多波动率概率
+    id: 6ec80689-ddb8-415c-82f3-c0a476d01097
+    name: PROB_LONG_L2_0
+    selector:
+    - env
+    - PROB_LONG_L2_0
+    value: '0.65'
+    value_type: string
+  - description: ''
+    id: 287bb18e-5cba-4b6b-9535-de421e26dab4
+    name: WEIGHT_VRP_LONG
+    selector:
+    - env
+    - WEIGHT_VRP_LONG
+    value: '0.25'
+    value_type: string
+  - description: ''
+    id: 61f6b67e-3cd0-4fb3-a731-eda71f3a3533
+    name: WEIGHT_GEX_LONG
+    selector:
+    - env
+    - WEIGHT_GEX_LONG
+    value: '0.18'
+    value_type: string
+  - description: ''
+    id: 6d50b104-3e70-43ca-a90d-3dd561a32f94
+    name: WEIGHT_VEX_LONG
+    selector:
+    - env
+    - WEIGHT_VEX_LONG
+    value: '0.18'
+    value_type: string
+  - description: ''
+    id: 749169ba-5cac-49c5-862d-431fe6580b98
+    name: WEIGHT_CARRY_LONG
+    selector:
+    - env
+    - WEIGHT_CARRY_LONG
+    value: '0.08'
+    value_type: string
+  - description: ''
+    id: 60f510da-097b-4eb8-8117-b367a4ffee3c
+    name: WEIGHT_SKEW_LONG
+    selector:
+    - env
+    - WEIGHT_SKEW_LONG
+    value: '0.08'
+    value_type: string
+  - description: ''
+    id: 349b3c5a-3b8d-4ba0-93e5-9527f5ef9ae8
+    name: WEIGHT_VRP_SHORT
+    selector:
+    - env
+    - WEIGHT_VRP_SHORT
+    value: '0.30'
+    value_type: string
+  - description: ''
+    id: fd3bb6f0-556f-4ece-b7fa-9911a6de7699
+    name: WEIGHT_GEX_SHORT
+    selector:
+    - env
+    - WEIGHT_GEX_SHORT
+    value: '0.12'
+    value_type: string
+  - description: ''
+    id: c1aafa4a-8b7d-44cb-998d-2a0fbde2faae
+    name: WEIGHT_CARRY_SHORT
+    selector:
+    - env
+    - WEIGHT_CARRY_SHORT
+    value: '0.18'
+    value_type: string
+  - description: 做多波动率L分数门槛
+    id: 80632eef-372f-46ea-8968-08875bba1981
+    name: DECISION_THRESHOLD_LONG
+    selector:
+    - env
+    - DECISION_THRESHOLD_LONG
+    value: '1.00'
+    value_type: string
+  - description: 做空波动率S分数门槛
+    id: 0b6c6658-734f-4984-a1d6-318a35d54015
+    name: DECISION_THRESHOLD_SHORT
+    selector:
+    - env
+    - DECISION_THRESHOLD_SHORT
+    value: '1.00'
+    value_type: string
+  - description: 概率门槛
+    id: 93465a47-23d5-4ab1-b4e1-ef70229003f0
+    name: PROB_THRESHOLD
+    selector:
+    - env
+    - PROB_THRESHOLD
+    value: '0.55'
+    value_type: string
+  - description: Edge EV必须>0
+    id: 787a82e0-45aa-4117-9bc7-793b83d31044
+    name: EDGE_EV_THRESHOLD
+    selector:
+    - env
+    - EDGE_EV_THRESHOLD
+    value: '0'
+    value_type: string
+  - description: Edge最低盈亏比
+    id: dd480a6c-a157-46a2-bbdf-283cc28ecdde
+    name: EDGE_RR_THRESHOLD
+    selector:
+    - env
+    - EDGE_RR_THRESHOLD
+    value: '1.5'
+    value_type: string
+  - description: 距VOL TRIGGER阈值%(视为中性)
+    id: 7d31d5ec-a884-484b-86a1-c5e60c8d475a
+    name: TRIGGER_NEUTRAL_PCT
+    selector:
+    - env
+    - TRIGGER_NEUTRAL_PCT
+    value: '0.2'
+    value_type: string
+  - description: Gamma Wall接近度阈值%
+    id: 461c2129-b20d-43bc-a3cb-8e1efdb65aa9
+    name: GAMMA_WALL_PROX_THRESHOLD
+    selector:
+    - env
+    - GAMMA_WALL_PROX_THRESHOLD
+    value: '0.5'
+    value_type: string
+  - description: RIM>=0.6视为盘中动能有效
+    id: ffa721e1-9974-435f-ab5d-2255ec9ffb77
+    name: RIM_ACTIVE_THRESHOLD
+    selector:
+    - env
+    - RIM_ACTIVE_THRESHOLD
+    value: '0.6'
+    value_type: string
+  - description: RIM<=0.4偏弱
+    id: a2a1b0e7-b635-4876-b33f-e6bbba9b9e07
+    name: RIM_WEAK_THRESHOLD
+    selector:
+    - env
+    - RIM_WEAK_THRESHOLD
+    value: '0.4'
+    value_type: string
   features:
     file_upload:
       allowed_file_extensions:
@@ -44,15 +205,14 @@ workflow:
         - local_file
         - remote_url
       number_limits: 3
-    opening_statement: "你好,我是您的波动率与结构性供需分析师。请稍等,我将向您收集分析所需的变量。"
+    opening_statement: ''
     retriever_resource:
-      enabled: false
+      enabled: true
     sensitive_word_avoidance:
       enabled: false
     speech_to_text:
       enabled: false
-    suggested_questions:
-    - "开始分析"
+    suggested_questions: []
     suggested_questions_after_answer:
       enabled: false
     text_to_speech:
@@ -61,44 +221,141 @@ workflow:
       voice: ''
   graph:
     edges:
-    # 1. Start -> Router
     - data:
-        isInIteration: false
-        isInLoop: false
         sourceType: start
         targetType: llm
-      id: 1740000001-source-1740000002-target
-      source: '1740000001'
+      id: 1001-llm
+      source: '1001'
       sourceHandle: source
-      target: '1740000002'
+      target: llm
       targetHandle: target
       type: custom
-      zIndex: 0
-    
-    # 2. Router -> Main Router
     - data:
         isInIteration: false
         isInLoop: false
         sourceType: llm
         targetType: if-else
-      id: 1740000002-source-1740000003-target
-      source: '1740000002'
+      id: llm-source-1003-target
+      source: llm
       sourceHandle: source
-      target: '1740000003'
+      target: '1003'
       targetHandle: target
       type: custom
       zIndex: 0
-      
-    # 3. Path A: New Request
     - data:
         isInIteration: false
         isInLoop: false
         sourceType: if-else
         targetType: llm
-      id: 1740000003-source-1740000011-target
-      source: '1740000003'
+      id: 1003-true-2001-target
+      source: '1003'
+      sourceHandle: 'true'
+      target: '2001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 2001-source-2002-target
+      source: '2001'
       sourceHandle: source
-      target: '1740000011'
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1003-bc8d0973-baba-4332-88b3-bfbe4e341190-3001-target
+      source: '1003'
+      sourceHandle: bc8d0973-baba-4332-88b3-bfbe4e341190
+      target: '3001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 2001-source-2002-target
+      source: '2001'
+      sourceHandle: source
+      target: '2002'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: if-else
+      id: 3001-source-1763047571352-target
+      source: '3001'
+      sourceHandle: source
+      target: '1763047571352'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 1763047571352-70915da9-857e-42ab-b45f-6de71d443129-1763047646569-target
+      source: '1763047571352'
+      sourceHandle: 70915da9-857e-42ab-b45f-6de71d443129
+      target: '1763047646569'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+      id: 1763047571352-true-4001-target
+      source: '1763047571352'
+      sourceHandle: 'true'
+      target: '4001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: code
+      id: 4001-source-5001-target
+      source: '4001'
+      sourceHandle: source
+      target: '5001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: llm
+      id: 5001-source-6001-target
+      source: '5001'
+      sourceHandle: source
+      target: '6001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: llm
+      id: 6001-source-7001-target
+      source: '6001'
+      sourceHandle: source
+      target: '7001'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -107,414 +364,909 @@ workflow:
         isInLoop: false
         sourceType: llm
         targetType: answer
-      id: 1740000011-source-1740000012-target
-      source: '1740000011'
+      id: 7001-source-1763048723409-target
+      source: '7001'
       sourceHandle: source
-      target: '1740000012'
+      target: '1763048723409'
       targetHandle: target
       type: custom
       zIndex: 0
-
-    # 4. Path B: Vars Provided
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 1740000003-source-1740000021-target
-      source: '1740000003'
-      sourceHandle: source
-      target: '1740000021'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: answer
-      id: 1740000021-source-1740000022-target
-      source: '1740000021'
-      sourceHandle: source
-      target: '1740000022'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-
-    # 5. Path C: Data Provided
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 1740000003-source-1740000031-target
-      source: '1740000003'
-      sourceHandle: source
-      target: '1740000031'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: answer
-      id: 1740000031-source-1740000032-target
-      source: '1740000031'
-      sourceHandle: source
-      target: '1740000032'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-
-    # 6. Path D: Invalid
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: if-else
-        targetType: answer
-      id: 1740000003-source-1740000041-target
-      source: '1740000003'
-      sourceHandle: source
-      target: '1740000041'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-
     nodes:
-    # --------------------------------------------------
-    # 1. START NODE
-    # --------------------------------------------------
     - data:
-        desc: ''
         selected: false
-        title: 用户输入
+        title: 开始
         type: start
-        variables:
-        - label: query
-          max_length: 20000
-          options: []
-          required: true
-          type: text-input
-          variable: query
-      height: 90
-      id: '1740000001'
+        variables: []
+      height: 52
+      id: '1001'
       position:
-        x: 30
-        y: 300
+        x: 80
+        y: 282
       positionAbsolute:
-        x: 30
-        y: 300
-      selected: false
+        x: 80
+        y: 282
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
-
-    # --------------------------------------------------
-    # 2. AGENT 1: Router
-    # --------------------------------------------------
+      width: 242
     - data:
         context:
           enabled: false
           variable_selector: []
-        desc: ''
+        desc: 判断输入类型
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: false
+            size: 10
         model:
           completion_params:
-            temperature: 0.7
+            temperature: 0.3
           mode: chat
-          name: gpt-4o
-          provider: openai
+          name: Qwen3-8B
+          provider: langgenius/openai_api_compatible/openai_api_compatible
         prompt_template:
-        - id: sys-router-001
+        - id: 01a841c6-a56b-47f5-b789-56ba99a17f50
           role: system
-          text: "你是一个路由助手。你的唯一任务是判断用户输入属于以下哪一类,并仅输出 VARS_PROVIDED, DATA_PROVIDED, NEW_REQUEST, 或 INVALID。1.VARS_PROVIDED:如果消息中包含明确的变量赋值,如symbol:,event_type:,HV10:,holding_window:。2.DATA_PROVIDED:如果消息中包含gexbot的图表数据特征词,如!trigger,!gexn,VOL TRIGGER:,gexr output:,RIM:,VVIX:。3.NEW_REQUEST:如果消息是新的会话发起,如你好,开始分析,分析一下NVDA,并且不包含上述1和2的特征词。4.INVALID:其他所有情况。【你的判断】"
-        - role: user
-          text: '{{#1740000001.query#}}'
+          text: "你是路由助手，判断用户输入属于以下哪一类，仅输出一个关键词：\n                \n1. \"VARIABLES\"\
+            \ - 用户提供标的代码、事件类型等变量信息\n2. \"DATA\" - 用户回传gexbot图表数据（包含图片或数据截图）\n3. \"\
+            INVALID\" - 其他无效输入\n\n\n判断规则：\n- 若消息包含标的代码（1-5个大写字母）且提到事件类型、DTE等信息 → VARIABLES\n\
+            - 若上传了图片文件 → DATA\n- 其他 → INVALID"
         selected: false
-        title: LLM路由
+        title: Router
         type: llm
-        variables: []
         vision:
           enabled: false
-      height: 90
-      id: '1740000002'
+      height: 116
+      id: llm
       position:
-        x: 334
-        y: 300
+        x: 380
+        y: 282
       positionAbsolute:
-        x: 334
-        y: 300
+        x: 380
+        y: 282
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
-
-    # --------------------------------------------------
-    # 3. IF-ELSE NODE
-    # --------------------------------------------------
+      width: 242
+    - data:
+        answer: 【命令清单回复】{{#2001.text#}}
+        selected: false
+        title: 直接回复
+        type: answer
+        variables: []
+      height: 119
+      id: '2002'
+      position:
+        x: 1347.0055413355958
+        y: 146.16624006787654
+      positionAbsolute:
+        x: 1347.0055413355958
+        y: 146.16624006787654
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
     - data:
         cases:
-        - case_id: case-new-request
+        - case_id: 'true'
           conditions:
-          - comparison_operator: contains
-            id: cond-new-request
-            value: NEW_REQUEST
+          - comparison_operator: is
+            id: f07e03f3-5176-4004-aadc-66e529768d54
+            value: VARIABLES
+            varType: string
             variable_selector:
-            - '1740000002'
+            - llm
             - text
+          id: 'true'
           logical_operator: and
-        - case_id: case-vars-provided
+        - case_id: bc8d0973-baba-4332-88b3-bfbe4e341190
           conditions:
-          - comparison_operator: contains
-            id: cond-vars-provided
-            value: VARS_PROVIDED
+          - comparison_operator: not empty
+            id: a984d6b5-59b5-4cc2-898b-03c0b11b4a89
+            value: ''
+            varType: array[file]
             variable_selector:
-            - '1740000002'
-            - text
+            - sys
+            - files
+          id: bc8d0973-baba-4332-88b3-bfbe4e341190
           logical_operator: and
-        - case_id: case-data-provided
-          conditions:
-          - comparison_operator: contains
-            id: cond-data-provided
-            value: DATA_PROVIDED
-            variable_selector:
-            - '1740000002'
-            - text
-          logical_operator: and
-        - case_id: case-invalid
-          conditions:
-          - comparison_operator: contains
-            id: cond-invalid
-            value: INVALID
-            variable_selector:
-            - '1740000002'
-            - text
-          logical_operator: and
-        desc: ''
         selected: false
-        title: 意图分支
+        title: 条件分支
         type: if-else
-      height: 90
-      id: '1740000003'
+      height: 172
+      id: '1003'
       position:
-        x: 638
-        y: 300
+        x: 702
+        y: 282
       positionAbsolute:
-        x: 638
-        y: 300
+        x: 702
+        y: 282
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
-
-    # --------------------------------------------------
-    # PATH A: NEW REQUEST
-    # --------------------------------------------------
+      width: 242
     - data:
         context:
           enabled: false
           variable_selector: []
-        desc: ''
         model:
           completion_params:
-            temperature: 0.7
+            temperature: 0.3
           mode: chat
-          name: gpt-4o
-          provider: openai
+          name: Qwen3-8B
+          provider: langgenius/openai_api_compatible/openai_api_compatible
         prompt_template:
-        - id: sys-ask-001
+        - id: 8f8a1d50-dc15-4517-aafc-3032b38e4771
           role: system
-          text: "你是我的波动率与结构性供需分析师。你的第一个任务是开始交互流程,向我收集必要的初始变量。请严格按照以下格式,向用户提问,要求他她提供:您好,我是您的波动率量化分析师。为了开始分析,请提供以下信息(若无特定值,可回复默认):1.symbol:(指数板块ETF单股)2.event_type:(财报FOMCCPI非农并购其他)3.event_time_ET:(事件发生时间)4.holding_window:(如T到T+3,或5-20DTE)5.策略偏好:(delta-neutral或允许delta暴露)6.HV10HV20HV60:(请提供YZ口径的年化值,如25/30/35)7.会话时间:(盘中RTH盘前盘后)8.上下文:(是否静默期?是否临近OPEX?有无突发新闻?)9.增强数据(可选):(若能提供,请一并给出:VVIX,VIX9D/VIX,财报implied move,隐含相关性等)请仅输出以上提问内容。"
-        - role: user
-          text: '{{#1740000001.query#}}'
+          text: "你是gexbot命令生成助手。根据用户提供的变量，生成标准化的数据抓取命令清单。\n                \n【输入解析】\n\
+            从用户输入中提取：\n- symbol: 标的代码（大写）\n- event_type: 事件类型（财报/FOMC/CPI/非农/并购/其他/无）\n\
+            - holding_window: 持仓窗口（如 5-20 DTE）\n- strategy_preference: 策略偏好（delta-neutral\
+            \ 或 允许delta暴露）\n\n\n【命令格式规范】\n- 每条命令独占一行，便于复制\n- 参数按固定顺序，省略不适用的参数位\n-\
+            \ contract/filter: atm / ntm\n- expiration_filter: w(周) / m(月) / *(全部)\n\
+            \n\n【参数顺序】\n- !gexn / !gexr: {SYMBOL} {strikes} {dte}\n- !vexn: {SYMBOL}\
+            \ {strikes} {dte} {expiration_filter}\n- !vanna: {SYMBOL} {contract_filter}\
+            \ {dte} {expiration_filter}\n- !term: {SYMBOL} {dte} {expiration_filter}\n\
+            - !skew: {SYMBOL} {metric} {contract_or_option} {dte} {expiration_filter}\n\
+            - !surface: {SYMBOL} {metric} {contract_filter} {dte} {expiration_filter}\n\
+            - !trigger: {SYMBOL} {dte}\n\n\n【标准命令清单】\n根据 holding_window 和 event_type\
+            \ 调整 DTE 参数：\n- 事件前(5-20 DTE): 使用较短DTE\n- 常规(30-45 DTE): 使用标准DTE\n- 长周期:\
+            \ 扩展DTE\n\n\n**必备命令**（按顺序输出）:\n!trigger {SYMBOL} 98\n!gexn {SYMBOL} 15\
+            \ 98\n!gexr {SYMBOL} 15 98\n!vexn {SYMBOL} 15 190 *\n!vanna {SYMBOL} atm\
+            \ 190 *\n!vanna {SYMBOL} ntm 90\n!term {SYMBOL} 365 w\n!term {SYMBOL}\
+            \ 365 m\n!skew {SYMBOL} ivmid atm 30\n!skew {SYMBOL} ivmid ntm 30\n!skew\
+            \ {SYMBOL} ivmid put 30 w\n!surface {SYMBOL} ivmid 98\n!surface {SYMBOL}\
+            \ ivmid ntm 98\n!surface {SYMBOL} ivask ntm 98\n!surface {SYMBOL} spread\
+            \ atm 98\n\n\n**条件扩展**（根据场景）:\n- 事件前: 增加 extrinsic, theta, gex, vex\n\
+            - 盘中路径: 增加 gamma, spread, ivask\n- 事件后: 增加 vex, theta, vanna\n\n\n【输出格式】\n\
+            ## gexbot 数据抓取命令清单\n\n\n**标的**: {SYMBOL}\n**事件类型**: {event_type}\n**持仓窗口**:\
+            \ {holding_window}\n**策略偏好**: {strategy_preference}\n\n\n### 必备命令（请逐行复制执行）\n\
+            ```\n{命令列表，每行一条}\n```\n\n\n### 补充数据需求\n请同时提供以下数据：\n1. **HV数据**: HV10,\
+            \ HV20, HV60 (Yang-Zhang口径, 252年化)\n2. **RIM数据** (可选，提升精度):\n    - 方法1:\
+            \ 近{w}分钟高低价区间\n    - 方法2: ATM IV 或 ATM 30D IV\n    - 方法3: ATM straddle价格\n\
+            3. **增强数据** (可选):\n    - VVIX水平\n    - VIX9D / VIX\n    - 主要价位OI聚集\n\n\
+            \n### 回传要求\n- 每张图/输出请注明命令全文与时间戳(ET)\n- 可附收盘价与当日变动\n- 若命令输出为空或异常，请直接说明"
+        - id: 81bae211-b154-44b1-9853-9dc99ef34760
+          role: user
+          text: ''
         selected: false
-        title: LLM变量收集
+        title: 命令清单生成
         type: llm
-        variables: []
         vision:
           enabled: false
-      height: 90
-      id: '1740000011'
+      height: 88
+      id: '2001'
       position:
-        x: 942
-        y: 50
+        x: 1004
+        y: 282
       positionAbsolute:
-        x: 942
-        y: 50
-      selected: false
+        x: 1004
+        y: 282
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
-    - data:
-        answer: '{{#1740000011.text#}}'
-        desc: ''
-        selected: false
-        title: 回复提问
-        type: answer
-        variables: []
-      height: 90
-      id: '1740000012'
-      position:
-        x: 1246
-        y: 50
-      positionAbsolute:
-        x: 1246
-        y: 50
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 244
-
-    # --------------------------------------------------
-    # PATH B: VARS PROVIDED
-    # --------------------------------------------------
+      width: 242
     - data:
         context:
           enabled: false
           variable_selector: []
-        desc: ''
         model:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gpt-4o
-          provider: openai
+          name: Qwen3-VL-235B-A22B-Thinking
+          provider: langgenius/openai_api_compatible/openai_api_compatible
         prompt_template:
-        - id: sys-gencmd-001
+        - id: 02f38dd4-5235-494a-9771-e2fc10fcb93f
           role: system
-          text: "你是分析师。用户已提供了初始变量。你的任务是:1.解析用户提供的变量。2.将这些变量打包成一个JSON存根(隐藏在HTML注释中),用于对话历史传递。3.根据变量(主要是SYMBOL),生成标准指令列表(默认套件)。4.严格按照简化版按行输出的格式返回命令。标准指令列表(默认套件):!gexn {SYMBOL} 15 98;!gexr {SYMBOL} 15 98;!dex {SYMBOL} 15 98;!vexn {SYMBOL} 15 98;!vanna {SYMBOL} 15 98;!trigger {SYMBOL};!term {SYMBOL};!skew {SYMBOL} 0 98;!skew {SYMBOL} 25 98;!surface {SYMBOL} vex ntm 190。请输出:感谢您提供变量。请执行以下gexbot命令并回传所有图表和读数,然后将实际命令列表替换到此处。"
-        - role: user
-          text: '{{#1740000001.query#}}'
+          text: "你是gexbot图表解析与数据校验Agent。\n                \n【任务】\n1. 识别并提取gexbot图表中的关键数值\n\
+            2. 校验核心字段完整性\n3. 对缺失字段给出补齐方法\n\n\n【核心字段清单】（22个必需字段）\n**VOL TRIGGER 相关**:\n\
+            - vol_trigger: VOL TRIGGER数值（来自 !trigger 命令）\n- spot: 现价\n- spot_vs_trigger:\
+            \ 现价相对VOL TRIGGER位置（above/below/near）\n    - above: Spot >= VOL TRIGGER\
+            \ → NET-GEX > 0\n    - below: Spot < VOL TRIGGER → NET-GEX < 0\n    -\
+            \ near: |Spot - VOL TRIGGER| / Spot <= 0.2% → 中性/易翻转\n- net_gex_sign:\
+            \ NET-GEX符号（positive/negative/neutral）\n\n\n**Gamma Walls**:\n- gamma_wall:\
+            \ Gamma Wall位置\n- call_wall: Call Wall位置\n- put_wall: Put Wall位置\n- gamma_wall_prox:\
+            \ min(|Spot - GammaWall_i|/Spot)\n\n\n**IV/HV 数据**:\n- iv_event_w_atm:\
+            \ 事件周ATM IV\n- iv_m1_atm: 近月ATM IV\n- iv_m2_atm: 次近月ATM IV\n- hv10: 历史波动率10日\n\
+            - hv20: 历史波动率20日\n- hv60: 历史波动率60日\n\n\n**结构性指标**:\n- vex_net: VEX净值（5-60\
+            \ DTE）\n- vanna_atm: Vanna ATM\n- term_slope: 期限结构斜率\n- put_skew_25: Put\
+            \ Skew 25Δ\n- call_skew_25: Call Skew 25Δ\n- spread_atm: ATM Spread\n\
+            - ask_premium_atm: ATM Ask Premium %\n\n\n【图表识别规则】\n- !trigger 图表: 识别\
+            \ VOL TRIGGER / GAMMA WALL / CALL WALL / PUT WALL\n- !gexn / !gexr 图表:\
+            \ 识别 NET-GEX 符号、墙位\n- !vexn 图表: 识别 VEX 净值\n- !vanna 图表: 识别 Vanna ATM 符号与强度\n\
+            - !term 图表: 识别期限结构斜率\n- !skew 图表: 识别 Put/Call Skew\n- !surface spread/ivask\
+            \ 图表: 识别流动性指标\n\n\n【缺失字段补齐方法】\n优先级 critical:\n- vol_trigger: !trigger\
+            \ {SYMBOL} 98\n- spot: 从任意图表提取或用户提供\n- net_gex_sign: 根据 spot vs vol_trigger\
+            \ 判定\n\n\n优先级 high:\n- gamma_wall_prox: !trigger 或 !gexr 提取墙位计算\n- iv_event_w_atm:\
+            \ !skew {SYMBOL} ivmid atm {dte}\n- hv10: 用户提供或从平台获取\n\n\n优先级 medium:\n\
+            - vex_net: !vexn {SYMBOL} 15 190 *\n- vanna_atm: !vanna {SYMBOL} atm 190\
+            \ *\n- term_slope: !term {SYMBOL} 365 w\n\n\n【输出JSON】\n严格按照上述schema输出，包含：\n\
+            - symbol: 标的代码\n- timestamp: 数据时间戳(ET)\n- status: data_ready / missing_data\n\
+            - core_fields: 所有核心字段的提取值（缺失用null）\n- missing_fields: 缺失字段列表（含优先级、补齐命令、替代方法）\n\
+            - next_step: proceed_to_analysis / request_missing_data"
+        - id: d2dcaf20-2791-4e8b-80e8-162836af58e2
+          role: user
+          text: '【上传文件】
+
+            {{#sys.files#}}
+
+            '
         selected: false
-        title: LLM命令生成
+        structured_output:
+          schema:
+            properties:
+              core_fields:
+                properties:
+                  ask_premium_atm:
+                    type: number
+                  call_skew_25:
+                    type: number
+                  call_wall:
+                    type: number
+                  gamma_wall:
+                    type: number
+                  gamma_wall_prox:
+                    type: number
+                  hv10:
+                    type: number
+                  hv20:
+                    type: number
+                  hv60:
+                    type: number
+                  iv_event_w_atm:
+                    type: number
+                  iv_m1_atm:
+                    type: number
+                  iv_m2_atm:
+                    type: number
+                  net_gex_sign:
+                    enum:
+                    - positive
+                    - negative
+                    - neutral
+                    type: string
+                  put_skew_25:
+                    type: number
+                  put_wall:
+                    type: number
+                  spot:
+                    type: number
+                  spot_vs_trigger:
+                    enum:
+                    - above
+                    - below
+                    - near
+                    type: string
+                  spread_atm:
+                    type: number
+                  term_slope:
+                    type: number
+                  vanna_atm:
+                    type: number
+                  vex_net:
+                    type: number
+                  vol_trigger:
+                    type: number
+                required:
+                - vol_trigger
+                - spot
+                - net_gex_sign
+                - gamma_wall_prox
+                - iv_event_w_atm
+                - hv10
+                type: object
+              missing_fields:
+                items:
+                  properties:
+                    alternative:
+                      type: string
+                    command:
+                      type: string
+                    field:
+                      type: string
+                    priority:
+                      enum:
+                      - critical
+                      - high
+                      - medium
+                      - low
+                      type: string
+                  type: object
+                type: array
+              next_step:
+                enum:
+                - proceed_to_analysis
+                - request_missing_data
+                type: string
+              status:
+                enum:
+                - data_ready
+                - missing_data
+                type: string
+              symbol:
+                type: string
+              timestamp:
+                type: string
+            required:
+            - symbol
+            - timestamp
+            - status
+            - core_fields
+            - missing_fields
+            - next_step
+            type: object
+        structured_output_enabled: true
+        title: Agent 3 数据校验
         type: llm
-        variables: []
         vision:
-          enabled: false
-      height: 90
-      id: '1740000021'
+          configs:
+            detail: high
+            variable_selector:
+            - sys
+            - files
+          enabled: true
+      height: 88
+      id: '3001'
       position:
-        x: 942
-        y: 200
+        x: 1004
+        y: 409
       positionAbsolute:
-        x: 942
-        y: 200
+        x: 1004
+        y: 409
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
     - data:
-        answer: '{{#1740000021.text#}}'
-        desc: ''
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: contains
+            id: 53c59dbf-fdcc-4f6f-b939-7fc6d995270d
+            value: case-ready
+            varType: string
+            variable_selector:
+            - '3001'
+            - structured_output
+            - status
+          id: 'true'
+          logical_operator: and
+        - case_id: 70915da9-857e-42ab-b45f-6de71d443129
+          conditions:
+          - comparison_operator: is
+            id: 6f7f45b7-a466-4f70-b677-9dcd422765e0
+            value: case-missing
+            varType: object
+            variable_selector:
+            - '3001'
+            - structured_output
+            - status
+          id: 70915da9-857e-42ab-b45f-6de71d443129
+          logical_operator: and
         selected: false
-        title: 回复命令清单
+        title: 数据完整性检查
+        type: if-else
+      height: 172
+      id: '1763047571352'
+      position:
+        x: 1306
+        y: 409
+      positionAbsolute:
+        x: 1306
+        y: 409
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#3001.text#}}'
+        selected: false
+        title: 返回缺失数据提示
         type: answer
         variables: []
-      height: 90
-      id: '1740000022'
+      height: 103
+      id: '1763047646569'
       position:
-        x: 1246
-        y: 200
+        x: 1617
+        y: 592
       positionAbsolute:
-        x: 1246
-        y: 200
+        x: 1617
+        y: 592
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
-
-    # --------------------------------------------------
-    # PATH C: DATA PROVIDED
-    # --------------------------------------------------
+      width: 242
+    - data:
+        code: "import json\nimport math\n\ndef calculate_features(core_fields: dict,\
+          \ env_vars: dict) -> dict:\n\"\"\"计算波动率交易特征\"\"\"\n\n# 提取核心字段\nspot = core_fields.get('spot',\
+          \ 0)\nvol_trigger = core_fields.get('vol_trigger', 0)\niv_event_w = core_fields.get('iv_event_w_atm',\
+          \ 0)\niv_m1 = core_fields.get('iv_m1_atm', 0)\niv_m2 = core_fields.get('iv_m2_atm',\
+          \ 0)\nhv10 = core_fields.get('hv10', 0)\nhv20 = core_fields.get('hv20',\
+          \ 0)\nhv60 = core_fields.get('hv60', 0)\nvex_net = core_fields.get('vex_net',\
+          \ 0)\nvanna_atm = core_fields.get('vanna_atm', 0)\nterm_slope = core_fields.get('term_slope',\
+          \ 0)\nput_skew_25 = core_fields.get('put_skew_25', 0)\ncall_skew_25 = core_fields.get('call_skew_25',\
+          \ 0)\nspread_atm = core_fields.get('spread_atm', 0)\nask_premium = core_fields.get('ask_premium_atm',\
+          \ 0)\ngamma_wall_prox = core_fields.get('gamma_wall_prox', 0)\n\n# 1. VRP\
+          \ (Variance Risk Premium)\nvrp_ew = iv_event_w - hv10 if iv_event_w and\
+          \ hv10 else 0\nvrp_30 = iv_m1 - hv20 if iv_m1 and hv20 else 0\n\n# 2. Term\
+          \ Structure\nterm_curv = 0  # 简化处理，需要更多期限点\nif iv_m1 and iv_m2:\n    term_curv\
+          \ = iv_m2 - 2*iv_m1 + iv_event_w if iv_event_w else 0\n\n# 3. Skew\nskew_asym\
+          \ = (put_skew_25 - call_skew_25) if put_skew_25 and call_skew_25 else 0\n\
+          \n# 4. RV Momentum\nrv_momo = (hv10 / hv60 - 1) if hv10 and hv60 and hv60\
+          \ > 0 else 0\n\n# 5. GEX Level (基于VOL TRIGGER)\nspot_vs_trigger = core_fields.get('spot_vs_trigger',\
+          \ 'unknown')\nif spot_vs_trigger == 'below':\n    gex_level = 1  # 负GEX，趋势倾向，做多波动\n\
+          elif spot_vs_trigger == 'above':\n    gex_level = -1  # 正GEX，区间倾向，做空波动\n\
+          else:\n    gex_level = 0  # 中性\n\n# 6. Pin Risk\ntrigger_neutral_pct = float(env_vars.get('TRIGGER_NEUTRAL_PCT',\
+          \ 0.2)) / 100\ngamma_wall_prox_threshold = float(env_vars.get('GAMMA_WALL_PROX_THRESHOLD',\
+          \ 0.5)) / 100\n\npin_risk = 0\nif (gamma_wall_prox <= gamma_wall_prox_threshold\
+          \ and \n    spot_vs_trigger == 'above'):\n    pin_risk = -1  # Pin风险，不利于做多波动\n\
+          \nfeatures = {\n    # 原始特征\n    'vrp_ew': round(vrp_ew, 4),\n    'vrp_30':\
+          \ round(vrp_30, 4),\n    'term_slope': round(term_slope, 4),\n    'term_curv':\
+          \ round(term_curv, 4),\n    'skew_asym': round(skew_asym, 4),\n    'rv_momo':\
+          \ round(rv_momo, 4),\n    'gex_level': gex_level,\n    'pin_risk': pin_risk,\n\
+          \    'vex_net': vex_net,\n    'vanna_atm': vanna_atm,\n    'spread_atm':\
+          \ spread_atm,\n    'ask_premium_atm': ask_premium,\n    'gamma_wall_prox':\
+          \ round(gamma_wall_prox, 4),\n    \n    # 派生特征\n    'vrp_sel': vrp_ew if\
+          \ abs(vrp_ew) > 0.001 else vrp_30,  # 选择使用的VRP\n}\n\nreturn features\n\n\
+          def main(validation_output: str, **env_vars) -> dict:\n\"\"\"主函数\"\"\"\n\
+          try:\n    data = json.loads(validation_output)\n    core_fields = data.get('core_fields',\
+          \ {})\n    \n    features = calculate_features(core_fields, env_vars)\n\
+          \    \n    result = {\n        'symbol': data.get('symbol', ''),\n     \
+          \   'timestamp': data.get('timestamp', ''),\n        'features': features,\n\
+          \        'status': 'success'\n    }\n    \n    return {'result': json.dumps(result,\
+          \ ensure_ascii=False, indent=2)}\n    \nexcept Exception as e:\n    return\
+          \ {'result': json.dumps({\n        'error': True,\n        'message': str(e)\n\
+          \    }, ensure_ascii=False)}"
+        code_language: python3
+        desc: '计算VRP, Skew, RV Momentum等特征 #4001'
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: CODE1 特征计算
+        type: code
+        variables:
+        - value_selector:
+          - '3001'
+          - structured_output
+          value_type: object
+          variable: validation_output
+      height: 96
+      id: '4001'
+      position:
+        x: 1617
+        y: 429.42252683918616
+      positionAbsolute:
+        x: 1617
+        y: 429.42252683918616
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\nimport math\n\ndef z_score(x, mean=0, std=1):\n    \"\"\
+          \"简化z-score计算\"\"\"\n    if std == 0:\n        return 0\n    return (x -\
+          \ mean) / std\n\ndef calculate_signals(features: dict, env_vars: dict) ->\
+          \ dict:\n    \"\"\"计算标准化信号\"\"\"\n    \n    # 提取特征\n    vrp_sel = features.get('vrp_sel',\
+          \ 0)\n    term_slope = features.get('term_slope', 0)\n    term_curv = features.get('term_curv',\
+          \ 0)\n    skew_asym = features.get('skew_asym', 0)\n    gex_level = features.get('gex_level',\
+          \ 0)\n    pin_risk = features.get('pin_risk', 0)\n    vex_net = features.get('vex_net',\
+          \ 0)\n    vanna_atm = features.get('vanna_atm', 0)\n    rv_momo = features.get('rv_momo',\
+          \ 0)\n    spread_atm = features.get('spread_atm', 0)\n    ask_premium =\
+          \ features.get('ask_premium_atm', 0)\n    \n    # 标准化信号（多波动为正分）\n    s_vrp\
+          \ = -z_score(vrp_sel, mean=0, std=0.05)  # VRP高→做空波动，取负→多波动正分\n    s_carry\
+          \ = -z_score(term_slope, mean=0, std=0.02) - 0.5 * z_score(term_curv, mean=0,\
+          \ std=0.01)\n    s_skew = z_score(skew_asym, mean=0, std=0.05)\n    s_gex\
+          \ = gex_level + pin_risk  # gex_level已考虑方向，pin_risk为负\n    s_vex = z_score(-vex_net,\
+          \ mean=0, std=100)  # VEX负→多波动\n    s_vanna = -z_score(abs(vanna_atm), mean=0,\
+          \ std=0.01)  # |Vanna|大→不利\n    s_rv = z_score(rv_momo, mean=0, std=0.2)\n\
+          \    \n    # 流动性惩罚\n    s_liq = -(max(0, z_score(spread_atm, mean=0.01,\
+          \ std=0.01)) + \n                0.5 * max(0, z_score(ask_premium, mean=0,\
+          \ std=0.02)))\n    \n    # 增强信号（简化版，默认0）\n    s_vov = 0\n    s_vix_ts =\
+          \ 0\n    s_rim = 0\n    s_compress = 0\n    s_eir_long = 0\n    s_eir_short\
+          \ = 0\n    s_corr_idx = 0\n    s_flow_putcrowd = 0\n    \n    signals =\
+          \ {\n        's_vrp': round(s_vrp, 3),\n        's_carry': round(s_carry,\
+          \ 3),\n        's_skew': round(s_skew, 3),\n        's_gex': round(s_gex,\
+          \ 3),\n        's_vex': round(s_vex, 3),\n        's_vanna': round(s_vanna,\
+          \ 3),\n        's_rv': round(s_rv, 3),\n        's_liq': round(s_liq, 3),\n\
+          \        's_vov': s_vov,\n        's_vix_ts': s_vix_ts,\n        's_rim':\
+          \ s_rim,\n        's_compress': s_compress,\n        's_eir_long': s_eir_long,\n\
+          \        's_eir_short': s_eir_short,\n        's_corr_idx': s_corr_idx,\n\
+          \        's_flow_putcrowd': s_flow_putcrowd\n    }\n    \n    return signals\n\
+          \ndef calculate_scores(signals: dict, env_vars: dict) -> dict:\n    \"\"\
+          \"计算LongVolScore和ShortVolScore\"\"\"\n    \n    # 做多波动率权重\n    w_vrp_long\
+          \ = float(env_vars.get('WEIGHT_VRP_LONG', 0.25))\n    w_gex_long = float(env_vars.get('WEIGHT_GEX_LONG',\
+          \ 0.18))\n    w_vex_long = float(env_vars.get('WEIGHT_VEX_LONG', 0.18))\n\
+          \    w_carry_long = float(env_vars.get('WEIGHT_CARRY_LONG', 0.08))\n   \
+          \ w_skew_long = float(env_vars.get('WEIGHT_SKEW_LONG', 0.08))\n    \n  \
+          \  # LongVolScore\n    long_vol_score = (\n        w_vrp_long * signals['s_vrp']\
+          \ +\n        w_gex_long * signals['s_gex'] +\n        w_vex_long * signals['s_vex']\
+          \ +\n        w_carry_long * signals['s_carry'] +\n        w_skew_long *\
+          \ signals['s_skew'] +\n        0.05 * signals['s_vanna'] +\n        0.06\
+          \ * signals['s_rv'] +\n        0.10 * signals['s_liq'] +\n        0.07 *\
+          \ signals['s_vov'] +\n        0.05 * signals['s_vix_ts'] +\n        0.05\
+          \ * signals['s_rim'] +\n        0.05 * signals['s_compress'] +\n       \
+          \ 0.04 * signals['s_eir_long']\n    )\n    \n    # 做空波动率权重\n    w_vrp_short\
+          \ = float(env_vars.get('WEIGHT_VRP_SHORT', 0.30))\n    w_gex_short = float(env_vars.get('WEIGHT_GEX_SHORT',\
+          \ 0.12))\n    w_carry_short = float(env_vars.get('WEIGHT_CARRY_SHORT', 0.18))\n\
+          \    \n    # ShortVolScore\n    short_vol_score = (\n        w_vrp_short\
+          \ * (-signals['s_vrp']) +\n        w_gex_short * (-signals['s_gex']) +\n\
+          \        0.12 * (-signals['s_vex']) +\n        w_carry_short * (-signals['s_carry'])\
+          \ +\n        0.08 * (-signals['s_skew']) +\n        0.05 * (-signals['s_rv'])\
+          \ +\n        0.10 * signals['s_liq'] +\n        0.07 * (-signals['s_vov'])\
+          \ +\n        0.05 * (-signals['s_vix_ts']) +\n        0.05 * (-signals['s_rim'])\
+          \ +\n        0.05 * (-signals['s_compress']) +\n        0.06 * signals['s_eir_short']\
+          \ +\n        0.05 * signals['s_corr_idx'] +\n        0.04 * signals['s_flow_putcrowd']\n\
+          \    )\n    \n    return {\n        'long_vol_score': round(long_vol_score,\
+          \ 3),\n        'short_vol_score': round(short_vol_score, 3),\n        'score_breakdown':\
+          \ {\n            'long': {\n                'vrp': round(w_vrp_long * signals['s_vrp'],\
+          \ 3),\n                'gex': round(w_gex_long * signals['s_gex'], 3),\n\
+          \                'vex': round(w_vex_long * signals['s_vex'], 3),\n     \
+          \           'carry': round(w_carry_long * signals['s_carry'], 3),\n    \
+          \            'skew': round(w_skew_long * signals['s_skew'], 3)\n       \
+          \     },\n            'short': {\n                'vrp': round(w_vrp_short\
+          \ * (-signals['s_vrp']), 3),\n                'gex': round(w_gex_short *\
+          \ (-signals['s_gex']), 3),\n                'carry': round(w_carry_short\
+          \ * (-signals['s_carry']), 3)\n            }\n        }\n    }\n\ndef main(features_output:\
+          \ str, **env_vars) -> dict:\n    \"\"\"主函数\"\"\"\n    try:\n        data\
+          \ = json.loads(features_output)\n        features = data.get('features',\
+          \ {})\n        \n        signals = calculate_signals(features, env_vars)\n\
+          \        scores = calculate_scores(signals, env_vars)\n        \n      \
+          \  result = {\n            'symbol': data.get('symbol', ''),\n         \
+          \   'timestamp': data.get('timestamp', ''),\n            'signals': signals,\n\
+          \            'scores': scores,\n            'status': 'success'\n      \
+          \  }\n        \n        return {'result': json.dumps(result, ensure_ascii=False,\
+          \ indent=2)}\n        \n    except Exception as e:\n        return {'result':\
+          \ json.dumps({\n            'error': True,\n            'message': str(e)\n\
+          \        }, ensure_ascii=False)}"
+        code_language: python3
+        desc: '计算 LongVolScore & ShortVolScore #5001'
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: CODE2 信号打分
+        type: code
+        variables:
+        - value_selector:
+          - '4001'
+          - result
+          value_type: string
+          variable: features_output
+      height: 96
+      id: '5001'
+      position:
+        x: 1919
+        y: 429.42252683918616
+      positionAbsolute:
+        x: 1919
+        y: 429.42252683918616
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
     - data:
         context:
           enabled: false
           variable_selector: []
-        desc: ''
+        desc: '校准做多/做空波动率概率  #6001'
         model:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gpt-4o
-          provider: openai
+          name: Qwen3-8B
+          provider: langgenius/openai_api_compatible/openai_api_compatible
         prompt_template:
-        - id: sys-analyst-001
+        - id: 5f6d5256-8eb9-47f2-9e69-dc9c273030cb
           role: system
-          text: "你是波动率与结构性供需分析师。这是最关键的一步。任务:1.回溯状态:仔细阅读对话历史,找到HTML注释块,提取所有初始变量(symbol,event,HV10/20/60,holding_window等)。2.解析数据:解析用户当前的输入,这包含了gexbot图表数据(如VOL TRIGGER,GEX,VEX,Skew等)。3.完整性检查(追问RIM):检查输入中是否已包含RIM(Realized/Implied Move比值)或其计算所需数据。如果缺失RIM:你的唯一任务是停止分析,并严格按照用户补充数据的获取路径与要求模板向用户追问RIM数据。追问模板:数据已收到。分析还需要最后一步关键数据:盘中真实波幅(RIM)。请提供RIM(Realized/Implied Move比值)或其计算所需字段(三选一):1.价差法(推荐):提供近5-15分钟的高低价或ATR(1-5m),以及当前标的价格S。2.IV法:提供目标DTE的ATM IV、标的S、窗口w(分钟)。3.跨价法:提供目标DTE的ATM straddle价格。(若为财报场景,请提供平台显示的earnings implied move%)。如果RIM已提供:则执行完整分析。完整分析步骤:1.NET-GEX判定(必须使用VOL TRIGGER作为唯一证据)2.墙距评估(计算GammaWallProx)3.RV/HV匹配4.计算信号(VRP_sel,S_vrp,S_carry,S_skew,S_gex,S_vex,S_vanna,S_rv,S_liq,S_vov,S_rim等所有分数)5.计算总分(LongVolScore和ShortVolScore)6.校准概率(使用冷启动先验p_long和p_short)7.三分类决策(做多波动率/做空波动率/观望)8.Edge检查(必须EV>0且RR>=1.5:1)9.策略映射(仅在决策非观望且Edge检查通过时,给出1-3种策略)。最终输出:1.结论:(多空观望)+方向概率p与主要理由(明确引用VOL TRIGGER判断)2.策略与参数:(DTE、行权区间、希腊、目标盈亏比、胜率EV估计、入场触发与退出)3.关键分数:列出所有S_开头的分数4.时间戳与缺失项替代;0DTE已规避;限定盘中执行(ET)"
-        - role: user
-          text: '{{#1740000001.query#}}'
+          text: "你是概率校准Agent，负责将LongVolScore/ShortVolScore转化为可信概率。\n             \
+            \   \n【任务】\n1. 根据评分计算做多/做空波动率的概率\n2. 应用三分类决策门槛\n3. 判定最终方向\n\n\n【输入数据】\n\
+            评分结果: {{#5001.result#}}\n\n\n【概率标定方法】\n采用冷启动先验（后续可用历史回测优化）：\n\n\n**做多波动率概率\
+            \ p_long(L)**:\n- L >= 2.0 → p_long ≈ 0.65-0.70 (high confidence)\n- L\
+            \ >= 1.5 → p_long ≈ 0.60-0.65 (medium confidence)\n- L >= 1.0 → p_long\
+            \ ≈ 0.55-0.60 (medium confidence)\n- L < 1.0 → p_long < 0.55 (low confidence)\n\
+            \n\n**做空波动率概率 p_short(S)**:\n- S >= 2.0 → p_short ≈ 0.65-0.70 (high confidence)\n\
+            - S >= 1.5 → p_short ≈ 0.60-0.65 (medium confidence)\n- S >= 1.0 → p_short\
+            \ ≈ 0.55-0.60 (medium confidence)\n- S < 1.0 → p_short < 0.55 (low confidence)\n\
+            \n\n【三分类决策门槛】\n**做多波动率**:\n- L >= {{#env.DECISION_THRESHOLD_LONG#}} \n\
+            - AND S <= 0.30\n- AND p_long >= {{#env.PROB_THRESHOLD#}}\n- 优选: L >=\
+            \ 1.5 AND p_long >= 0.60\n\n\n**做空波动率**:\n- S >= {{#env.DECISION_THRESHOLD_SHORT#}}\n\
+            - AND L <= 0.30\n- AND p_short >= {{#env.PROB_THRESHOLD#}}\n- 优选: S >=\
+            \ 1.5 AND p_short >= 0.60\n\n\n**观望**:\n- 不满足上述任一条件\n\n\n【输出JSON】\n严格按schema输出，包含：\n\
+            - probability_calibration: 概率标定结果\n- decision_gate: 决策门控结果"
+        - id: ca246e78-10d2-4457-aa10-310b75dc93fd
+          role: user
+          text: 请根据评分结果进行概率校准： {{#5001.result#}}
         selected: false
-        title: LLM量化分析
+        structured_output:
+          schema:
+            properties:
+              decision_gate:
+                properties:
+                  final_direction:
+                    description: 最终方向判定
+                    enum:
+                    - 做多波动率
+                    - 做空波动率
+                    - 观望
+                    type: string
+                  gate_check:
+                    properties:
+                      conflict_check:
+                        type: string
+                      long_score_check:
+                        type: string
+                      prob_check:
+                        type: string
+                      short_score_check:
+                        type: string
+                    type: object
+                  long_vol_pass:
+                    description: 做多波动率是否通过门槛
+                    type: boolean
+                  short_vol_pass:
+                    description: 做空波动率是否通过门槛
+                    type: boolean
+                required:
+                - long_vol_pass
+                - short_vol_pass
+                - final_direction
+                type: object
+              probability_calibration:
+                properties:
+                  confidence:
+                    description: 概率置信度
+                    enum:
+                    - high
+                    - medium
+                    - low
+                    type: string
+                  method:
+                    description: 概率标定方法
+                    enum:
+                    - 冷启动先验
+                    - 历史回测
+                    - Platt_scaling
+                    type: string
+                  p_long:
+                    description: 做多波动率概率
+                    maximum: 1
+                    minimum: 0
+                    type: number
+                  p_short:
+                    description: 做空波动率概率
+                    maximum: 1
+                    minimum: 0
+                    type: number
+                  rationale:
+                    description: 概率判断理由
+                    type: string
+                required:
+                - p_long
+                - p_short
+                - method
+                type: object
+              symbol:
+                type: string
+            required:
+            - symbol
+            - probability_calibration
+            - decision_gate
+            type: object
+        structured_output_enabled: true
+        title: Agent 6 概率校准
         type: llm
-        variables: []
         vision:
           enabled: false
-      height: 90
-      id: '1740000031'
+      height: 116
+      id: '6001'
       position:
-        x: 942
-        y: 400
+        x: 2221
+        y: 429.42252683918616
       positionAbsolute:
-        x: 942
-        y: 400
+        x: 2221
+        y: 429.42252683918616
       selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
+      width: 242
     - data:
-        answer: '{{#1740000031.text#}}'
-        desc: ''
+        context:
+          enabled: false
+          variable_selector: []
+        desc: '#7001 根据决策方向生成可执行策略'
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: Qwen3-8B
+          provider: langgenius/openai_api_compatible/openai_api_compatible
+        prompt_template:
+        - id: 6e42fee5-6ac5-45cf-9589-6e6ff02d8e47
+          role: system
+          text: "你是策略映射Agent，根据决策方向生成可执行的期权策略。\n                \n【任务】\n1. 根据decision_gate的final_direction选择策略类型\n\
+            2. 生成三档策略（进取/均衡/保守）\n3. 估算每个策略的胜率、盈亏比、期望收益\n4. 确保所有策略满足Edge门槛\n\n\n【输入数据】\n\
+            - 概率校准结果: {{#6001.structured_output#}}\n- 核心字段: {{#3001.structured_output.core_fields#}}\n\
+            - 特征: {{#4001.result#}}\n\n\n【策略映射规则】\n\n\n## 做多波动率策略\n\n\n### 进取版（盈亏比≥2:1）\n\
+            **Long Straddle/Strangle**:\n- DTE: 事件5-20D；非事件30-45D\n- 行权: 买ATM straddle；若strangle用30-35Δ两翼\n\
+            - 入场: 5-15分钟realized≥implied×0.6，且Spot<VOL_TRIGGER或刚下破触发线\n- 退出: RV/IV回归、RR达标、重返触发线之上、触及反向gamma\
+            \ wall\n\n\n**Bull Call Spread**（趋势做多）:\n- DTE: 14-35D\n- 路径: buy {25-35Δ}\
+            \ call / sell {阻力位或gamma wall附近} call\n- 管理: 盈利锁定50-70%价差宽度；失效回落至壁垒下且RIM<0.4\n\
+            \n\n### 均衡版（盈亏比1.2-1.8:1）\n**Calendar/Diagonal**:\n- 路径: sell近月ATM；buy次近月同/略外价\n\
+            - 条件: TermSlope≤0或事件周抬升后预期回落\n\n\n**Debit Vertical**:\n- Bull call: buy\
+            \ {Δ≈0.35} call / sell {Δ≈0.15-0.20} call\n\n\n### 保守版（盈亏比0.8-1.2:1，高胜率）\n\
+            仅在做多波动率时不推荐保守版\n\n\n## 做空波动率策略\n\n\n### 保守版（优先，RR 0.8-1.2:1）\n**Iron Condor\
+            \ / Short Strangle**:\n- DTE: 14-45D；事件后T-T+1优先\n- 路径: sell {10-20Δ} call\
+            \ / sell {10-20Δ} put；保护翼buy {3-5Δ}\n- 条件: Spot≥VOL_TRIGGER、GammaWallProx≤0.5-1.0%、RIM≤0.4\n\
+            - 管理: 收取50-70%信用额即了结；跌破触发线或突破gamma wall立即减仓\n\n\n**ATM/Near-ATM Credit\
+            \ Spread**:\n- 贴正壁垒±0.5%-1.0%，宽度按1.0-1.5×ATR\n\n\n### 均衡版\n**Credit Vertical**:\n\
+            - 贴墙收租，宽度适中\n\n\n【Edge估算】\n对每个策略估算：\n- win_rate: 基于p_long/p_short和策略类型调整\n\
+            \    - Straddle/Strangle: win_rate = p_long × 0.9\n    - Credit Spread:\
+            \ win_rate = p_short × 1.1（但最高0.75）\n- rr_ratio: 根据策略结构\n    - Straddle:\
+            \ \"2:1\" ~ \"3:1\"\n    - Credit Spread: \"1:2\" ~ \"1:3\"\n- ev: 快速近似\n\
+            \    - Long straddle: (RV - IV) × vega - carry - 成本\n    - Credit spread:\
+            \ 信用额 - P(触碰) × 亏损额 - 成本\n- meets_threshold: EV>0 AND RR≥{{#env.EDGE_RR_THRESHOLD#}}\n\
+            \n\n【关键约束】\n1. 所有策略必须明确DTE、行权价（用Δ或距离表示）、入场条件、退出规则\n2. 必须引用VOL_TRIGGER、Gamma\
+            \ Wall等关键位\n3. Edge估算必须包含胜率、盈亏比、EV\n4. 仅输出满足Edge门槛的策略\n\n\n【输出JSON】\n\
+            严格按schema输出，strategies数组包含1-3个策略方案"
+        - id: e2470e2c-3e7a-49a3-8a5b-7e5c3c4a73ed
+          role: user
+          text: "请生成最终决策报告。\n                \n【数据汇总】\n核心字段: {{#3001.structured_output#}}\n\
+            特征: {{#4001.result#}}\n信号评分: {{#5001.result#}}\n概率校准: {{#6001.structured_output#}}\n\
+            策略方案: {{#7001.structured_output#}}"
         selected: false
-        title: 回复分析或追问RIM
+        structured_output:
+          schema:
+            properties:
+              direction:
+                enum:
+                - 做多波动率
+                - 做空波动率
+                - 观望
+                type: string
+              strategies:
+                items:
+                  properties:
+                    description:
+                      type: string
+                    dte:
+                      type: string
+                    edge_estimate:
+                      properties:
+                        ev:
+                          type: string
+                        ev_numeric:
+                          type: number
+                        meets_threshold:
+                          type: boolean
+                        note:
+                          type: string
+                        rr_ratio:
+                          type: string
+                        win_rate:
+                          type: string
+                      required:
+                      - win_rate
+                      - rr_ratio
+                      - ev
+                      type: object
+                    entry:
+                      properties:
+                        condition:
+                          type: string
+                        timing:
+                          type: string
+                        trigger:
+                          type: string
+                      type: object
+                    exit:
+                      properties:
+                        profit_target:
+                          type: string
+                        regime_change:
+                          type: string
+                        stop_loss:
+                          type: string
+                        time_decay:
+                          type: string
+                      type: object
+                    legs:
+                      items:
+                        properties:
+                          action:
+                            type: string
+                          delta:
+                            type: string
+                          rationale:
+                            type: string
+                          strike:
+                            type: string
+                          type:
+                            type: string
+                        type: object
+                      type: array
+                    structure:
+                      type: string
+                    tier:
+                      enum:
+                      - 进取版
+                      - 均衡版
+                      - 保守版
+                      type: string
+                  required:
+                  - tier
+                  - structure
+                  - dte
+                  - legs
+                  - entry
+                  - exit
+                  - edge_estimate
+                  type: object
+                type: array
+              symbol:
+                type: string
+            required:
+            - symbol
+            - direction
+            - strategies
+            type: object
+        structured_output_enabled: true
+        title: Agent 7 策略映射
+        type: llm
+        vision:
+          enabled: false
+      height: 116
+      id: '7001'
+      position:
+        x: 2523
+        y: 429.42252683918616
+      positionAbsolute:
+        x: 2523
+        y: 429.42252683918616
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#7001.structured_output#}}'
+        selected: false
+        title: 输出最终报告
         type: answer
         variables: []
-      height: 90
-      id: '1740000032'
+      height: 104
+      id: '1763048723409'
       position:
-        x: 1246
-        y: 400
+        x: 2825
+        y: 429.42252683918616
       positionAbsolute:
-        x: 1246
-        y: 400
-      selected: false
+        x: 2825
+        y: 429.42252683918616
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
-      width: 244
-
-    # --------------------------------------------------
-    # PATH D: INVALID
-    # --------------------------------------------------
-    - data:
-        answer: "输入无法识别。请按以下流程操作:\n1.(如果刚开始)等待我向您提问。\n2.(如果我已提问)请按symbol:XXX格式回复变量。\n3.(如果我已给命令)请粘贴gexbot数据。\n4.(如果我已追问)请提供RIM数据。"
-        desc: ''
-        selected: false
-        title: 回复无效
-        type: answer
-        variables: []
-      height: 90
-      id: '1740000041'
-      position:
-        x: 942
-        y: 600
-      positionAbsolute:
-        x: 942
-        y: 600
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 244
+      width: 242
     viewport:
-      x: 0
-      y: 0
-      zoom: 1
+      x: -1095.7425389044079
+      y: -211.59924139425198
+      zoom: 0.9889709163809318
   rag_pipeline_variables: []
