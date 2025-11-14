@@ -1,9 +1,9 @@
 app:
-  description: '波动率套利策略'
+  description: 波动率套利策略
   icon: 🤖
   icon_background: '#FFEAD5'
   mode: advanced-chat
-  name: vol-quant_workflow
+  name: vol_quant_workflow
   use_icon_as_answer_icon: false
 dependencies:
 - current_identifier: null
@@ -263,44 +263,10 @@ workflow:
         isInLoop: false
         sourceType: if-else
         targetType: llm
-      id: 1003-true-2001-target
-      source: '1003'
-      sourceHandle: 'true'
-      target: '2001'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: llm
-        targetType: answer
-      id: 2001-source-2002-target
-      source: '2001'
-      sourceHandle: source
-      target: answer
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
       id: 1003-bc8d0973-baba-4332-88b3-bfbe4e341190-3001-target
       source: '1003'
       sourceHandle: bc8d0973-baba-4332-88b3-bfbe4e341190
       target: '3001'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: llm
-        targetType: answer
-      id: 2001-source-2002-target
-      source: '2001'
-      sourceHandle: source
-      target: '2002'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -422,6 +388,29 @@ workflow:
       targetHandle: target
       type: custom
       zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1003-true-2001-target
+      source: '1003'
+      sourceHandle: 'true'
+      target: '2001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 2001-source-2002-target
+      source: '2001'
+      sourceHandle: source
+      target: '2002'
+      targetHandle: target
+      type: custom
+      zIndex: 0
     nodes:
     - data:
         selected: false
@@ -488,12 +477,12 @@ workflow:
       type: custom
       width: 242
     - data:
-        answer: 【命令清单回复】{{#2001.text#}}
+        answer: 【命令清单回复】
         selected: false
         title: 直接回复
         type: answer
         variables: []
-      height: 119
+      height: 100
       id: '2002'
       position:
         x: 1347.0055413355958
@@ -542,66 +531,6 @@ workflow:
         x: 702
         y: 282
       selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        context:
-          enabled: false
-          variable_selector: []
-        model:
-          completion_params:
-            temperature: 0.3
-          mode: chat
-          name: Qwen3-8B
-          provider: langgenius/openai_api_compatible/openai_api_compatible
-        prompt_template:
-        - id: 8f8a1d50-dc15-4517-aafc-3032b38e4771
-          role: system
-          text: "你是gexbot命令生成助手。根据用户提供的变量，生成标准化的数据抓取命令清单。\n                \n【输入解析】\n\
-            从用户输入中提取：\n- symbol: 标的代码（大写）\n- event_type: 事件类型（财报/FOMC/CPI/非农/并购/其他/无）\n\
-            - holding_window: 持仓窗口（如 5-20 DTE）\n- strategy_preference: 策略偏好（delta-neutral\
-            \ 或 允许delta暴露）\n\n\n【命令格式规范】\n- 每条命令独占一行，便于复制\n- 参数按固定顺序，省略不适用的参数位\n-\
-            \ contract/filter: atm / ntm\n- expiration_filter: w(周) / m(月) / *(全部)\n\
-            \n\n【参数顺序】\n- !gexn / !gexr: {SYMBOL} {strikes} {dte}\n- !vexn: {SYMBOL}\
-            \ {strikes} {dte} {expiration_filter}\n- !vanna: {SYMBOL} {contract_filter}\
-            \ {dte} {expiration_filter}\n- !term: {SYMBOL} {dte} {expiration_filter}\n\
-            - !skew: {SYMBOL} {metric} {contract_or_option} {dte} {expiration_filter}\n\
-            - !surface: {SYMBOL} {metric} {contract_filter} {dte} {expiration_filter}\n\
-            - !trigger: {SYMBOL} {dte}\n\n\n【标准命令清单】\n根据 holding_window 和 event_type\
-            \ 调整 DTE 参数：\n- 事件前(5-20 DTE): 使用较短DTE\n- 常规(30-45 DTE): 使用标准DTE\n- 长周期:\
-            \ 扩展DTE\n\n\n**必备命令**（按顺序输出）:\n!trigger {SYMBOL} 98\n!gexn {SYMBOL} 15\
-            \ 98\n!gexr {SYMBOL} 15 98\n!vexn {SYMBOL} 15 190 *\n!vanna {SYMBOL} atm\
-            \ 190 *\n!vanna {SYMBOL} ntm 90\n!term {SYMBOL} 365 w\n!term {SYMBOL}\
-            \ 365 m\n!skew {SYMBOL} ivmid atm 30\n!skew {SYMBOL} ivmid ntm 30\n!skew\
-            \ {SYMBOL} ivmid put 30 w\n!surface {SYMBOL} ivmid 98\n!surface {SYMBOL}\
-            \ ivmid ntm 98\n!surface {SYMBOL} ivask ntm 98\n!surface {SYMBOL} spread\
-            \ atm 98\n\n\n**条件扩展**（根据场景）:\n- 事件前: 增加 extrinsic, theta, gex, vex\n\
-            - 盘中路径: 增加 gamma, spread, ivask\n- 事件后: 增加 vex, theta, vanna\n\n\n【输出格式】\n\
-            ## gexbot 数据抓取命令清单\n\n\n**标的**: {SYMBOL}\n**事件类型**: {event_type}\n**持仓窗口**:\
-            \ {holding_window}\n**策略偏好**: {strategy_preference}\n\n\n### 必备命令（请逐行复制执行）\n\
-            ```\n{命令列表，每行一条}\n```\n\n\n### 补充数据需求\n请同时提供以下数据：\n1. **HV数据**: HV10,\
-            \ HV20, HV60 (Yang-Zhang口径, 252年化)\n2. **RIM数据** (可选，提升精度):\n    - 方法1:\
-            \ 近{w}分钟高低价区间\n    - 方法2: ATM IV 或 ATM 30D IV\n    - 方法3: ATM straddle价格\n\
-            3. **增强数据** (可选):\n    - VVIX水平\n    - VIX9D / VIX\n    - 主要价位OI聚集\n\n\
-            \n### 回传要求\n- 每张图/输出请注明命令全文与时间戳(ET)\n- 可附收盘价与当日变动\n- 若命令输出为空或异常，请直接说明"
-        - id: 81bae211-b154-44b1-9853-9dc99ef34760
-          role: user
-          text: ''
-        selected: false
-        title: 命令清单生成
-        type: llm
-        vision:
-          enabled: false
-      height: 88
-      id: '2001'
-      position:
-        x: 1004
-        y: 282
-      positionAbsolute:
-        x: 1004
-        y: 282
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1311,7 +1240,7 @@ workflow:
         title: 输出最终报告
         type: answer
         variables: []
-      height: 104
+      height: 103
       id: '8002'
       position:
         x: 3757.7450272723518
@@ -1553,7 +1482,7 @@ workflow:
       positionAbsolute:
         x: 3135.3512954193734
         y: 429.42252683918616
-      selected: false
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -1627,13 +1556,71 @@ workflow:
       positionAbsolute:
         x: 3435.7712127956465
         y: 429.42252683918616
-      selected: true
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: '#2001'
+        model:
+          completion_params:
+            temperature: 0.3
+          mode: chat
+          name: Qwen3-8B
+          provider: langgenius/openai_api_compatible/openai_api_compatible
+        prompt_template:
+        - id: f65a62c2-21b6-4c09-ab1e-2b68c52dc581
+          role: system
+          text: "你是gexbot命令生成助手。根据用户提供的变量，生成标准化的数据抓取命令清单。\n                \n【输入解析】\n\
+            从用户输入中提取：\n- symbol: 标的代码（大写）\n- event_type: 事件类型（财报/FOMC/CPI/非农/并购/其他/无）\n\
+            - holding_window: 持仓窗口（如 5-20 DTE）\n- strategy_preference: 策略偏好（delta-neutral\
+            \ 或 允许delta暴露）\n\n【命令格式规范】\n- 每条命令独占一行，便于复制\n- 参数按固定顺序，省略不适用的参数位\n- contract/filter:\
+            \ atm / ntm\n- expiration_filter: w(周) / m(月) / *(全部)\n\n【参数顺序】\n- !gexn\
+            \ / !gexr: {SYMBOL} {strikes} {dte}\n- !vexn: {SYMBOL} {strikes} {dte}\
+            \ {expiration_filter}\n- !vanna: {SYMBOL} {contract_filter} {dte} {expiration_filter}\n\
+            - !term: {SYMBOL} {dte} {expiration_filter}\n- !skew: {SYMBOL} {metric}\
+            \ {contract_or_option} {dte} {expiration_filter}\n- !surface: {SYMBOL}\
+            \ {metric} {contract_filter} {dte} {expiration_filter}\n- !trigger: {SYMBOL}\
+            \ {dte}\n\n【标准命令清单】\n根据 holding_window 和 event_type 调整 DTE 参数：\n- 事件前(5-20\
+            \ DTE): 使用较短DTE\n- 常规(30-45 DTE): 使用标准DTE\n- 长周期: 扩展DTE\n\n**必备命令**（按顺序输出）:\n\
+            !trigger {SYMBOL} 98\n!gexn {SYMBOL} 15 98\n!gexr {SYMBOL} 15 98\n!vexn\
+            \ {SYMBOL} 15 190 *\n!vanna {SYMBOL} atm 190 *\n!vanna {SYMBOL} ntm 90\n\
+            !term {SYMBOL} 365 w\n!term {SYMBOL} 365 m\n!skew {SYMBOL} ivmid atm 30\n\
+            !skew {SYMBOL} ivmid ntm 30\n!skew {SYMBOL} ivmid put 30 w\n!surface {SYMBOL}\
+            \ ivmid 98\n!surface {SYMBOL} ivmid ntm 98\n!surface {SYMBOL} ivask ntm\
+            \ 98\n!surface {SYMBOL} spread atm 98\n\n**条件扩展**（根据场景）:\n- 事件前: 增加 extrinsic,\
+            \ theta, gex, vex\n- 盘中路径: 增加 gamma, spread, ivask\n- 事件后: 增加 vex, theta,\
+            \ vanna\n\n【输出格式】\n## gexbot 数据抓取命令清单\n\n**标的**: {SYMBOL}\n**事件类型**: {event_type}\n\
+            **持仓窗口**: {holding_window}\n**策略偏好**: {strategy_preference}\n\n### 必备命令（请逐行复制执行）\n\
+            ```\n{命令列表，每行一条}\n```\n\n### 补充数据需求\n请同时提供以下数据：\n1. **HV数据**: HV10, HV20,\
+            \ HV60 (Yang-Zhang口径, 252年化)\n2. **RIM数据** (可选，提升精度):\n    - 方法1: 近{w}分钟高低价区间\n\
+            \    - 方法2: ATM IV 或 ATM 30D IV\n    - 方法3: ATM straddle价格\n3. **增强数据**\
+            \ (可选):\n    - VVIX水平\n    - VIX9D / VIX\n    - 主要价位OI聚集\n\n### 回传要求\n\
+            - 每张图/输出请注明命令全文与时间戳(ET)\n- 可附收盘价与当日变动\n- 若命令输出为空或异常，请直接说明"
+        selected: false
+        title: 命令清单生成
+        type: llm
+        vision:
+          enabled: false
+      height: 116
+      id: '2001'
+      position:
+        x: 1016.640660989814
+        y: 185.22165753266245
+      positionAbsolute:
+        x: 1016.640660989814
+        y: 185.22165753266245
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     viewport:
-      x: -1256.5539446616135
-      y: -45.12527489519948
+      x: -1664.553944661614
+      y: 53.87472510480029
       zoom: 0.6328782969851434
   rag_pipeline_variables: []
