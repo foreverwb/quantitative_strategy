@@ -1,9 +1,9 @@
 app:
-  description: ''
+  description: '波动率套利策略'
   icon: 🤖
   icon_background: '#FFEAD5'
   mode: advanced-chat
-  name: vol-quantity
+  name: vol-quant_workflow
   use_icon_as_answer_icon: false
 dependencies:
 - current_identifier: null
@@ -16,6 +16,22 @@ version: 0.4.0
 workflow:
   conversation_variables: []
   environment_variables:
+  - description: 蒙特卡洛模拟次数
+    id: cecebd51-0647-4ab1-902e-58e3713456cf
+    name: MONTE_CARLO_SIMULATIONS
+    selector:
+    - env
+    - MONTE_CARLO_SIMULATIONS
+    value: '10000'
+    value_type: string
+  - description: '# 无风险利率（用于BS模型）'
+    id: 78280691-03c2-4476-9ee8-31472bbd955b
+    name: RISK_FREE_RATE
+    selector:
+    - env
+    - RISK_FREE_RATE
+    value: '0.05'
+    value_type: string
   - description: L>=1.0时做多波动率概率下限
     id: 5525253a-c885-42c6-ad22-19699a917786
     name: PROB_LONG_L1_0
@@ -363,11 +379,46 @@ workflow:
         isInIteration: false
         isInLoop: false
         sourceType: llm
-        targetType: answer
-      id: 7001-source-1763048723409-target
+        targetType: code
+      id: 7001--7002-target
       source: '7001'
       sourceHandle: source
-      target: '1763048723409'
+      target: '7002'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: code
+      id: 7002-source-7003-target
+      source: '7002'
+      sourceHandle: source
+      target: '7003'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: llm
+      id: 7003--8001-target
+      source: '7003'
+      sourceHandle: source
+      target: '8001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: 8001-source-8002-target
+      source: '8001'
+      sourceHandle: source
+      target: '8002'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -1129,9 +1180,17 @@ workflow:
             严格按schema输出，strategies数组包含1-3个策略方案"
         - id: e2470e2c-3e7a-49a3-8a5b-7e5c3c4a73ed
           role: user
-          text: "请生成最终决策报告。\n                \n【数据汇总】\n核心字段: {{#3001.structured_output#}}\n\
-            特征: {{#4001.result#}}\n信号评分: {{#5001.result#}}\n概率校准: {{#6001.structured_output#}}\n\
-            策略方案: {{#7001.structured_output#}}"
+          text: '请生成策略方案。
+
+            【数据汇总】
+
+            核心字段: {{#3001.structured_output.core_fields#}}
+
+            特征: {{#4001.result#}}
+
+            信号评分: {{#5001.result#}}
+
+            概率校准: {{#6001.structured_output#}}"'
         selected: false
         structured_output:
           schema:
@@ -1247,18 +1306,326 @@ workflow:
       type: custom
       width: 242
     - data:
-        answer: '{{#7001.structured_output#}}'
+        answer: '{{#8001.text#}}'
         selected: false
         title: 输出最终报告
         type: answer
         variables: []
       height: 104
-      id: '1763048723409'
+      id: '8002'
       position:
-        x: 2825
+        x: 3757.7450272723518
+        y: 457.8640140662676
+      positionAbsolute:
+        x: 3757.7450272723518
+        y: 457.8640140662676
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "\nimport json\nimport numpy as np\nfrom scipy.stats import norm\nfrom\
+          \ scipy.optimize import brentq\n\n\ndef bs_delta(S, K, T, r, sigma, option_type):\n\
+          \    \"\"\"Black-Scholes Delta\"\"\"\n    if T <= 0:\n        return 1.0\
+          \ if (option_type == 'call' and S > K) else 0.0\n    \n    d1 = (np.log(S/K)\
+          \ + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))\n    \n    if option_type\
+          \ == 'call':\n        return norm.cdf(d1)\n    else:  # put\n        return\
+          \ norm.cdf(d1) - 1\n\n\ndef find_strike_by_delta(S, target_delta, T, r,\
+          \ sigma, option_type):\n    \"\"\"反推满足目标Delta的行权价\"\"\"\n    def objective(K):\n\
+          \        return bs_delta(S, K, T, r, sigma, option_type) - target_delta\n\
+          \    \n    # 搜索范围:现价的 50%-150%\n    try:\n        strike = brentq(objective,\
+          \ S * 0.5, S * 1.5)\n        return round(strike, 2)\n    except:\n    \
+          \    # 备用:线性近似\n        if option_type == 'call':\n            return round(S\
+          \ * (1 + (0.5 - target_delta) * 0.3), 2)\n        else:\n            return\
+          \ round(S * (1 - (0.5 - abs(target_delta)) * 0.3), 2)\n\n\ndef calculate_strikes_from_strategy(strategy,\
+          \ core_fields, env_vars):\n    \"\"\"为单个策略计算所有行权价\"\"\"\n    spot = core_fields.get('spot',\
+          \ 0)\n    gamma_wall = core_fields.get('gamma_wall', spot)\n    call_wall\
+          \ = core_fields.get('call_wall', spot * 1.05)\n    put_wall = core_fields.get('put_wall',\
+          \ spot * 0.95)\n    iv_atm = core_fields.get('iv_event_w_atm', 0.25)\n \
+          \   \n    # 解析 DTE\n    dte_str = strategy.get('dte', '30天')\n    dte =\
+          \ int(''.join(filter(str.isdigit, dte_str)))\n    T = dte / 365\n    r =\
+          \ float(env_vars.get('RISK_FREE_RATE', 0.05))\n    \n    # 从环境变量获取阈值\n \
+          \   gamma_wall_prox = float(env_vars.get('GAMMA_WALL_PROX_THRESHOLD', 0.5))\
+          \ / 100\n    \n    updated_legs = []\n    \n    for leg in strategy.get('legs',\
+          \ []):\n        leg_copy = leg.copy()\n        action = leg.get('action',\
+          \ '')\n        option_type = leg.get('type', '')\n        delta_str = leg.get('delta',\
+          \ '')\n        strike_desc = leg.get('strike', '')\n        \n        strike_calculated\
+          \ = None\n        method_used = None\n        \n        # 方法1: Delta 法\n\
+          \        if 'Δ' in delta_str or 'delta' in delta_str.lower():\n        \
+          \    try:\n                target_delta = float(delta_str.replace('Δ', '').replace('delta',\
+          \ '').strip())\n                if option_type == 'put' and target_delta\
+          \ > 0:\n                    target_delta = -target_delta\n             \
+          \   \n                strike_calculated = find_strike_by_delta(\n      \
+          \              spot, target_delta, T, r, iv_atm, option_type\n         \
+          \       )\n                method_used = 'delta_method'\n            except:\n\
+          \                pass\n        \n        # 方法2: 壁垒法\n        if strike_calculated\
+          \ is None and ('wall' in strike_desc.lower() or '壁垒' in strike_desc):\n\
+          \            if 'gamma' in strike_desc.lower():\n                if action\
+          \ == 'sell':\n                    # 卖方:贴墙外侧\n                    strike_calculated\
+          \ = round(gamma_wall * (1 - gamma_wall_prox), 2)\n                else:\n\
+          \                    strike_calculated = round(gamma_wall, 2)\n        \
+          \        method_used = 'barrier_method_gamma'\n            \n          \
+          \  elif 'call' in strike_desc.lower():\n                strike_calculated\
+          \ = round(call_wall * (1 - gamma_wall_prox), 2)\n                method_used\
+          \ = 'barrier_method_call'\n            \n            elif 'put' in strike_desc.lower():\n\
+          \                strike_calculated = round(put_wall * (1 + gamma_wall_prox),\
+          \ 2)\n                method_used = 'barrier_method_put'\n        \n   \
+          \     # 方法3: ATR 法(需要 ATR 数据)\n        if strike_calculated is None and\
+          \ 'atr' in strike_desc.lower():\n            # 假设 ATR 为现价的 2%(实际应从数据获取)\n\
+          \            atr = spot * 0.02\n            multiplier = 1.5\n         \
+          \   \n            if option_type == 'call':\n                strike_calculated\
+          \ = round(spot + atr * multiplier, 2)\n            else:\n             \
+          \   strike_calculated = round(spot - atr * multiplier, 2)\n            method_used\
+          \ = 'atr_method'\n        \n        # 方法4: 百分比法(描述中有 ±x%)\n        if strike_calculated\
+          \ is None:\n            import re\n            pct_match = re.search(r'([+-]?\\\
+          d+\\.?\\d*)%', strike_desc)\n            if pct_match:\n               \
+          \ pct = float(pct_match.group(1)) / 100\n                strike_calculated\
+          \ = round(spot * (1 + pct), 2)\n                method_used = 'percentage_method'\n\
+          \        \n        # 兜底: 使用 ATM\n        if strike_calculated is None:\n\
+          \            strike_calculated = round(spot, 2)\n            method_used\
+          \ = 'atm_fallback'\n        \n        leg_copy['strike_calculated'] = strike_calculated\n\
+          \        leg_copy['calculation_method'] = method_used\n        updated_legs.append(leg_copy)\n\
+          \    \n    strategy['legs'] = updated_legs\n    return strategy\n\n\ndef\
+          \ main(strategies_json: str, core_fields_json: str, **env_vars) -> dict:\n\
+          \    \"\"\"主函数\"\"\"\n    try:\n        strategies_data = json.loads(strategies_json)\n\
+          \        \n        # 兼容处理:可能是dict或直接是list\n        if isinstance(strategies_data,\
+          \ dict):\n            strategies = strategies_data.get('strategies', [])\n\
+          \            symbol = strategies_data.get('symbol', '')\n            direction\
+          \ = strategies_data.get('direction', '')\n        else:\n            strategies\
+          \ = strategies_data\n            symbol = ''\n            direction = ''\n\
+          \        \n        # core_fields可能是字符串或dict\n        if isinstance(core_fields_json,\
+          \ str):\n            core_fields_data = json.loads(core_fields_json)\n \
+          \       else:\n            core_fields_data = core_fields_json\n       \
+          \ \n        core_fields = core_fields_data.get('core_fields', core_fields_data)\n\
+          \        \n        updated_strategies = []\n        for strategy in strategies:\n\
+          \            updated_strategy = calculate_strikes_from_strategy(\n     \
+          \           strategy, core_fields, env_vars\n            )\n           \
+          \ updated_strategies.append(updated_strategy)\n        \n        result\
+          \ = {\n            'symbol': symbol,\n            'direction': direction,\n\
+          \            'strategies_with_strikes': updated_strategies,\n          \
+          \  'status': 'success'\n        }\n        \n        return {'result': json.dumps(result,\
+          \ ensure_ascii=False, indent=2)}\n    \n    except Exception as e:\n   \
+          \     return {'result': json.dumps({\n            'error': True,\n     \
+          \       'message': str(e)\n        }, ensure_ascii=False)}\n"
+        code_language: python3
+        desc: '#7002 ''计算具体行权价(Δ法/壁垒法/ATR法)'''
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: CODE3 行权价计算
+        type: code
+        variables:
+        - value_selector:
+          - '7001'
+          - structured_output
+          value_type: object
+          variable: strategies_json
+        - value_selector:
+          - '3001'
+          - structured_output
+          value_type: object
+          variable: core_fields_json
+      height: 96
+      id: '7002'
+      position:
+        x: 2834.3952073467954
         y: 429.42252683918616
       positionAbsolute:
-        x: 2825
+        x: 2834.3952073467954
+        y: 429.42252683918616
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        code: "import json\nimport numpy as np\nfrom scipy.stats import norm\nfrom\
+          \ scipy.optimize import brentq\n\n\ndef bs_delta(S, K, T, r, sigma, option_type):\n\
+          \    \"\"\"Black-Scholes Delta\"\"\"\n    if T <= 0:\n        return 1.0\
+          \ if (option_type == 'call' and S > K) else 0.0\n    \n    d1 = (np.log(S/K)\
+          \ + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))\n    \n    if option_type\
+          \ == 'call':\n        return norm.cdf(d1)\n    else:  # put\n        return\
+          \ norm.cdf(d1) - 1\n\n\ndef find_strike_by_delta(S, target_delta, T, r,\
+          \ sigma, option_type):\n    \"\"\"反推满足目标Delta的行权价\"\"\"\n    def objective(K):\n\
+          \        return bs_delta(S, K, T, r, sigma, option_type) - target_delta\n\
+          \    \n    # 搜索范围:现价的 50%-150%\n    try:\n        strike = brentq(objective,\
+          \ S * 0.5, S * 1.5)\n        return round(strike, 2)\n    except:\n    \
+          \    # 备用:线性近似\n        if option_type == 'call':\n            return round(S\
+          \ * (1 + (0.5 - target_delta) * 0.3), 2)\n        else:\n            return\
+          \ round(S * (1 - (0.5 - abs(target_delta)) * 0.3), 2)\n\n\ndef calculate_strikes_from_strategy(strategy,\
+          \ core_fields, env_vars):\n    \"\"\"为单个策略计算所有行权价\"\"\"\n    spot = core_fields.get('spot',\
+          \ 0)\n    gamma_wall = core_fields.get('gamma_wall', spot)\n    call_wall\
+          \ = core_fields.get('call_wall', spot * 1.05)\n    put_wall = core_fields.get('put_wall',\
+          \ spot * 0.95)\n    iv_atm = core_fields.get('iv_event_w_atm', 0.25)\n \
+          \   \n    # 解析 DTE\n    dte_str = strategy.get('dte', '30天')\n    dte =\
+          \ int(''.join(filter(str.isdigit, dte_str)))\n    T = dte / 365\n    r =\
+          \ float(env_vars.get('RISK_FREE_RATE', 0.05))\n    \n    # 从环境变量获取阈值\n \
+          \   gamma_wall_prox = float(env_vars.get('GAMMA_WALL_PROX_THRESHOLD', 0.5))\
+          \ / 100\n    \n    updated_legs = []\n    \n    for leg in strategy.get('legs',\
+          \ []):\n        leg_copy = leg.copy()\n        action = leg.get('action',\
+          \ '')\n        option_type = leg.get('type', '')\n        delta_str = leg.get('delta',\
+          \ '')\n        strike_desc = leg.get('strike', '')\n        \n        strike_calculated\
+          \ = None\n        method_used = None\n        \n        # 方法1: Delta 法\n\
+          \        if 'Δ' in delta_str or 'delta' in delta_str.lower():\n        \
+          \    try:\n                target_delta = float(delta_str.replace('Δ', '').replace('delta',\
+          \ '').strip())\n                if option_type == 'put' and target_delta\
+          \ > 0:\n                    target_delta = -target_delta\n             \
+          \   \n                strike_calculated = find_strike_by_delta(\n      \
+          \              spot, target_delta, T, r, iv_atm, option_type\n         \
+          \       )\n                method_used = 'delta_method'\n            except:\n\
+          \                pass\n        \n        # 方法2: 壁垒法\n        if strike_calculated\
+          \ is None and ('wall' in strike_desc.lower() or '壁垒' in strike_desc):\n\
+          \            if 'gamma' in strike_desc.lower():\n                if action\
+          \ == 'sell':\n                    # 卖方:贴墙外侧\n                    strike_calculated\
+          \ = round(gamma_wall * (1 - gamma_wall_prox), 2)\n                else:\n\
+          \                    strike_calculated = round(gamma_wall, 2)\n        \
+          \        method_used = 'barrier_method_gamma'\n            \n          \
+          \  elif 'call' in strike_desc.lower():\n                strike_calculated\
+          \ = round(call_wall * (1 - gamma_wall_prox), 2)\n                method_used\
+          \ = 'barrier_method_call'\n            \n            elif 'put' in strike_desc.lower():\n\
+          \                strike_calculated = round(put_wall * (1 + gamma_wall_prox),\
+          \ 2)\n                method_used = 'barrier_method_put'\n        \n   \
+          \     # 方法3: ATR 法(需要 ATR 数据)\n        if strike_calculated is None and\
+          \ 'atr' in strike_desc.lower():\n            # 假设 ATR 为现价的 2%(实际应从数据获取)\n\
+          \            atr = spot * 0.02\n            multiplier = 1.5\n         \
+          \   \n            if option_type == 'call':\n                strike_calculated\
+          \ = round(spot + atr * multiplier, 2)\n            else:\n             \
+          \   strike_calculated = round(spot - atr * multiplier, 2)\n            method_used\
+          \ = 'atr_method'\n        \n        # 方法4: 百分比法(描述中有 ±x%)\n        if strike_calculated\
+          \ is None:\n            import re\n            pct_match = re.search(r'([+-]?\\\
+          d+\\.?\\d*)%', strike_desc)\n            if pct_match:\n               \
+          \ pct = float(pct_match.group(1)) / 100\n                strike_calculated\
+          \ = round(spot * (1 + pct), 2)\n                method_used = 'percentage_method'\n\
+          \        \n        # 兜底: 使用 ATM\n        if strike_calculated is None:\n\
+          \            strike_calculated = round(spot, 2)\n            method_used\
+          \ = 'atm_fallback'\n        \n        leg_copy['strike_calculated'] = strike_calculated\n\
+          \        leg_copy['calculation_method'] = method_used\n        updated_legs.append(leg_copy)\n\
+          \    \n    strategy['legs'] = updated_legs\n    return strategy\n\n\ndef\
+          \ main(strategies_json: str, core_fields_json: str, **env_vars) -> dict:\n\
+          \    \"\"\"主函数\"\"\"\n    try:\n        strategies_data = json.loads(strategies_json)\n\
+          \        \n        # 兼容处理:可能是dict或直接是list\n        if isinstance(strategies_data,\
+          \ dict):\n            strategies = strategies_data.get('strategies', [])\n\
+          \            symbol = strategies_data.get('symbol', '')\n            direction\
+          \ = strategies_data.get('direction', '')\n        else:\n            strategies\
+          \ = strategies_data\n            symbol = ''\n            direction = ''\n\
+          \        \n        # core_fields可能是字符串或dict\n        if isinstance(core_fields_json,\
+          \ str):\n            core_fields_data = json.loads(core_fields_json)\n \
+          \       else:\n            core_fields_data = core_fields_json\n       \
+          \ \n        core_fields = core_fields_data.get('core_fields', core_fields_data)\n\
+          \        \n        updated_strategies = []\n        for strategy in strategies:\n\
+          \            updated_strategy = calculate_strikes_from_strategy(\n     \
+          \           strategy, core_fields, env_vars\n            )\n           \
+          \ updated_strategies.append(updated_strategy)\n        \n        result\
+          \ = {\n            'symbol': symbol,\n            'direction': direction,\n\
+          \            'strategies_with_strikes': updated_strategies,\n          \
+          \  'status': 'success'\n        }\n        \n        return {'result': json.dumps(result,\
+          \ ensure_ascii=False, indent=2)}\n    \n    except Exception as e:\n   \
+          \     return {'result': json.dumps({\n            'error': True,\n     \
+          \       'message': str(e)\n        }, ensure_ascii=False)}"
+        code_language: python3
+        desc: '#7003 蒙特卡洛模拟计算 Edge'
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: CODE4 Edge估算
+        type: code
+        variables:
+        - value_selector:
+          - '7002'
+          - result
+          value_type: string
+          variable: strategies_json
+        - value_selector:
+          - '3001'
+          - structured_output
+          value_type: object
+          variable: core_fields_json
+      height: 80
+      id: '7003'
+      position:
+        x: 3135.3512954193734
+        y: 429.42252683918616
+      positionAbsolute:
+        x: 3135.3512954193734
+        y: 429.42252683918616
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: '#8001 汇总生成最终决策报告'
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: Qwen3-8B
+          provider: langgenius/openai_api_compatible/openai_api_compatible
+        prompt_template:
+        - id: 1faa3cc7-1923-4429-a15a-29ec71e96e59
+          role: system
+          text: "你是最终决策报告生成Agent,负责汇总所有分析结果并生成完整的可执行策略报告。\n【任务】\n1. 汇总数据校验、特征计算、信号打分、概率校准、策略映射、行权价计算、Edge估算的所有结果\n\
+            2. 生成结构化的决策报告\n3. 包含市场状态、核心结论、信号评分、推荐策略、风险提示、监控要点\n【输入数据】\n- 核心字段: {{#3001.structured_output#}}\n\
+            - 特征: {{#4001.result#}}\n- 信号评分: {{#5001.result#}}\n- 概率校准: {{#6001.structured_output#}}\n\
+            - 策略(含行权价与Edge): {{#7003.result#}}\n【输出格式】\n生成Markdown格式的决策报告,包含:\n# 波动率交易决策报告\n\
+            **标的**: {SYMBOL} | **现价**: {SPOT} | **VOL TRIGGER**: {VOL_TRIGGER}  \n\
+            **分析时间**: {TIMESTAMP} (ET)\n---\n## 1. 核心结论\n**决策方向**: \n{做多波动率/做空波动率/观望}\
+            \  \n**概率**: \n{p_long/p_short} (置信度: {high/medium/low})  \n**主要理由**:\
+            \ \n[引用VOL TRIGGER判据、VRP、GEX等核心因素]\n---\n## 2. 市场状态\n### Gamma Regime\n\
+            - **VOL TRIGGER**: {value}\n- **现价位置**: {above/below/near} → NET-GEX {positive/negative/neutral}\n\
+            - **解读**: [说明正/负Gamma对波动的影响]\n### 关键位\n- **Gamma Wall**: {value} (距离:\
+            \ {%})\n- **Call Wall**: {value}\n- **Put Wall**: {value}\n---\n## 3.\
+            \ 信号评分\n### 做多波动率评分: {L}\n**分解**:\n- VRP: {value}\n- GEX: {value}\n- VEX:\
+            \ {value}\n- Carry: {value}\n- Skew: {value}\n\n### 做空波动率评分: {S}\n**分解**:\n\
+            - VRP: {value}\n- GEX: {value}\n- Carry: {value}\n\n---\n## 4. 推荐策略\n\
+            [对每个通过Edge门槛的策略]\n### {保守版/均衡版/进取版} - {策略名称}\n\n**描述**: [简要说明策略逻辑]\n\n\
+            **参数**:\n- DTE: {dte}天\n- 行权区间:\n  - [Leg1]: {action} {strike_calculated}\
+            \ {type} ({delta}, {calculation_method})\n  - [Leg2]: ...\n\n**入场**:\n\
+            - 触发: [具体条件]\n- 时机: [具体时间]\n- 条件: [其他约束]\n\n**退出**:\n- 止盈: [目标]\n- 止损:\
+            \ [条件]\n- 时间: [最晚退出时间]\n- Regime变化: [触发条件]\n\n**Edge估算**:\n- 胜率: {win_rate}\n\
+            - 盈亏比: {rr_ratio}\n- 期望收益: {ev}\n- 平均盈利: {avg_win}\n- 平均亏损: {avg_loss}\n\
+            - 最大回撤: {max_drawdown}\n- 是否满足门槛: {✅/❌}\n\n---\n\n## 5. 风险提示\n\n- 流动性:\
+            \ [Spread_atm评估]\n- Pin风险: [GammaWallProx评估]\n- 0DTE: 已规避\n- 事件风险: [是否跨期]\n\
+            \n---\n## 6. 监控要点\n*强化关注**:\n- VOL TRIGGER跨越({value})\n- Gamma Wall突破({value})\n\
+            - 5-15分钟RIM变化\n- Spread扩大\n**退出触发**:\n- Spot穿越{VOL_TRIGGER}(方向)\n- GammaWallProx\
+            \ < {threshold}\n- IV扩张>{threshold}\n\n---\n**报告生成**: {TIMESTAMP} "
+        - role: user
+          text: '"请生成最终决策报告。
+
+            【数据汇总】
+
+            核心字段: {{#3001.structured_output#}}
+
+            特征: {{#4001.result#}}
+
+            信号评分: {{#5001.result#}}
+
+            概率校准: {{#6001.structured_output#}}
+
+            策略方案: {{#7003.result#}}"
+
+
+            '
+        selected: false
+        title: Agent 8 最终决策
+        type: llm
+        vision:
+          enabled: false
+      height: 116
+      id: '8001'
+      position:
+        x: 3435.7712127956465
+        y: 429.42252683918616
+      positionAbsolute:
+        x: 3435.7712127956465
         y: 429.42252683918616
       selected: true
       sourcePosition: right
@@ -1266,7 +1633,7 @@ workflow:
       type: custom
       width: 242
     viewport:
-      x: -1095.7425389044079
-      y: -211.59924139425198
-      zoom: 0.9889709163809318
+      x: -1256.5539446616135
+      y: -45.12527489519948
+      zoom: 0.6328782969851434
   rag_pipeline_variables: []
