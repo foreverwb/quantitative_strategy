@@ -1,5 +1,5 @@
 app:
-  description: 输入1-3个美股代码获取命令清单,或回传数据获取完整分析。
+  description: 波段分析策略
   icon: 🤖
   icon_background: '#FCE7F3'
   mode: advanced-chat
@@ -12,9 +12,41 @@ dependencies:
     marketplace_plugin_unique_identifier: langgenius/openai_api_compatible:0.0.24@2266d6adfeafd3a161ba4a033553f4ff8a8b1d07be54f4b11ce9e68032889ac3
     version: null
 kind: app
-version: 0.4.0
+version: 0.5.0
 workflow:
-  conversation_variables: []
+  conversation_variables:
+  - description: 缺失字段数量
+    id: f695f981-f7a4-4dd0-b09c-13ddf7e007a6
+    name: missing_count
+    selector:
+    - conversation
+    - missing_count
+    value: 0
+    value_type: integer
+  - description: '数据处理状态, # initial | awaiting_data | ready | error'
+    id: 75095b84-d6c8-4623-b550-c61691a80293
+    name: data_status
+    selector:
+    - conversation
+    - data_status
+    value: initial
+    value_type: string
+  - description: 当前分析的股票代码，用于识别补齐回传
+    id: 5d24af5c-a996-47e6-8d72-3e443ce99457
+    name: current_symbol
+    selector:
+    - conversation
+    - current_symbol
+    value: ''
+    value_type: string
+  - description: '"首次解析的完整数据，用于补齐时合并"'
+    id: 2e987f9c-5667-4dca-9c79-3a97c096af0f
+    name: first_parse_data
+    selector:
+    - conversation
+    - first_parse_data
+    value: ''
+    value_type: string
   environment_variables:
   - description: IV路径相对变化阈值百分比, 阈值=max(2 vol点, 8–10%相对变化)
     id: 6947dc09-d0c3-4aef-aade-6474c620628c
@@ -100,18 +132,18 @@ workflow:
     value_type: string
   - description: ''
     id: 1175c26c-d2b4-4e1c-800e-06be95429cd6
-    name: CLUSTER_STRENGTH_THRESHOLD_TREND
+    name: CLUSTER_STRENGTH_THRESHOLD_T
     selector:
     - env
-    - CLUSTER_STRENGTH_THRESHOLD_TREND
+    - CLUSTER_STRENGTH_THRESHOLD_T
     value: '1.2'
     value_type: string
   - description: ''
     id: d1f43157-5c94-4f96-9fc5-40d58dc90dca
-    name: CLUSTER_STRENGTH_THRESHOLD_STRONG
+    name: CLUSTER_STRENGTH_THRESHOLD_S
     selector:
     - env
-    - CLUSTER_STRENGTH_THRESHOLD_STRONG
+    - CLUSTER_STRENGTH_THRESHOLD_S
     value: '2.0'
     value_type: string
   - description: ''
@@ -694,9 +726,9 @@ workflow:
       allowed_file_types:
       - image
       allowed_file_upload_methods:
-      - local_file
       - remote_url
-      enabled: false
+      - local_file
+      enabled: true
       fileUploadConfig:
         audio_file_size_limit: 50
         batch_count_limit: 5
@@ -710,17 +742,15 @@ workflow:
         transfer_methods:
         - local_file
         - remote_url
-      number_limits: 3
-    opening_statement: 你好!我是您的美股期权分析师。请输入1-3个美股代码(例如:AAPL 或 NVDA, TSLA)
+      number_limits: 10
+    opening_statement: ''
     retriever_resource:
       enabled: false
     sensitive_word_avoidance:
       enabled: false
     speech_to_text:
       enabled: false
-    suggested_questions:
-    - AAPL
-    - NVDA, TSLA
+    suggested_questions: []
     suggested_questions_after_answer:
       enabled: false
     text_to_speech:
@@ -729,32 +759,6 @@ workflow:
       voice: ''
   graph:
     edges:
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: start
-        targetType: llm
-      id: edge-1001-1002
-      selected: false
-      source: '1001'
-      sourceHandle: source
-      target: '1002'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: if-else
-      id: edge-1002-1003
-      selected: false
-      source: '1002'
-      sourceHandle: source
-      target: '1003'
-      targetHandle: target
-      type: custom
-      zIndex: 0
     - data:
         isInIteration: false
         isInLoop: false
@@ -795,45 +799,6 @@ workflow:
       type: custom
       zIndex: 0
     - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: if-else
-      id: edge-3001-3002
-      selected: false
-      source: '3001'
-      sourceHandle: source
-      target: '3002'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: if-else
-        targetType: answer
-      id: edge-3002-3003
-      selected: false
-      source: '3002'
-      sourceHandle: source
-      target: '3003'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: edge-3002-4001
-      selected: false
-      source: '3002'
-      sourceHandle: source
-      target: '4001'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
         isInLoop: false
         sourceType: if-else
         targetType: llm
@@ -848,62 +813,12 @@ workflow:
     - data:
         isInLoop: false
         sourceType: if-else
-        targetType: answer
-      id: 3002-case-missing-3003-target
-      selected: false
-      source: '3002'
-      sourceHandle: case-missing
-      target: '3003'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
         targetType: llm
       id: 1003-case-data-3001-target
       selected: false
       source: '1003'
       sourceHandle: case-data
       target: '3001'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInLoop: false
-        sourceType: if-else
-        targetType: llm
-      id: 3002-case-ready-4001-target
-      selected: false
-      source: '3002'
-      sourceHandle: case-ready
-      target: '4001'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: if-else
-        targetType: code
-      id: 3002-case-ready-1004-target
-      selected: false
-      source: '3002'
-      sourceHandle: case-ready
-      target: '1004'
-      targetHandle: target
-      type: custom
-      zIndex: 0
-    - data:
-        isInIteration: false
-        isInLoop: false
-        sourceType: llm
-        targetType: code
-      id: 4001--1007-target
-      selected: false
-      source: '4001'
-      sourceHandle: source
-      target: '1007'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -974,6 +889,7 @@ workflow:
         sourceType: llm
         targetType: code
       id: 6001--1008-target
+      selected: false
       source: '6001'
       sourceHandle: source
       target: '1008'
@@ -985,6 +901,7 @@ workflow:
         sourceType: code
         targetType: llm
       id: 1008-source-1005-target
+      selected: false
       source: '1008'
       sourceHandle: source
       target: '1005'
@@ -996,9 +913,79 @@ workflow:
         sourceType: llm
         targetType: llm
       id: 1005-source-7001-target
+      selected: false
       source: '1005'
       sourceHandle: source
       target: '7001'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: 3001--1009-target
+      selected: false
+      source: '3001'
+      sourceHandle: source
+      target: '1009'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: if-else
+      id: 1001-source-1003-target
+      selected: false
+      source: '1001'
+      sourceHandle: source
+      target: '1003'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: code
+      id: 3002-case-ready-1004-target
+      source: '3002'
+      sourceHandle: case-ready
+      target: '1004'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 3002-case-missing-3003-target
+      source: '3002'
+      sourceHandle: case-missing
+      target: '3003'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: answer
+      id: 3002-e24094ec-5f1e-4ad2-be2c-c6cb6275b48c-1763130136495-target
+      source: '3002'
+      sourceHandle: e24094ec-5f1e-4ad2-be2c-c6cb6275b48c
+      target: '1763130136495'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: code
+        targetType: if-else
+      id: 1009-source-3002-target
+      source: '1009'
+      sourceHandle: source
+      target: '3002'
       targetHandle: target
       type: custom
       zIndex: 0
@@ -1008,32 +995,8 @@ workflow:
         selected: false
         title: user input
         type: start
-        variables:
-        - default: ''
-          hint: ''
-          label: query
-          max_length: 48
-          options: []
-          placeholder: ''
-          required: true
-          type: text-input
-          variable: query
-        - allowed_file_extensions: []
-          allowed_file_types:
-          - image
-          allowed_file_upload_methods:
-          - local_file
-          - remote_url
-          default: ''
-          hint: ''
-          label: chat
-          max_length: 10
-          options: []
-          placeholder: ''
-          required: false
-          type: file-list
-          variable: chart
-      height: 114
+        variables: []
+      height: 73
       id: '1001'
       position:
         x: 30
@@ -1047,62 +1010,21 @@ workflow:
       type: custom
       width: 242
     - data:
-        context:
-          enabled: false
-          variable_selector: []
-        desc: 根据用户输入，判断是新任务（Ticker）还是数据回传（Data）。
-        model:
-          completion_params:
-            temperature: 0.3
-          mode: chat
-          name: Qwen3-8B
-          provider: langgenius/openai_api_compatible/openai_api_compatible
-        prompt_template:
-        - id: sys-router
-          role: system
-          text: "你是一个路由助手。你的唯一任务是判断用户输入属于以下哪一类,并仅输出 \"SYMBOL\", \"DATA\", 或 \"INVALID\"\
-            。\n\n1. \"TICKER\": 如果消息中包含1-3个符合美股代码格式的字符串(例如:AAPL, MSFT, \"amzn us\"\
-            , \"tsla\"),并且不包含 \"!gexr\" 或 \"SPOT PRICE\" 等数据特征。\n   - 正则(参考):(^|[^A-Z])([A-Za-z]{1,5})(?:\\\
-            s*,\\s*([A-Za-z]{1,5})){0,2}([^A-Z]|$)\n\n2. \"DATA\": 如果消息中包含数据特征词,如\
-            \ \"!gexr\", \"!skew\", \"SPOT PRICE\", \"Call Wall\", \"EM1$\" 等。\n\n\
-            3. \"INVALID\": 其他所有情况。\n\n【你的判断】(SYMBOL, DATA, or INVALID)\n"
-        - id: user-router
-          role: user
-          text: '{{#1001.query#}}'
-        selected: false
-        structured_output_enabled: false
-        title: Router
-        type: llm
-        vision:
-          enabled: false
-      height: 132
-      id: '1002'
-      position:
-        x: 330
-        y: 300
-      positionAbsolute:
-        x: 330
-        y: 300
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
         cases:
         - case_id: case-ticker
           conditions:
-          - comparison_operator: is
+          - comparison_operator: empty
             id: cond-ticker
-            value: SYMBOL
+            value: ''
+            varType: array[file]
             variable_selector:
-            - '1002'
-            - text
+            - sys
+            - files
           id: case-ticker
           logical_operator: and
         - case_id: case-data
           conditions:
-          - comparison_operator: contains
+          - comparison_operator: not empty
             id: cond-data
             sub_variable_condition:
               case_id: 6f06a580-b00a-493c-bab4-57cc20c3086a
@@ -1115,28 +1037,18 @@ workflow:
             - files
           id: case-data
           logical_operator: and
-        - case_id: case-invalid
-          conditions:
-          - comparison_operator: is
-            id: cond-invalid
-            value: INVALID
-            variable_selector:
-            - '1002'
-            - text
-          id: case-invalid
-          logical_operator: and
         desc: ''
         selected: false
         title: 判定分支
         type: if-else
-      height: 220
+      height: 172
       id: '1003'
       position:
-        x: 631.4737315063629
-        y: 162.94296990825057
+        x: 466.8589549331674
+        y: 161.59366846092928
       positionAbsolute:
-        x: 631.4737315063629
-        y: 162.94296990825057
+        x: 466.8589549331674
+        y: 161.59366846092928
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1189,7 +1101,7 @@ workflow:
             \ 生成命令清单。\n\n"
         - id: user-cmdlist
           role: user
-          text: 请立即开始为{{#1001.query#}}生成命令清单。
+          text: 请立即开始为{{#sys.query#}}生成命令清单。
         selected: false
         title: Agent 2 命令清单
         type: llm
@@ -1406,127 +1318,165 @@ workflow:
         prompt_template:
         - id: sys-validate
           role: system
-          text: "你是一个期权结构和波动率特征图像解析器、数据校验和计算 Agent。\n你的任务是将用户回传的可视化数据 chart,进行 chart\
-            \ 图像解析,准确提取结构化量化数据\n目标是输出标准 JSON schema 并严格按照【数据口径与指标定义】计算所有核心字段\n\n【任务】\n\
-            1. 解析【用户原始数据】。\n2. 执行【数据口径与指标定义】中的所有计算。\n3. 核对【数据校验关口】中的必需字段。\n4. 严格仅输出\
-            \ JSON schema\n\n【系统环境变量 - 计算参数】 \n- EM1$计算因子：sqrt(1/252) = {{#env.EM1_SQRT_FACTOR#}}\
-            \ \n- 破墙阈值下限：{{#env.BREAK_WALL_THRESHOLD_LOW#}} × EM1$ \n- 破墙阈值上限：{{#env.BREAK_WALL_THRESHOLD_HIGH#}}\
-            \ × EM1$ \n- 月度叠加阈值系数：{{#env.MONTHLY_OVERRIDE_THRESHOLD#}} \n- 月度簇强度触发比：{{#env.MONTHLY_CLUSTER_STRENGTH_RATIO#}}\
-            \ \n- 簇强度趋势阈值：{{#env.CLUSTER_STRENGTH_THRESHOLD_TREND#}} \n- 簇强度极强阈值：{{#env.CLUSTER_STRENGTH_THRESHOLD_STRONG#}}\
-            \ \n- 墙识别峰值倍数：{{#env.WALL_PEAK_MULTIPLIER#}} \n- 墙识别簇宽度：{{#env.WALL_CLUSTER_WIDTH#}}\
-            \ \n- DEX强信号阈值：{{#env.DEX_SAME_DIR_THRESHOLD_STRONG#}}% \n- DEX中等信号阈值：{{#env.DEX_SAME_DIR_THRESHOLD_MEDIUM#}}%\
-            \ \n- IV路径阈值：{{#env.IV_PATH_THRESHOLD_VOL#}} vol 或 {{#env.IV_PATH_THRESHOLD_PCT#}}%\
-            \ \n- IV噪声阈值：{{#env.IV_NOISE_THRESHOLD#}}% \n- 默认strikes：{{#env.DEFAULT_STRIKES#}}\
-            \ \n- 默认NET窗口：{{#env.DEFAULT_NET_WINDOW#}}天\n\n【数据口径与指标定义 - 核心计算22字段】\
-            \ \n**1. 到期与采样** \n- 周度优先：DTE {{#env.DEFAULT_DTE_WEEKLY_SHORT#}}与{{#env.DEFAULT_DTE_WEEKLY_MID#}}\
-            \ \n- 无周度取月度：DTE {{#env.DEFAULT_DTE_MONTHLY_SHORT#}}与{{#env.DEFAULT_DTE_MONTHLY_MID#}}\
-            \ \n- strikes = {{#env.DEFAULT_STRIKES#}} \n- NET类窗口默认{{#env.DEFAULT_NET_WINDOW#}}天，必要时{{#env.EXTENDED_NET_WINDOW#}}天\n\
-            \n**2. EM1$ (预期单日波幅美元)** \n公式：EM1$ = Spot × min(ATM_IV_7D, ATM_IV_14D)\
-            \ × {{#env.EM1_SQRT_FACTOR#}} \n- 优先使用7D ATM-IV \n- 若7D与14D差异>{{#env.IV_NOISE_THRESHOLD#}}%，则用14D\n\
-            \ - 两者皆缺时补21D \n- 输出字段：em1_dollar (数值)\n\n**3. 墙与簇识别规则** \n从 !gexr SYMBOL\
-            \ {{ {{#env.DEFAULT_STRIKES#}} 7w 与 14w 识别Call/Put/Major墙。 \n- 规则：局部峰\
-            \ ≥ 相邻γ中位数 × {{#env.WALL_PEAK_MULTIPLIER#}} 倍 \n- 且簇宽 ≥ {{#env.WALL_CLUSTER_WIDTH#}}\
-            \ 相邻行权价 - Major_Wall 为 Call/Put 墙中 GEX 绝对值更大者 \n- 输出字段： * call_wall (行权价数值)\
-            \ * put_wall (行权价数值) * major_wall (行权价数值) * major_wall_type (\"call\"\
-            \ 或 \"put\")\n\n**4. 正γ负γ判定（Gamma Regime）\n- 最关键**\n使用 !trigger SYMBOL\
-            \ {{#env.DEFAULT_NET_WINDOW#}} 输出的 VOL_TRIGGER 即 Gamma 翻转价位。\n       \
-            \ - 若 SPOT > VOL_TRIGGER：\n          * spot_vs_trigger = \"above\"\n \
-            \         * 解读：正γ倾向，做市商压制波动，基础场景为区间\n        - 若 SPOT < VOL_TRIGGER：\n\
-            \          * spot_vs_trigger = \"below\"\n          * 解读：负γ倾向，做市商放大波动，基础场景为趋势\n\
-            \        - 若 SPOT 靠近 VOL_TRIGGER (±0.3×EM1$)：\n          * spot_vs_trigger\
-            \ = \"near\"\n          * 解读：临界状态，可能 regime 反转\n        - 输出字段：\n    \
-            \      * vol_trigger (数值)\n          * spot_vs_trigger (\"above\" | \"\
-            below\" | \"near\")\n\n **5. 月度叠加机制**\n若 !gexr 月度簇强度 ≥ 周度 × {{#env.MONTHLY_CLUSTER_STRENGTH_RATIO#}}：\n\
-            - 破墙阈值降至 {{#env.MONTHLY_OVERRIDE_THRESHOLD#}} × EM1$\n- 且需次日确认\n- 输出字段：monthly_cluster_override\
-            \ (true | false)\n\n**6. Vanna三级回退** \n优先：!vanna SYMBOL ntm {{#env.DEFAULT_NET_WINDOW#}}\
-            \ m\n - 读取现价附近符号与斜率 \n- 得到 vanna_dir (\"up\" | \"down\" | \"flat\") \n\
-            - 置信度 vanna_confidence (\"high\" | \"medium\" | \"low\") \n- 若缺，补：!vanna\
-            \ SYMBOL ntm {{#env.DEFAULT_DTE_MONTHLY_SHORT#}} m → confidence = \"medium\"\
-            \ \n- 若仍缺，按skew与delta偏斜临时推断 → confidence = \"low\" - 输出字段： * vanna_dir\
-            \ * vanna_confidence\n\n**7. ATM_IV数据源优先级** \n!skew SYMBOL ivmid atm 7\
-            \ 与 14 \n- 优先使用7D - 若7D与14D差异 > {{#env.IV_NOISE_THRESHOLD#}}%，则用14D \n\
-            - 若两者皆缺，补21D \n- 输出字段： * atm_iv_7d (数值或null) * atm_iv_14d (数值或null) *\
-            \ iv_source (\"7d\" | \"14d\" | \"21d_fallback\")\n\n**8. iv_path 波动率路径**\
-            \ \n比较今日7D_ATM_IV与昨日或前三日： \n- 显著阈值：±{{#env.IV_PATH_THRESHOLD_VOL#}} vol\
-            \ 或 ±{{#env.IV_PATH_THRESHOLD_PCT#}}% 相对变化 \n- 输出 iv_path： \n * \"升\"\
-            \ - IV上升趋势 \n * \"降\" - IV下降趋势 \n * \"平\" - IV稳定 \n * \"数据不足\" - 无历史数据\
-            \ \n- 输出 iv_path_confidence (\"high\" | \"medium\" | \"low\") \n- 无历史数据时从\
-            \ !term SYMBOL 推断： \n  * Backwardation → \"升\"，confidence = \"medium\"\
-            \ \n  * Contango → \"降\"，confidence = \"medium\"\n\n**9. gap_distance\
-            \ 墙距精确定义** \n从 !gexr 获取 ABS_GEX 分布：\n - 当前价 Spot 到下一 ABS_GEX 峰簇中心或有效边界的美元距离\
-            \ \n - 判断方向： \n  * 若 spot_vs_trigger = \"above\"：向上看 Call_Wall 阻力 \n \
-            \ * 若 spot_vs_trigger = \"below\"：向下看 Put_Wall 支撑 \n- 输出字段： \n * gap_distance_dollar\
-            \ (美元数值) \n * gap_distance_em1_multiple (gap_distance_dollar / EM1$)\n\
-            \n**10. cluster_strength_ratio 簇强度比** \n从 !gexr 周度数据： \n  - 计算：主墙 Major_Wall\
-            \ 的 GEX 绝对值 ÷ 次墙（下一个最强峰）的 GEX 绝对值 \n  - 若仅单峰无对照，补跑 !gexr SYMBOL {{#env.DEFAULT_STRIKES#}}\
-            \ {{#env.DEFAULT_DTE_MONTHLY_SHORT#}} m \n - 或延伸 DTE 以寻参照峰 \n - 输出字段：\
-            \ \n   * cluster_strength_ratio (数值) \n   * data_source (\"weekly\" |\
-            \ \"monthly\" | \"extended\") \n- 解读： \n  * ≥ {{#env.CLUSTER_STRENGTH_THRESHOLD_STRONG#}}：主墙极强，破墙难度高\
-            \ \n  * ≥ {{#env.CLUSTER_STRENGTH_THRESHOLD_TREND#}}：中等强度，易趋势突破 \n  *\
-            \ < {{#env.CLUSTER_STRENGTH_THRESHOLD_TREND#}}：较易突破\n\n**11. dex_same_dir\
-            \ 方向一致性** \n从 !dexn SYMBOL {{#env.DEFAULT_STRIKES#}} 14w： \n - gap 区间内同向\
-            \ DEX 净和在 60 日历史中的分位百分比 \n - 输出字段：dex_same_dir_pct (百分比数值，如 65 表示 65%)\
-            \ \n - 解读： \n  * ≥ {{#env.DEX_SAME_DIR_THRESHOLD_STRONG#}}%：强方向信号 \n \
-            \ * ≥ {{#env.DEX_SAME_DIR_THRESHOLD_MEDIUM#}}%：中等方向信号 \n  * < {{#env.DEX_SAME_DIR_THRESHOLD_WEAK#}}%：弱方向信号\n\
-            \n**12. NET_GEX 与符号** \n从 !gexn SYMBOL {{#env.DEFAULT_NET_WINDOW#}} 98：\
-            \ - 读取 NET-GEX 数值 \n- 判断符号： \n  * NET-GEX < 0 → net_gex_sign = \"negative_gamma\"\
-            \ (负γ，趋势倾向) \n  * NET-GEX > 0 → net_gex_sign = \"positive_gamma\" (正γ，区间倾向)\
-            \ \n  * NET-GEX ≈ 0 → net_gex_sign = \"neutral\" (中性) \n- 输出字段： * net_gex\
-            \ (数值) * net_gex_sign\n\n**13. 指数背景必需** \n默认 {{#env.DEFAULT_INDEX_PRIMARY#}}，必要时\
-            \ {{#env.DEFAULT_INDEX_SECONDARY#}}。 \n从 !gexn SPX {{#env.DEFAULT_DTE_MONTHLY_SHORT#}}\
-            \ 98 和 !trigger SPX {{#env.DEFAULT_NET_WINDOW#}}：\n  - NET_GEX_IDX：指数的\
-            \ NET-GEX \n从 !skew SPX ivmid atm 7 和 14： \n - 计算 EM1$_IDX = Spot_IDX\
-            \ × min(ATM_IV_7D, ATM_IV_14D) × {{#env.EM1_SQRT_FACTOR#}} \n\n科技权重高可并行输出\
-            \ QQQ 数据。 \n输出字段： \n- indices.spx.net_gex_idx \n- indices.spx.em1_dollar_idx\
-            \ \n- indices.spx.spot_idx \n- indices.qqq.net_gex_idx (可选) \n- indices.qqq.em1_dollar_idx\
-            \ (可选) \n- indices.qqq.spot_idx (可选)\n\n【数据校验关口】 \n**标的必需字段**（22个核心字段）：\
-            \ \n1. spot_price 2. em1_dollar 3. call_wall 4. put_wall 5. major_wall\
-            \ 6. major_wall_type 7. gap_distance_dollar 8. gap_distance_em1_multiple\
-            \ 9. cluster_strength_ratio 10. dex_same_dir_pct 11. vanna_dir 12. vanna_confidence\
-            \ 13. iv_path 14. iv_path_confidence 15. net_gex 16. net_gex_sign 17.\
-            \ vol_trigger 18. spot_vs_trigger 19. monthly_cluster_override 20. atm_iv_7d\
-            \ 21. atm_iv_14d 22. iv_source **指数背景必需字段**： - net_gex_idx (SPX 或 QQQ)\
-            \ - em1_dollar_idx (SPX 或 QQQ) - spot_idx (SPX 或 QQQ)\n\n【数据完整性判断】 \n\
-            status 字段取值逻辑： \n - 若 22 个核心字段全部非 null 且 missing_count = 0 → status =\
-            \ \"data_ready\" \n - 若存在任何关键字段为 null 或 missing_count > 0 → status = \"\
-            missing_data\" \n【补齐指引生成规则】 \n**仅当 status = \"missing_data\" 时，必须生成 \"\
-            补齐指引\" 数组** \n对于每个缺失字段，按以下优先级提供补齐方案： \n**优先级 1（critical）：影响 Gamma Regime\
-            \ 判断的字段**   - vol_trigger \n- spot_vs_trigger \n- net_gex - net_gex_sign\
-            \ \n示例格式： \n{ \n    \"missing_field\": \"vol_trigger\", \n    \"description\"\
-            : \"Gamma 翻转价位VOL_TRIGGER是判断正γ负γ的关键\", \n   \"command\": \"!trigger AAPL\
-            \ {{#env.DEFAULT_NET_WINDOW#}}\", \n \"alternative\": \"!gexn AAPL {{#env.DEFAULT_NET_WINDOW#}}\
-            \ 98 从输出提取Gamma Flip价位\", \n \"extraction_note\": \"提取输出中的VOL TRIGGER或Gamma\
-            \ Flip数值\", \n  \"priority\": 1, \n  \"impact\": \"无此字段无法判断Gamma Regime，影响剧本分类\"\
-            \ \n} \n**优先级 2（high）：影响核心计算的字段** \n  - em1_dollar (影响所有距离计算) \n  - atm_iv_7d\
-            \ / atm_iv_14d (影响 EM1$ 计算) \n  - call_wall / put_wall (影响墙距计算) \n\n示例格式：\
-            \ \n { \n   \"missing_field\": \n   \"atm_iv_14d\", \n   \"description\"\
-            : \"14日ATM隐含波动率\", \n   \"command\": \"!skew AAPL ivmid atm 14\",\n  \
-            \ \"alternative\": \"若7D数据噪声大，14D可提供更稳定的IV基准\", \n  \"extraction_note\"\
-            : \"提取ATM IV 14DTE数值如0.30\",\n  \"priority\": 2, \n  \"impact\": \"影响EM1$计算精度，进而影响所有距离类指标\"\
-            \ \n } \n**优先级 3（medium）：影响方向判断的字段** \n  - dex_same_dir_pct \n  - vanna_dir\
-            \ \n  - vanna_confidence \n  - iv_path 示例格式： \n{ \n  \"missing_field\"\
-            : \"dex_same_dir_pct\", \n  \"description\": \"DEX方向一致性百分比\", \n  \"command\"\
-            : \"!dexn AAPL {{#env.DEFAULT_STRIKES#}} 14 w\", \n  \"alternative\":\
-            \ \"可从历史DEX分布手动计算同向占比\",  \"extraction_note\": \"查看输出中gap区间内DEX净和的历史分位\"\
-            , \n  \"priority\": 3, \n  \"impact\": \"影响方向信号强度评估，但不阻断基础判断\"\n } \n\
-            **优先级 4-5（low）：补充性字段** \n - cluster_strength_ratio \n - monthly_cluster_override\
-            \ \n - iv_path_confidence \n**补齐指引数组排序**：按 priority 从小到大排列（1最优先） \n **补齐后续说明**：\
-            \ \n \"补齐后续\" 字段应说明：\n  - \"补齐上述 {missing_count} 个关键字段后将自动重新计算 gap_distance、cluster_strength\
-            \ 等派生指标\" \n - \"优先补齐 priority=1 的字段，这些直接影响 Gamma Regime 判断\"\n\n【关键注意事项】\n\
-            1. **异常处理**：\n   - 若图表模糊不清：返回 \"chart_quality\": \"low\", \"confidence\"\
-            : \"medium\"\n   - 若缺失核心指标（如无RSI）：在indicators_raw中标注 \"available\": false\n\
-            \   - 若无法识别平台：返回 \"platform\": \"unknown\"\n2. **状态一致性**：\n   - targets.status\
-            \ 必须与顶层 status 保持一致\n   - missing_fields 数组长度必须与 validation_summary.missing_count\
-            \ 一致\n3. **补齐指引完整性**：\n   - 当 status = \"missing_data\" 时，必须提供 \"补齐指引\"\
-            \ 数组\n   - 数组中每个对象必须包含所有 required 字段\n   - priority 值必须在 1-5 范围内"
+          text: "你是期权结构和波动率特征图像解析器、数据校验和计算 Agent。\n**核心任务**: \n1. 解析期权数据图表(GEX/DEX/Vanna/IV/Skew)\n\
+            2. 提取技术面指标(EMA/RSI/BB/MACD/Volume)\n3. 计算核心指标(EM1$/gap距离/簇强度等)\n4. 执行三级数据验证\n\
+            5. 生成补齐指引(若数据缺失)\n**目标**: \n目标是输出标准数据并严格按照【数据口径与指标定义】计算所有核心字段\n\n【系统环境变量\
+            \ - 计算参数】 \n- EM1$计算因子：sqrt(1/252) = {{#env.EM1_SQRT_FACTOR#}} \n- 破墙阈值下限：{{#env.BREAK_WALL_THRESHOLD_LOW#}}\
+            \ × EM1$ \n- 破墙阈值上限：{{#env.BREAK_WALL_THRESHOLD_HIGH#}} × EM1$ \n- 月度占优阈值系数：{{#env.MONTHLY_OVERRIDE_THRESHOLD#}}\
+            \ \n- 月度簇强度触发比：{{#env.MONTHLY_CLUSTER_STRENGTH_RATIO#}} \n- 簇强度趋势阈值：{{#env.CLUSTER_STRENGTH_THRESHOLD_T#}}\
+            \ \n- 簇强度极强阈值：{{#env.CLUSTER_STRENGTH_THRESHOLD_S#}} \n- 墙识别峰值倍数：{{#env.WALL_PEAK_MULTIPLIER#}}\
+            \ \n- 墙识别簇宽度：{{#env.WALL_CLUSTER_WIDTH#}} \n- DEX强信号阈值：{{#env.DEX_SAME_DIR_THRESHOLD_STRONG#}}%\
+            \ \n- DEX中等信号阈值：{{#env.DEX_SAME_DIR_THRESHOLD_MEDIUM#}}% \n- IV路径阈值：{{#env.IV_PATH_THRESHOLD_VOL#}}\
+            \ vol 或 {{#env.IV_PATH_THRESHOLD_PCT#}}% \n- IV噪声阈值：{{#env.IV_NOISE_THRESHOLD#}}%\
+            \ \n- 默认strikes：{{#env.DEFAULT_STRIKES#}} \n- 默认NET窗口：{{#env.DEFAULT_NET_WINDOW#}}天\n\
+            \n\n## 阶段 1: 数据提取规则\n\n\n### 1.1 期权核心数据(22 必需字段)\n\n\n#### A. 基础价格数据\n\
+            - **spot_price**: 当前标的价格,从图表标题或最新K线提取\n- **em1_dollar**: 预期单日波幅美元值\n \
+            \ - 公式: `Spot × min(ATM_IV_7D, ATM_IV_14D) × {{#env.EM1_SQRT_FACTOR#}}`\n\
+            \  - 优先使用 7D ATM-IV\n  - 若 7D 与 14D 差异 > {{#env.IV_NOISE_THRESHOLD#}}%,则用\
+            \ 14D\n\n\n#### B. 墙与簇识别\n从 `!gexr SYMBOL {{#env.DEFAULT_STRIKES#}} 7w`\
+            \ 和 `14w` 输出识别:\n\n\n**墙识别规则**:\n- 局部峰 ≥ 相邻 γ 中位数 × {{#env.WALL_PEAK_MULTIPLIER#}}\
+            \ 倍\n- 且簇宽 ≥ {{#env.WALL_CLUSTER_WIDTH#}} 个相邻行权价\n\n\n**输出字段**:\n- **call_wall**:\
+            \ 看涨期权墙价位\n- **put_wall**: 看跌期权墙价位\n- **major_wall**: Call/Put 墙中 GEX\
+            \ 绝对值更大者\n- **major_wall_type**: \"call\" 或 \"put\"\n\n\n#### C. Gamma\
+            \ 状态判定\n从 `!trigger SYMBOL {{#env.DEFAULT_NET_WINDOW#}}` 提取:\n\n\n- **vol_trigger**:\
+            \ Gamma 翻转价位(VOL_TRIGGER 或 Gamma Flip)\n- **spot_vs_trigger**: 现价相对触发线位置\n\
+            \  - 若 SPOT > VOL_TRIGGER: \"above\"\n  - 若 SPOT < VOL_TRIGGER: \"below\"\
+            \n  - 若 SPOT 接近 VOL_TRIGGER (±0.3×EM1$): \"near\"\n\n\n从 `!gexn SYMBOL\
+            \ {{#env.DEFAULT_NET_WINDOW#}} 98` 提取:\n- **net_gex**: NET-GEX 数值\n- **net_gex_sign**:\
+            \ 净 Gamma 符号\n  - NET-GEX < 0: \"negative_gamma\"\n  - NET-GEX > 0: \"\
+            positive_gamma\"\n  - NET-GEX ≈ 0: \"neutral\"\n\n\n#### D. 距离与强度指标\n\
+            从 `!gexr` 输出的 ABS_GEX 分布计算:\n\n\n- **gap_distance_dollar**: 当前价到下一 ABS_GEX\
+            \ 峰簇的美元距离\n  - 方向: 若 spot_vs_trigger=\"above\" 向上看 Call_Wall\n  - 方向:\
+            \ 若 spot_vs_trigger=\"below\" 向下看 Put_Wall\n\n\n- **gap_distance_em1_multiple**:\
+            \ gap_distance_dollar ÷ EM1$\n\n\n- **cluster_strength_ratio**: 主墙 GEX\
+            \ 绝对值 ÷ 次墙 GEX 绝对值\n  - 若仅单峰无对照,补跑 `!gexr SYMBOL {{#env.DEFAULT_STRIKES#}}\
+            \ {{#env.DEFAULT_DTE_MONTHLY_SHORT#}} m`\n  - 或延长 DTE 以寻参照峰\n\n\n- **monthly_cluster_override**:\
+            \ 月度簇是否占优\n  - 若月度簇强度 ≥ 周度 × {{#env.MONTHLY_CLUSTER_STRENGTH_RATIO#}}:\
+            \ true\n  - 否则: false\n\n\n#### E. 方向信号\n从 `!dexn SYMBOL {{#env.DEFAULT_STRIKES#}}\
+            \ 14w` 提取:\n\n\n- **dex_same_dir_pct**: gap 区间内同向 DEX 净和在 60 日历史中的分位百分比(0-100)\n\
+            \n\n从 `!vanna SYMBOL ntm {{#env.DEFAULT_NET_WINDOW#}} m` 提取(三级回退):\n-\
+            \ **vanna_dir**: Vanna 方向 (\"up\" | \"down\" | \"flat\")\n- **vanna_confidence**:\
+            \ Vanna 置信度 (\"high\" | \"medium\" | \"low\")\n  - 优先: ntm 60 day monthly\
+            \ → confidence = \"high\"\n  - 若缺: ntm {{#env.DEFAULT_DTE_MONTHLY_SHORT#}}\
+            \ m → confidence = \"medium\"\n  - 若仍缺: 按 skew 与 delta 反斜临时推断 → confidence\
+            \ = \"low\"\n\n\n#### F. IV 动态\n从 `!skew SYMBOL ivmid atm 7` 和 `14` 提取:\n\
+            \n\n- **iv_7d**: 7 日 ATM 隐含波动率(小数形式,如 0.45)\n- **iv_14d**: 14 日 ATM 隐含波动率\n\
+            - **iv_source**: IV 数据源 (\"7d\" | \"14d\" | \"21d_fallback\")\n  - 优先使用\
+            \ 7D\n  - 若 7D 与 14D 差异 > {{#env.IV_NOISE_THRESHOLD#}}%,则用 14D\n  - 两者皆缺时补\
+            \ 21D\n\n\n从历史 IV 数据或 `!term SYMBOL` 推断:\n- **iv_path**: IV 路径趋势 (\"升\"\
+            \ | \"降\" | \"平\" | \"数据不足\")\n  - 比较今日 7D_ATM_IV 与昨日/前三日\n  - 显著阈值: ±{{#env.IV_PATH_THRESHOLD_VOL#}}\
+            \ vol 或 ±{{#env.IV_PATH_THRESHOLD_PCT#}}% 相对变化\n\n\n- **iv_path_confidence**:\
+            \ IV 路径置信度 (\"high\" | \"medium\" | \"low\")\n  - 有历史数据: \"high\"\n  -\
+            \ 仅 term structure 推断: \"medium\"\n  - Backwardation → \"升\", Contango\
+            \ → \"降\"\n\n\n---\n\n\n### 1.2 技术面数据(可选字段)\n\n\n**重要**: 技术面数据完全可选,若图表未包含技术指标,不影响\
+            \ status 判定。\n\n\n#### A. 图表元数据\n- **platform**: 识别平台(TradingView/Thinkorswim/Yahoo\
+            \ Finance/其他)\n- **timeframe**: 时间周期(Daily/4H/1H)\n- **latest_timestamp**:\
+            \ 最新时间戳\n\n\n#### B. 价格与均线\n从图表最新 K 线提取:\n\n\n- **close**: 收盘价\n- **ema20**:\
+            \ EMA20 数值\n- **ema50**: EMA50 数值\n- **price_vs_ema20_pct**: (close -\
+            \ ema20) / ema20 × 100\n- **price_vs_ema50_pct**: (close - ema50) / ema50\
+            \ × 100\n- **ema20_slope**: EMA20 斜率(\"上行\" | \"走平\" | \"下行\")\n- **ema50_slope**:\
+            \ EMA50 斜率\n- **golden_cross**: 是否金叉(ema20 > ema50: true)\n\n\n#### C.\
+            \ RSI 指标\n- **rsi_value**: RSI(14) 当前值\n- **rsi_zone**: RSI 区间(\"超买\"\
+            \ | \"中性偏强\" | \"中性\" | \"中性偏弱\" | \"超卖\")\n- **rsi_divergence**: 背离形态(\"\
+            顶背离\" | \"底背离\" | \"无\")\n\n\n#### D. 布林带\n- **bb_width**: BB 宽度(上轨 -\
+            \ 下轨)\n- **bb_width_percentile**: 当前宽度在历史中的分位(0-100)\n- **bb_position**:\
+            \ 价格相对布林带位置(\"上轨上方\" | \"中轨上方\" | \"中轨\" | \"中轨下方\" | \"下轨下方\")\n- **bb_band_direction**:\
+            \ 带口方向(\"扩张\" | \"平行\" | \"收缩\")\n\n\n#### E. MACD\n- **macd_histogram**:\
+            \ 柱状图趋势(\"正值扩大\" | \"正值收敛\" | \"负值扩大\" | \"负值收敛\")\n- **macd_signal_line_cross**:\
+            \ 快慢线交叉(\"金叉后第N日\" | \"死叉后第N日\" | \"无交叉\")\n- **macd_zero_line**: 相对零轴位置(\"\
+            上方\" | \"下方\" | \"接近零轴\")\n\n\n#### F. 成交量\n- **volume_current**: 当前成交量\n\
+            - **volume_avg_20d**: 20 日平均成交量\n- **volume_ratio**: current / avg_20d\n\
+            - **volume_status**: 成交量状态(\"显著放量\" | \"温和放量\" | \"正常\" | \"缩量\")\n\n\n\
+            #### G. 技术面评分\n根据以下规则计算 **ta_score**(0-2 分,最多 +2):\n\n\n**评分规则**:\n- EMA\
+            \ 判断(最多 +1):\n  - EMA20/50 发散向上且 golden_cross=true → +1\n  - EMA20/50\
+            \ 走平或粘合 → +1\n  - 其他 → 0\n\n\n- RSI 判断(最多 +1):\n  - RSI > 60 且无顶背离 → +1\n\
+            \  - RSI 在 40-60 → +1\n  - RSI 背离 → -1\n\n\n- BB 判断(最多 +1,可叠加但总分上限 2):\n\
+            \  - BB 宽度低分位 + 同向开口 → +1(择一计分)\n\n\n**评分上限**: 最多累计 +2 分\n\n\n**ta_commentary**:\
+            \ 简述评分理由(不超过 80 字)\n\n\n---\n\n\n## 阶段 2: 指数背景数据(低优先级)\n\n\n默认 {{#env.DEFAULT_INDEX_PRIMARY#}}(SPX),必要时\
+            \ {{#env.DEFAULT_INDEX_SECONDARY#}}(QQQ)。\n\n\n从 `!gexn SPX {{#env.DEFAULT_DTE_MONTHLY_SHORT#}}\
+            \ 98` 和 `!trigger SPX {{#env.DEFAULT_NET_WINDOW#}}` 提取:\n\n\n- **indices.spx.net_gex_idx**:\
+            \ SPX 的 NET-GEX\n- **indices.spx.spot_idx**: SPX 现价\n\n\n从 `!skew SPX\
+            \ ivmid atm 7` 和 `14` 计算:\n- **indices.spx.em1_dollar_idx**: SPX 的 EM1$\n\
+            \n\n同理处理 QQQ(可选)。\n\n\n**重要**: 若指数数据全为 -999,不影响 status 判定,仅在 validation_summary.warnings\
+            \ 中标注。\n\n\n---\n\n\n## 阶段 3: 数据验证与状态判定\n\n\n### 三级验证规则(决策树)\n\n\n```\n\
+            第一级:检查 22 个必需字段\n  ├─ 若任一字段为 -999/null/\"N/A\"/\"数据不足\"\n  │   └─ status\
+            \ = \"missing_data\"\n  └─ 若全部有效\n      └─ 进入第二级\n\n\n第二级:检查指数背景\n  ├─\
+            \ 若 SPX 和 QQQ 全为 -999\n  │   ├─ 添加 warning: \"⚠️ 指数背景数据缺失,不影响个股分析\"\n\
+            \  │   └─ 继续第三级\n  └─ 若至少一个指数有效\n      └─ 进入第三级\n\n\n第三级:检查技术面(可选)\n \
+            \ ├─ 若 technical_analysis 不存在或 ta_score = 0\n  │   └─ 添加 warning: \"\U0001F4A1\
+            \ 技术面数据缺失,仅影响评分\"\n  └─ 最终 status = \"data_ready\"\n```\n\n\n### status\
+            \ 最终判定\n\n\n**唯一判定标准**: 22 个必需字段是否全部有效\n\n\n- 若全部有效 → `status = \"data_ready\"\
+            `\n- 若任一缺失 → `status = \"missing_data\"`\n\n\n**次要字段(不影响 status)**:\n\
+            - 指数背景(indices): 缺失时仅警告\n- 技术面(technical_analysis): 缺失时仅警告\n\n\n---\n\n\
+            \n## 阶段 4: 补齐指引生成(仅 status=\"missing_data\" 时)\n\n\n### 优先级定义\n\n\n**Priority\
+            \ 1 (Critical)**: 影响 Gamma Regime 判断\n- vol_trigger\n- spot_vs_trigger\n\
+            - net_gex\n- net_gex_sign\n\n\n**Priority 2 (High)**: 影响核心计算\n- em1_dollar\n\
+            - gap_distance_dollar\n- gap_distance_em1_multiple\n- call_wall / put_wall\n\
+            \n\n**Priority 3 (Medium)**: 影响方向判断\n- dex_same_dir_pct\n- vanna_dir /\
+            \ vanna_confidence\n- iv_path / iv_path_confidence\n\n\n**Priority 4-5\
+            \ (Low/Optional)**: 补充性字段\n- cluster_strength_ratio\n- monthly_cluster_override\n\
+            \n\n### 补齐指引格式\n\n\n为每个缺失字段生成:\n\n\n- **missing_field**: 字段名\n- **description**:\
+            \ 字段说明\n- **command**: 建议执行的命令\n- **alternative**: 备选方案\n- **extraction_note**:\
+            \ 数据提取说明\n- **priority**: 优先级(1-5)\n- **impact**: 缺失影响说明\n---\n\n## 阶段\
+            \ 5: 输出规范\n\n\n### 关键原则\n\n\n1. **严格依赖 JSON Schema**: 不要在 prompt 中写 JSON\
+            \ 示例\n2. **使用占位符**: 所有环境变量的引用\n3. **自然语言描述**: 用决策树/规则描述,不用 Python 代码块\n\
+            4. **状态一致性**: validation_summary 必须与 status 一致\n\n\n### 数据质量标注\n\n\n####\
+            \ validation_summary 字段说明\n\n\n- **total_targets**: 1(固定)\n- **targets_ready**:\
+            \ status=\"data_ready\" ? 1 : 0\n- **total_fields_required**: 22(固定)\n\
+            - **fields_provided**: 实际提供的有效字段数\n- **missing_count**: 缺失字段数量\n- **completion_rate**:\
+            \ fields_provided / 22 × 100\n\n\n#### 新增字段(可选)\n\n\n- **optional_fields_provided**:\
+            \ 技术面字段提供数量\n- **background_fields_provided**: 指数背景字段提供数量\n- **warnings**:\
+            \ 警告信息列表\n\n\n---\n\n\n## 关键注意事项\n\n\n### 异常处理\n\n\n1. **图表模糊不清**:\n \
+            \  - 在 chart_metadata 中标注 `\"chart_quality\": \"low\"`\n   - 在 validation_summary.warnings\
+            \ 中说明\n\n\n2. **无法识别平台**:\n   - `\"platform\": \"unknown\"`\n\n\n3. **缺失核心指标**:\n\
+            \   - 若 RSI 不可用: `\"indicators_raw.rsi.available\": false`\n\n\n### 数据规范\n\
+            \n\n1. **价格精度**: 保留 2 位小数\n2. **百分比**: 保留 1 位小数(如 1.5%)\n3. **比率**: 保留\
+            \ 2 位小数(如 3.25)\n4. **RSI/IV**: 保留小数形式(0.45 而非 45%)\n\n\n### 状态一致性检查\n\
+            \n\n最终输出前验证:\n- `targets.status` 必须与顶层 `status` 一致\n- `missing_fields`\
+            \ 数组长度必须等于 `validation_summary.missing_count`\n- `status=\"data_ready\"\
+            ` 时,`missing_fields` 和 `补齐指引` 必须为空数组\n\n\n---\n\n\n## 输出流程\n\n\n1. 识别图表类型和时间周期\n\
+            2. 提取所有可见的期权数据和技术指标\n3. 执行三级数据验证\n4. 计算 validation_summary\n5. 若 status=\"\
+            missing_data\",生成补齐指引\n6. 输出符合 JSON Schema 的结构化数据\n\n\n**重要**: \n- 不要尝试\"\
+            记忆\"之前的数据,专注于解析当前上传的图表内容。下游会自动聚合多次解析的结果。\n- 无论图表内容如何，targets 字段必须返回字典格式，不能返回空列表\
+            \ []\n- 如果图表中没有可识别的数据，应该返回: { \"targets\": { \"symbol\": \"UNKNOWN\",\
+            \ \"status\": \"missing_data\", \"spot_price\": -999, ... } }\n- 禁止返回:\
+            \ {\"targets\": []} 或 {\"targets\": null}"
         - edition_type: basic
           id: user-validate
           role: user
-          text: '{{#1001.query#}}
+          text: '{{#sys.query#}}
 
             【上传文件】
 
-            {{#sys.files#}}'
+            {{#sys.files#}}
+
+            **数据源识别**：
+
+            - `!gexr` 图表 → walls, cluster_strength
+
+            - `!trigger` 图表 → vol_trigger, net_gex
+
+            - `!dexn` 图表 → dex_same_dir_pct
+
+            - `!vanna` 图表 → vanna_dir, vanna_confidence
+
+            - `!skew` 图表 → atm_iv.iv_7d, atm_iv.iv_14d
+
+            - `iv_path_*.png` 时间序列 → iv_path, iv_path_confidence
+
+
+
+            **关键规则**：
+
+            1. 输出完整的 JSON Schema（包含所有 22 个核心字段）
+
+            2. 无法识别的字段使用占位值（-999 / "N/A"）
+
+            3. IV Path 时间序列必须包含 `iv_path_details` 对象
+
+            4. 不要尝试"记忆"之前的数据，下游会自动聚合
+
+            5. 专注于解析当前上传的图表内容'
         reasoning_format: tagged
         selected: false
         structured_output:
@@ -1537,13 +1487,13 @@ workflow:
                   qqq:
                     properties:
                       em1_dollar_idx:
-                        description: QQQ的EM1$，若不需要使用 -999
+                        description: QQQ的EM1$,若不需要使用 -999
                         type: number
                       net_gex_idx:
-                        description: QQQ净Gamma，若不需要使用 -999
+                        description: QQQ的NET-GEX,若不需要使用 -999
                         type: number
                       spot_idx:
-                        description: QQQ现价，若不需要使用 -999
+                        description: QQQ现价,若不需要使用 -999
                         type: number
                     required:
                     - net_gex_idx
@@ -1553,13 +1503,13 @@ workflow:
                   spx:
                     properties:
                       em1_dollar_idx:
-                        description: SPX的EM1$，若缺失使用 -999
+                        description: SPX的EM1$,若缺失使用 -999
                         type: number
                       net_gex_idx:
-                        description: SPX净Gamma，若缺失使用 -999
+                        description: SPX的NET-GEX,若缺失使用 -999
                         type: number
                       spot_idx:
-                        description: SPX现价，若缺失使用 -999
+                        description: SPX现价,若缺失使用 -999
                         type: number
                     required:
                     - net_gex_idx
@@ -1571,7 +1521,7 @@ workflow:
                 - qqq
                 type: object
               missing_fields:
-                description: 缺失字段列表，若无缺失则为空数组
+                description: 缺失字段列表,若无缺失则为空数组
                 items:
                   properties:
                     category:
@@ -1610,10 +1560,10 @@ workflow:
                   atm_iv:
                     properties:
                       iv_14d:
-                        description: 14日ATM隐含波动率，若缺失使用 -999
+                        description: 14日ATM隐含波动率,若缺失使用 -999
                         type: number
                       iv_7d:
-                        description: 7日ATM隐含波动率，若缺失使用 -999
+                        description: 7日ATM隐含波动率,若缺失使用 -999
                         type: number
                       iv_source:
                         description: IV数据源
@@ -1631,7 +1581,7 @@ workflow:
                   directional_metrics:
                     properties:
                       dex_same_dir_pct:
-                        description: DEX方向一致性百分比，若缺失使用 -999
+                        description: DEX方向一致性百分比,若缺失使用 -999
                         type: number
                       iv_path:
                         description: 隐含波动率路径
@@ -1649,7 +1599,7 @@ workflow:
                         - low
                         type: string
                       vanna_confidence:
-                        description: Vanna置信度，若缺失使用 N/A
+                        description: Vanna置信度,若缺失使用 N/A
                         enum:
                         - high
                         - medium
@@ -1657,7 +1607,7 @@ workflow:
                         - N/A
                         type: string
                       vanna_dir:
-                        description: Vanna方向，若缺失使用 N/A
+                        description: Vanna方向,若缺失使用 N/A
                         enum:
                         - up
                         - down
@@ -1672,27 +1622,30 @@ workflow:
                     - iv_path_confidence
                     type: object
                   em1_dollar:
-                    description: 预期单日波幅，若缺失使用 -999
+                    description: 预期单日波幅,若缺失使用 -999
                     type: number
                   gamma_metrics:
                     properties:
                       cluster_strength_ratio:
-                        description: 簇强度比，若缺失使用 -999
+                        description: 簇强度比,若缺失使用 -999
                         type: number
                       gap_distance_dollar:
-                        description: 距墙距离美元值，若缺失使用 -999
+                        description: 距墙距离美元值,若缺失使用 -999
                         type: number
                       gap_distance_em1_multiple:
-                        description: 距墙距离EM1倍数，若缺失使用 -999
+                        description: 距墙距离EM1倍数,若缺失使用 -999
                         type: number
                       monthly_cluster_override:
                         description: 是否月度簇占优
-                        type: boolean
+                        enum:
+                        - 'true'
+                        - 'false'
+                        type: string
                       net_gex:
-                        description: 净Gamma敞口，若缺失使用 -999
+                        description: 净Gamma敞口,若缺失使用 -999
                         type: number
                       net_gex_sign:
-                        description: 净Gamma符号，若缺失使用 N/A
+                        description: 净Gamma符号,若缺失使用 N/A
                         enum:
                         - positive_gamma
                         - negative_gamma
@@ -1700,7 +1653,7 @@ workflow:
                         - N/A
                         type: string
                       spot_vs_trigger:
-                        description: 现价相对触发线位置，若缺失使用 N/A
+                        description: 现价相对触发线位置,若缺失使用 N/A
                         enum:
                         - above
                         - below
@@ -1708,7 +1661,7 @@ workflow:
                         - N/A
                         type: string
                       vol_trigger:
-                        description: 波动率触发价位，若缺失使用 -999
+                        description: 波动率触发价位,若缺失使用 -999
                         type: number
                     required:
                     - gap_distance_dollar
@@ -1721,7 +1674,7 @@ workflow:
                     - monthly_cluster_override
                     type: object
                   spot_price:
-                    description: 现价，若缺失使用 -999
+                    description: 现价,若缺失使用 -999
                     type: number
                   status:
                     enum:
@@ -1733,20 +1686,20 @@ workflow:
                   walls:
                     properties:
                       call_wall:
-                        description: 看涨期权墙价位，若缺失使用 -999
+                        description: 看涨期权墙价位,若缺失使用 -999
                         type: number
                       major_wall:
-                        description: 主要墙价位，若缺失使用 -999
+                        description: 主要墙价位,若缺失使用 -999
                         type: number
                       major_wall_type:
-                        description: 主要墙类型，若缺失使用 N/A
+                        description: 主要墙类型,若缺失使用 N/A
                         enum:
                         - call
                         - put
                         - N/A
                         type: string
                       put_wall:
-                        description: 看跌期权墙价位，若缺失使用 -999
+                        description: 看跌期权墙价位,若缺失使用 -999
                         type: number
                     required:
                     - call_wall
@@ -1764,16 +1717,116 @@ workflow:
                 - directional_metrics
                 - atm_iv
                 type: object
+              technical_analysis:
+                description: 技术面数据(可选)
+                properties:
+                  chart_metadata:
+                    properties:
+                      latest_timestamp:
+                        type: string
+                      platform:
+                        type: string
+                      timeframe:
+                        type: string
+                    type: object
+                  indicators_raw:
+                    properties:
+                      avwap:
+                        properties:
+                          available:
+                            type: boolean
+                          note:
+                            type: string
+                        type: object
+                      bb:
+                        properties:
+                          band_direction:
+                            type: string
+                          position:
+                            type: string
+                          width:
+                            type: number
+                          width_percentile:
+                            type: integer
+                        type: object
+                      macd:
+                        properties:
+                          histogram:
+                            type: string
+                          signal_line_cross:
+                            type: string
+                          zero_line:
+                            type: string
+                        type: object
+                      price:
+                        properties:
+                          close:
+                            type: number
+                          ema20:
+                            type: number
+                          ema20_slope:
+                            type: string
+                          ema50:
+                            type: number
+                          ema50_slope:
+                            type: string
+                          golden_cross:
+                            type: boolean
+                          price_vs_ema20_pct:
+                            type: number
+                          price_vs_ema50_pct:
+                            type: number
+                        type: object
+                      rsi:
+                        properties:
+                          divergence:
+                            type: string
+                          value:
+                            type: number
+                          zone:
+                            type: string
+                        type: object
+                      volume:
+                        properties:
+                          avg_20d:
+                            type: number
+                          current:
+                            type: number
+                          ratio:
+                            type: number
+                          status:
+                            type: string
+                        type: object
+                    type: object
+                  key_patterns:
+                    items:
+                      type: string
+                    type: array
+                  ta_commentary:
+                    description: 技术面评分理由
+                    type: string
+                  ta_score:
+                    description: 技术面评分(0-2分)
+                    maximum: 2
+                    minimum: 0
+                    type: integer
+                type: object
               timestamp:
-                description: 时间戳，格式 YYYY-MM-DDTHH:mm:ss
+                description: 时间戳,格式 YYYY-MM-DDTHH:mm:ss
                 type: string
               validation_summary:
                 properties:
+                  background_fields_provided:
+                    description: 指数背景字段提供数量(可选)
+                    type: integer
                   completion_rate:
                     type: integer
                   fields_provided:
                     type: integer
                   missing_count:
+                    type: integer
+                  optional_fields_provided:
+                    description: 技术面字段提供数量(可选)
                     type: integer
                   targets_ready:
                     type: integer
@@ -1781,6 +1834,11 @@ workflow:
                     type: integer
                   total_targets:
                     type: integer
+                  warnings:
+                    description: 警告信息列表(可选)
+                    items:
+                      type: string
+                    type: array
                 required:
                 - total_targets
                 - targets_ready
@@ -1790,14 +1848,14 @@ workflow:
                 - completion_rate
                 type: object
               补齐后续:
-                description: 补齐后的后续步骤，当status=data_ready时填 N/A
+                description: 补齐后的后续步骤,当status=data_ready时填 N/A
                 type: string
               补齐指引:
-                description: 补齐指引列表，当status=data_ready时为空数组
+                description: 补齐指引列表,当status=data_ready时为空数组
                 items:
                   properties:
                     alternative:
-                      description: 备选方案，若无则填 N/A
+                      description: 备选方案,若无则填 N/A
                       type: string
                     command:
                       description: 建议执行的命令
@@ -1853,11 +1911,11 @@ workflow:
       height: 116
       id: '3001'
       position:
-        x: 1034.3730386199136
-        y: 448.2474211113356
+        x: 825.1406328934224
+        y: 426.71192818232186
       positionAbsolute:
-        x: 1034.3730386199136
-        y: 448.2474211113356
+        x: 825.1406328934224
+        y: 426.71192818232186
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -1867,31 +1925,42 @@ workflow:
         cases:
         - case_id: case-ready
           conditions:
-          - comparison_operator: contains
+          - comparison_operator: is
             id: cond-ready
-            value: data_ready
+            value: ready
             varType: string
             variable_selector:
-            - '3001'
-            - structured_output
-            - status
+            - '1009'
+            - data_status
           id: case-ready
           logical_operator: and
         - case_id: case-missing
           conditions:
-          - comparison_operator: contains
+          - comparison_operator: is
             id: cond-missing
-            value: missing_data
+            value: awaiting_data
+            varType: string
             variable_selector:
-            - '3001'
-            - text
+            - '1009'
+            - data_status
           id: case-missing
+          logical_operator: and
+        - case_id: e24094ec-5f1e-4ad2-be2c-c6cb6275b48c
+          conditions:
+          - comparison_operator: is
+            id: d55483c5-46bd-499c-b26e-a105b53c8658
+            value: error
+            varType: string
+            variable_selector:
+            - '1009'
+            - data_status
+          id: e24094ec-5f1e-4ad2-be2c-c6cb6275b48c
           logical_operator: and
         desc: ''
         selected: false
         title: 校验分支
         type: if-else
-      height: 172
+      height: 220
       id: '3002'
       position:
         x: 1331.8076428705288
@@ -1905,269 +1974,24 @@ workflow:
       type: custom
       width: 242
     - data:
-        answer: '{{#3001.text#}}'
+        answer: "{{#1009.user_guide_summary#}} \n### \U0001F4CB 需要执行的命令 \n``` \n{{#1009.user_guide_commands#}}\
+          \ \n``` \n### ⚠️ 缺失字段明细 \n**Critical（必须补齐）**： {{#1009.user_guide_priority_critical#}}\
+          \ \n**High（强烈建议）**：\n {{#1009.user_guide_priority_high#}} \n**Medium（可选）**：\
+          \ {{#1009.user_guide_priority_medium#}} \n--- \n### \U0001F4A1 下一步操作\n {{#1009.user_guide_next_action#}}\
+          \ \n--- \n**当前状态**：等待补齐数据（已缓存首次解析结果） \n**股票代码**：{{#1009.current_symbol#}}\
+          \ *\n*缺失数量**：{{#1009.missing_count#}}个字段"
         desc: ''
         selected: false
         title: 回复缺失数据
         type: answer
-      height: 103
+      height: 392
       id: '3003'
       position:
-        x: 1688.2034969828262
-        y: 482.1496130490057
+        x: 1855.0990986195761
+        y: 255.53566904516737
       positionAbsolute:
-        x: 1688.2034969828262
-        y: 482.1496130490057
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-    - data:
-        context:
-          enabled: false
-          variable_selector: []
-        desc: 'Agent 4: Analyze technicals.'
-        model:
-          completion_params:
-            enable_thinking: false
-            response_format: json_schema
-            temperature: 0.5
-          mode: chat
-          name: Qwen3-VL-235B-A22B-Thinking
-          provider: langgenius/openai_api_compatible/openai_api_compatible
-        prompt_template:
-        - id: sys-ta
-          role: system
-          text: "你是一个技术面分析 Agent。\n你的任务是基于【数据JSON】中的 \"TA_Data\",计算技术面得分并给出简短读数。\n\
-            \n【核心能力】 \n1. **图表识别**：自动识别 TradingView、 yahoo finance等平台的技术指标图表 \n2.\
-            \ **指标提取**：精确读取以下指标的数值与形态 \n  - EMA20/50：价格相对位置、两均线斜率（上行/走平/下行）、金叉死叉 \n\
-            \  - RSI(14)：当前值、超买超卖、背离形态（顶背离/底背离） \n  - BB宽度(20,2)：当前宽度、历史分位、带口开合方向\
-            \ \n  - MACD：柱状图趋势、零轴位置、快慢线交叉 \n  - 成交量：相对20日均量的比值、放量缩量 \n  - AVWAP：价格距离AVWAP的百分比（若图表包含）\
-            \ \n3. **形态识别**：趋势线突破、支撑阻力、K线形态（锤子线/吞没等）\n\n【数据JSON】{{#3001.text#}}\n\
-            【用户上传】{{#sys.files#}}\n\n【处理流程】 \n## 第一步：图表解析 \n<thinking> \n1. 识别图表类型与时间周期（日线/4H/1H）\
-            \ \n2. 定位各技术指标的显示区域 \n3. 读取最新K线对应的指标数值 \n4. 识别关键技术形态（如突破/背离） \n</thinking>\n\
-            输出格式： \n```json\n{\n  \"chart_metadata\": {\n    \"platform\": \"TradingView/Thinkorswim/其他\"\
-            ,\n    \"timeframe\": \"Daily/4H/1H\",\n    \"latest_timestamp\": \"2025-01-15\
-            \ 16:00 ET\",\n    \"symbol\": \"AAPL\"\n  },\n  \"indicators_raw\": {\n\
-            \    \"price\": {\n      \"close\": 170.5,\n      \"ema20\": 168.3,\n\
-            \      \"ema50\": 165.8,\n      \"price_vs_ema20_pct\": 1.31,\n      \"\
-            price_vs_ema50_pct\": 2.83,\n      \"ema20_slope\": \"上行\",\n      \"\
-            ema50_slope\": \"上行\",\n      \"golden_cross\": true\n    },\n    \"rsi\"\
-            : {\n      \"value\": 58.3,\n      \"zone\": \"中性区间\",\n      \"divergence\"\
-            : \"无\"\n    },\n    \"bb\": {\n      \"width\": 4.2,\n      \"width_percentile\"\
-            : 35,\n      \"position\": \"中轨上方\",\n      \"band_direction\": \"平行\"\
-            \n    },\n    \"volume\": {\n      \"current\": 85000000,\n      \"avg_20d\"\
-            : 72000000,\n      \"ratio\": 1.18,\n      \"status\": \"温和放量\"\n    },\n\
-            \    \"macd\": {\n      \"histogram\": \"正值收敛\",\n      \"signal_line_cross\"\
-            : \"金叉后第3日\",\n      \"zero_line\": \"上方\"\n    },\n    \"avwap\": {\n\
-            \      \"available\": false,\n      \"note\": \"图表未包含AVWAP\"\n    }\n\
-            \  },\n  \"key_patterns\": [\n    \"价格在EMA20上方运行，均线多头排列\",\n    \"RSI处于50-60区间，未超买\"\
-            ,\n    \"BB宽度处于历史35分位，波动率中等\"\n  ]\n}\n```\n## 第二步：技术面评分（最多+2分） \n<thinking>\
-            \ \n - EMA20/50发散向上→趋势+1；走平/粘合→区间+1 \n- RSI>60且无顶背离→趋势+1；40-60→区间+1；背离→当前方向-1\
-            \ \n- BB宽度低分位+同向开口→趋势+1（择一计分） \n- 最多累计+2分 \n</thinking> \n评分逻辑：\n```json\n\
-            {\n  \"scoring_breakdown\": {\n    \"ema_score\": {\n      \"value\":\
-            \ 1,\n      \"rationale\": \"EMA20斜率上行且price_vs_ema20=1.31%，金叉后持续，给趋势+1\"\
-            \n    },\n    \"rsi_score\": {\n      \"value\": 1,\n      \"rationale\"\
-            : \"RSI=58.3处于40-60区间且无背离，给区间+1\"\n    },\n    \"bb_score\": {\n     \
-            \ \"value\": 0,\n      \"rationale\": \"BB宽度35分位属中等，带口平行，不给分\"\n    },\n\
-            \    \"volume_score\": {\n      \"value\": 0,\n      \"rationale\": \"\
-            成交量仅温和放量1.18倍，未显著放大，不单独加分\"\n    },\n    \"total_cap\": 2,\n    \"final_score\"\
-            : 2,\n    \"note\": \"EMA+1 + RSI+1 = 2分，达到上限\"\n  }\n}\n```\n## 第三步：综合输出\n\
-            ```json\n{\n  \"ta_score\": 2,\n  \"ta_commentary\": \"EMA20/50多头排列上行(+1)，RSI(14)处于55-60区间中性偏强(+1)，BB宽度中等未给分，技术面总评2分\"\
-            ,\n  \"detailed_analysis\": {\n    \"trend_alignment\": \"均线多头排列支持上行，但RSI未超买保留回调空间\"\
-            ,\n    \"momentum_check\": \"MACD金叉后第3日，柱状图正值收敛，动能温和\",\n    \"volatility_state\"\
-            : \"BB宽度35分位，波动率处于中等水平，非极端压缩或扩张\",\n    \"volume_confirmation\": \"成交量温和放量1.18倍，确认度中等\"\
-            \n  },\n  \"risk_alerts\": [\n    \"RSI接近60临界，若突破需警惕短期超买\",\n    \"BB带口平行，若收窄可能预示盘整\"\
-            \n  ],\n  \"chart_metadata\": {\n    \"platform\": \"TradingView\",\n\
-            \    \"timeframe\": \"Daily\",\n    \"latest_timestamp\": \"2025-01-15\
-            \ 16:00 ET\"\n  }\n}\n```\n【关键注意事项】\n 1. **数值精度**：价格、百分比保留2位小数；RSI保留1位小数\
-            \ \n2. **形态识别**：明确区分\"金叉\"与\"死叉\"；\"顶背离\"与\"底背离\"；\"突破\"与\"假突破\" \n3.\
-            \ **时间同步**：确保读取的是图表最新K线（通常为最右侧）的指标值 \n4. **异常处理**： - 若图表模糊不清：返回 `\"chart_quality\"\
-            : \"low\", \"confidence\": \"medium\"` - 若缺失核心指标（如无RSI）：在indicators_raw中标注\
-            \ `\"available\": false` - 若无法识别平台：返回 `\"platform\": \"unknown\"`\n 5.\
-            \ **评分上限**：严格执行最多+2分，即使多项指标都正向也不超过上限 \n\n【输出要求】 \n- 必须输出完整的三段JSON（chart_metadata、indicators_raw、scoring_breakdown）\
-            \ \n- ta_score 和 ta_commentary 必须存在且符合格式 \n- 若图表无法解析，返回 ta_score=0 并在\
-            \ ta_commentary 中说明原因"
-        - id: user-ta
-          role: user
-          text: "请基于 Agent 3 的数据,进行技术面分析。\n{{#sys.files#}}\n\n【参考现价与EM1$】（来自Agent\
-            \ 3，用于归一化距离） \n- Spot: {{#3001.structured_output.targets.spot_price#}}\n\
-            - EM1$: {{#3001.structured_output.targets.em1_dollar#}}\n\n请严格按照系统提示的三步流程输出JSON。\n"
-        reasoning_format: separated
-        selected: false
-        structured_output:
-          schema:
-            properties:
-              chart_metadata:
-                properties:
-                  latest_timestamp:
-                    type: string
-                  platform:
-                    type: string
-                  symbol:
-                    type: string
-                  timeframe:
-                    type: string
-                required:
-                - platform
-                - timeframe
-                - symbol
-                type: object
-              detailed_analysis:
-                properties:
-                  momentum_check:
-                    type: string
-                  trend_alignment:
-                    type: string
-                  volatility_state:
-                    type: string
-                  volume_confirmation:
-                    type: string
-                type: object
-              indicators_raw:
-                properties:
-                  avwap:
-                    properties:
-                      available:
-                        type: boolean
-                      note:
-                        type: string
-                    type: object
-                  bb:
-                    properties:
-                      band_direction:
-                        type: string
-                      position:
-                        type: string
-                      width:
-                        type: number
-                      width_percentile:
-                        type: integer
-                    type: object
-                  macd:
-                    properties:
-                      histogram:
-                        type: string
-                      signal_line_cross:
-                        type: string
-                      zero_line:
-                        type: string
-                    type: object
-                  price:
-                    properties:
-                      close:
-                        type: number
-                      ema20:
-                        type: number
-                      ema20_slope:
-                        type: string
-                      ema50:
-                        type: number
-                      ema50_slope:
-                        type: string
-                      golden_cross:
-                        type: boolean
-                      price_vs_ema20_pct:
-                        type: number
-                      price_vs_ema50_pct:
-                        type: number
-                    type: object
-                  rsi:
-                    properties:
-                      divergence:
-                        type: string
-                      value:
-                        type: number
-                      zone:
-                        type: string
-                    type: object
-                  volume:
-                    properties:
-                      avg_20d:
-                        type: number
-                      current:
-                        type: number
-                      ratio:
-                        type: number
-                      status:
-                        type: string
-                    type: object
-                type: object
-              key_patterns:
-                items:
-                  type: string
-                type: array
-              risk_alerts:
-                items:
-                  type: string
-                type: array
-              scoring_breakdown:
-                properties:
-                  bb_score:
-                    properties:
-                      rationale:
-                        type: string
-                      value:
-                        type: integer
-                    type: object
-                  ema_score:
-                    properties:
-                      rationale:
-                        type: string
-                      value:
-                        type: integer
-                    type: object
-                  final_score:
-                    type: integer
-                  note:
-                    type: string
-                  rsi_score:
-                    properties:
-                      rationale:
-                        type: string
-                      value:
-                        type: integer
-                    type: object
-                  total_cap:
-                    type: integer
-                  volume_score:
-                    properties:
-                      rationale:
-                        type: string
-                      value:
-                        type: integer
-                    type: object
-                type: object
-              ta_commentary:
-                type: string
-              ta_score:
-                maximum: 2
-                minimum: 0
-                type: integer
-            required:
-            - ta_score
-            - ta_commentary
-            - chart_metadata
-            type: object
-        structured_output_enabled: true
-        title: Agent 4 技术面
-        type: llm
-        vision:
-          configs:
-            detail: high
-            variable_selector:
-            - sys
-            - files
-          enabled: false
-      height: 116
-      id: '4001'
-      position:
-        x: 1688.2034969828262
-        y: 138.9789209991302
-      positionAbsolute:
-        x: 1688.2034969828262
-        y: 138.9789209991302
+        x: 1855.0990986195761
+        y: 255.53566904516737
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -2250,9 +2074,9 @@ workflow:
             \        - ✅ 四维评分计算\n        - ✅ 剧本分类\n        - ✅ 概率评估\n        - ✅ 风险警示\n\
             \        - ✅ 仓位建议\n你的职责是：\n1. **验证数据完整性**：确保所有必需字段存在\n2. **逻辑检查**：确保结论与数据一致（如有明显矛盾需指出）\n\
             3. **格式优化**：统一术语、标点、数值格式\n4. **文本润色**：将技术性描述改写为通顺、专业的中文\n【输入数据】(来自 Code2)\n\
-            {{#1007.result#}}\n【技术面数据】(来自 Agent 4，可选参考)\n{{#4001.text#}}\n\n## 处理规则\n\
-            \        \n        ### 1.数据完整性检查\n        \n        必需字段清单：\n        ```\n\
-            \        ✓ gamma_regime.vol_trigger\n        ✓ gamma_regime.spot_vs_trigger\n\
+            {{#1007.result#}}\n【技术面数据】(来自 Agent 4，可选参考)\n{{#3001.structured_output.technical_analysis#}}\n\
+            \n## 处理规则\n        \n        ### 1.数据完整性检查\n        \n        必需字段清单：\n\
+            \        ```\n        ✓ gamma_regime.vol_trigger\n        ✓ gamma_regime.spot_vs_trigger\n\
             \        ✓ gamma_regime.regime_note\n        ✓ scoring.total_score\n \
             \       ✓ scenario_classification.primary_scenario\n        ✓ scenario_classification.scenario_probability\n\
             \        ✓ entry_threshold_check\n        ✓ risk_warning\n        ✓ position_suggestion\n\
@@ -2494,7 +2318,7 @@ workflow:
               required\": [\n    \"strategies\"\n  ],\n  \"type\": \"object\"\n}"
             response_format: json_schema
           mode: chat
-          name: gpt-5
+          name: deepseek-v3.2-exp-thinking
           provider: langgenius/openai_api_compatible/openai_api_compatible
         prompt_template:
         - id: sys-strategy
@@ -2833,27 +2657,28 @@ workflow:
         - id: sys-report
           role: system
           text: "你是最终报告生成 Agent，负责汇总所有分析结果，生成易读的 Markdown 报告。\n\n【任务】 汇总所有分析，生成单标的完整报告（含事件风险）。\n\
-            【输入数据源】\n  - 数据校验: Agent 3 {{#3001.structured_output#}}\n  - 技术面: Agent\
-            \ 4 {{#4001.structured_output#}}\n  - 剧本分析: Agent 5 {{#5001.structured_output#}}\n\
-            \  - 策略推荐: Agent 7 {{#1005.structured_output#}}\n  - 事件检测: CODE1 {{#1004.result#}}\n\
-            \n 【输出模板】\n  生成简洁的 Markdown 报告，遵循以下结构：\n\n  # 美股期权分析报告\n  \n  **标的**:\
-            \ {symbol} | **现价**: {spot} | **EM1$**: {em1}  \n  **分析时间**: {timestamp}\
-            \ | **风险等级**: {event_risk_level} {\U0001F7E2/\U0001F7E1/\U0001F534}\n\n\
-            \  ## 0. 事件风险评估 ⚠️\n  \n  **检测日期**: {detection_date}  \n  **风险等级**: {risk_level}\n\
-            \  \n  {若无事件}\n  ✅ 未检测到近期重大事件，可正常执行策略\n  \n  {若有事件，输出表格}\n  | 事件类型 | 日期\
-            \ | 距离 | 影响 | 说明 |\n  |---------|------|------|------|------|\n  | {type}\
-            \ | {date} | {days_away}日 | {impact} | {note} |\n  \n  ### 策略调整建议\n  -\
-            \ **禁止跨期**: {no_cross_earnings ? \"\U0001F6AB 是\" : \"✅ 否\"}  \n    {若是:\
-            \ 财报或重大事件临近，建议DTE≤{max_dte}日或等待事件后}\n  - **缩短DTE**: {adjust_dte ? \"⚠️\
-            \ 是\" : \"✅ 否\"}  \n    {若是: OPEX临近，建议DTE≤{max_dte}日}\n  - **减仓操作**: {reduce_position\
-            \ ? \"⚠️ 是\" : \"✅ 否\"}  \n    {若是: FOMC临近，建议半仓或观望}\n  \n  ---\n\n  ##\
-            \ 1. 综合结论\n  \n  **总评分**: {total_score}/10  \n  **入场判定**: {entry_check}\
-            \ → {入场理由简述，100字}\n  \n  **评分构成**:\n  - Gamma状态: {gamma_score}/10 ({regime_note简化})\n\
-            \  - 破墙可能: {break_wall_score}/10 ({break_note简化})\n  - 方向一致: {direction_score}/10\
-            \ ({direction_note简化})\n  - IV动态: {iv_score}/10 ({iv_note简化})\n  \n  **主导剧本**:\
-            \ {primary_scenario} (概率{probability}%)  \n  {adjustment_note}\n  \n \
-            \ ---\n\n  ## 2. 策略推荐\n  \n  ### 排序总览\n  | 排名 | 策略 | 期望值 | 风险调整收益 | 剧本匹配\
-            \ | 流动性 | 推荐等级 |\n  |------|------|--------|--------------|----------|--------|----------|\n\
+            【输入数据源】\n  - 数据校验: Agent 3 {{#3001.structured_output#}}\n  - 剧本分析: Agent\
+            \ 5 {{#5001.structured_output#}}\n  - 策略推荐: Agent 7 {{#1005.structured_output#}}\n\
+            \  - 事件检测: CODE1 {{#1004.result#}}\n【技术面处理规则】\n技术面数据已整合到 Agent 3 中:\n\
+            \  - 若存在: 从 {{#3001.structured_output.technical_analysis#}} 提取\n  - 若缺失:\
+            \ 报告中标注 \"技术面数据缺失,仅影响评分\"\n\n 【输出模板】\n  生成简洁的 Markdown 报告，遵循以下结构：\n\n\
+            \  # 美股期权分析报告\n  \n  **标的**: {symbol} | **现价**: {spot} | **EM1$**: {em1}\
+            \  \n  **分析时间**: {timestamp} | **风险等级**: {event_risk_level} {\U0001F7E2\
+            /\U0001F7E1/\U0001F534}\n\n  ## 0. 事件风险评估 ⚠️\n  \n  **检测日期**: {detection_date}\
+            \  \n  **风险等级**: {risk_level}\n  \n  {若无事件}\n  ✅ 未检测到近期重大事件，可正常执行策略\n\
+            \  \n  {若有事件，输出表格}\n  | 事件类型 | 日期 | 距离 | 影响 | 说明 |\n  |---------|------|------|------|------|\n\
+            \  | {type} | {date} | {days_away}日 | {impact} | {note} |\n  \n  ### 策略调整建议\n\
+            \  - **禁止跨期**: {no_cross_earnings ? \"\U0001F6AB 是\" : \"✅ 否\"}  \n  \
+            \  {若是: 财报或重大事件临近，建议DTE≤{max_dte}日或等待事件后}\n  - **缩短DTE**: {adjust_dte\
+            \ ? \"⚠️ 是\" : \"✅ 否\"}  \n    {若是: OPEX临近，建议DTE≤{max_dte}日}\n  - **减仓操作**:\
+            \ {reduce_position ? \"⚠️ 是\" : \"✅ 否\"}  \n    {若是: FOMC临近，建议半仓或观望}\n\
+            \  \n  ---\n\n  ## 1. 综合结论\n  \n  **总评分**: {total_score}/10  \n  **入场判定**:\
+            \ {entry_check} → {入场理由简述，100字}\n  \n  **评分构成**:\n  - Gamma状态: {gamma_score}/10\
+            \ ({regime_note简化})\n  - 破墙可能: {break_wall_score}/10 ({break_note简化})\n\
+            \  - 方向一致: {direction_score}/10 ({direction_note简化})\n  - IV动态: {iv_score}/10\
+            \ ({iv_note简化})\n  \n  **主导剧本**: {primary_scenario} (概率{probability}%)\
+            \  \n  {adjustment_note}\n  \n  ---\n\n  ## 2. 策略推荐\n  \n  ### 排序总览\n\
+            \  | 排名 | 策略 | 期望值 | 风险调整收益 | 剧本匹配 | 流动性 | 推荐等级 |\n  |------|------|--------|--------------|----------|--------|----------|\n\
             \  | 1 | {type} | {ev} | {rar} | {match} | {pass} | {level} |\n  | 2 |\
             \ {type} | {ev} | {rar} | {match} | {pass} | {level} |\n  | 3 | {type}\
             \ | {ev} | {rar} | {match} | {pass} | {level} |\n  \n  **最终推荐**: {final_recommendation}\n\
@@ -3054,11 +2879,11 @@ workflow:
       height: 80
       id: '1004'
       position:
-        x: 1688.2034969828262
-        y: 320.06781246653895
+        x: 1695.8317617749378
+        y: 161.59366846092928
       positionAbsolute:
-        x: 1688.2034969828262
-        y: 320.06781246653895
+        x: 1695.8317617749378
+        y: 161.59366846092928
       selected: false
       sourcePosition: right
       targetPosition: left
@@ -3066,12 +2891,12 @@ workflow:
       width: 242
     - data:
         code: "\nimport json\nfrom typing import Dict, Any, List, Tuple\n\n\ndef main(agent3_output:\
-          \ str, agent4_output: str = \"\", **env_vars) -> dict:\n    \"\"\"\n   \
-          \ Dify Code Node 入口函数\n    \n    Args:\n        agent3_output: Agent 3 的数据校验结果\
-          \ JSON 字符串\n        agent4_output: Agent 4 的技术面分析 JSON 字符串 (可选)\n      \
-          \  **env_vars: 环境变量字典\n        \n    Returns:\n        {\"result\": 评分结果\
-          \ JSON 字符串}\n    \"\"\"\n    try:\n        # 解析输入\n        agent3_data =\
-          \ json.loads(agent3_output)\n        \n        # 初始化评分引擎\n        scoring\
+          \ str, technical_score: float = 0, **env_vars) -> dict:\n    \"\"\"\n  \
+          \  Dify Code Node 入口函数\n    \n    Args:\n        agent3_output: Agent 3\
+          \ 的数据校验结果 JSON 字符串\n        agent4_output: Agent 4 的技术面分析 JSON 字符串 (可选)\n\
+          \        **env_vars: 环境变量字典\n        \n    Returns:\n        {\"result\"\
+          : 评分结果 JSON 字符串}\n    \"\"\"\n    try:\n        # 解析输入\n        agent3_data\
+          \ = json.loads(agent3_output)\n        \n        # 初始化评分引擎\n        scoring\
           \ = OptionsScoring(env_vars)\n        \n        # 执行评分计算\n        result\
           \ = scoring.process(agent3_data)\n        \n        # 返回 JSON 字符串\n    \
           \    return {\n            \"result\": json.dumps(result, ensure_ascii=False,\
@@ -3391,7 +3216,7 @@ workflow:
           result:
             children: null
             type: object
-        selected: false
+        selected: true
         title: CODE2 评分计算引擎
         type: code
         variables:
@@ -3401,10 +3226,12 @@ workflow:
           value_type: string
           variable: agent3_output
         - value_selector:
-          - '4001'
-          - text
-          value_type: string
-          variable: agent4_output
+          - '3001'
+          - structured_output
+          - technical_analysis
+          - ta_score
+          value_type: object
+          variable: technical_score
       height: 96
       id: '1007'
       position:
@@ -3413,7 +3240,7 @@ workflow:
       positionAbsolute:
         x: 2057.53475768152
         y: 112.48397693418775
-      selected: false
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -3642,23 +3469,19 @@ workflow:
       positionAbsolute:
         x: 3342.950228515668
         y: 332.41002500221094
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
       width: 242
     - data:
         code: "import json\nfrom typing import Dict, Any, Optional\n\n\ndef main(agent3_output:\
-          \ str, agent5_output: str, agent4_output: str = \"\", **env_vars) -> dict:\n\
-          \    \"\"\"\n    Agent 6 策略计算辅助函数\n    \n    Args:\n        agent3_output:\
+          \ dict, agent5_output: dict, technical_score: float = 0, **env_vars) ->\
+          \ dict:\n    \"\"\"\n    Agent 6 策略计算辅助函数\n    \n    Args:\n        agent3_output:\
           \ Agent 3 的数据校验结果 JSON\n        agent5_output: Agent 5 的剧本分析结果 JSON\n  \
-          \      agent4_output: Agent 4 的技术面分析结果 JSON (可选)\n        **env_vars: 环境变量字典\n\
-          \        \n    Returns:\n        {\"result\": 策略计算辅助结果 JSON 字符串}\n    \"\
-          \"\"\n    try:\n        agent3_data = json.loads(agent3_output)\n      \
-          \  agent5_data = json.loads(agent5_output)\n        \n        technical_score\
-          \ = 0\n        if agent4_output:\n            try:\n                agent4_data\
-          \ = json.loads(agent4_output)\n                technical_score = agent4_data.get(\"\
-          ta_score\", 0)\n            except:\n                technical_score = 0\n\
+          \      technical_score: 技术面评分(0-2)\n        **env_vars: 环境变量字典\n       \
+          \ \n    Returns:\n        {\"result\": 策略计算辅助结果 JSON 字符串}\n    \"\"\"\n\
+          \    try:\n        agent3_data = agent3_output\n        agent5_data = agent5_output\n\
           \        \n        calculator = StrategyCalculator(env_vars)\n        result\
           \ = calculator.process(agent3_data, agent5_data, technical_score)\n    \
           \    \n        return {\n            \"result\": json.dumps(result, ensure_ascii=False,\
@@ -4042,19 +3865,21 @@ workflow:
         variables:
         - value_selector:
           - '3001'
-          - text
-          value_type: string
+          - structured_output
+          value_type: object
           variable: agent3_output
         - value_selector:
-          - '4001'
-          - text
-          value_type: string
-          variable: agent4_output
-        - value_selector:
           - '5001'
-          - text
-          value_type: string
+          - structured_output
+          value_type: object
           variable: agent5_output
+        - value_selector:
+          - '3001'
+          - structured_output
+          - technical_analysis
+          - ta_score
+          value_type: object
+          variable: technical_score
       height: 80
       id: '1006'
       position:
@@ -4216,8 +4041,427 @@ workflow:
       targetPosition: left
       type: custom
       width: 242
+    - data:
+        code: "import json\nfrom datetime import datetime\nfrom typing import Dict,\
+          \ List, Tuple, Any\n\ndef main(agent3_output: dict,\n         first_parse_data:\
+          \ str = \"\",\n         current_symbol: str = \"\",\n         data_status:\
+          \ str = \"initial\",\n         **env_vars) -> dict:\n    \"\"\"\n    数据聚合节点\
+          \ v5 - 增量合并优化版\n    \n    核心改进:\n    1. 智能增量合并：多次上传自动累积数据\n    2. 字段级追踪：记录每个字段的来源和质量\n\
+          \    3. 防止覆盖：有效数据不会被无效数据覆盖\n    4. 自动完成：达到 22/22 自动进入分析流程\n    \"\"\"\n\
+          \    try:\n        \n        current_data = agent3_output\n        # \U0001F525\
+          \ 调试日志 1: 检查输入数据\n        print(f\"\U0001F4E5 输入数据类型: {type(current_data)}\"\
+          )\n        print(f\"\U0001F4E5 targets 类型: {type(current_data.get('targets'))}\"\
+          )\n        print(f\"\U0001F4E5 targets 内容预览: {str(current_data.get('targets'))[:200]}\"\
+          )\n        \n        symbol = extract_symbol(current_data)\n        current_status\
+          \ = current_data.get(\"status\", \"missing_data\")\n        \n        is_accumulation_mode,\
+          \ judgment = judge_accumulation_mode(\n            current_data=current_data,\n\
+          \            cached_first_data=first_parse_data,\n            cached_symbol=current_symbol,\n\
+          \            cached_status=data_status\n        )\n        \n        print(f\"\
+          \U0001F4CA 累积模式: {is_accumulation_mode}, 原因: {judgment}\")\n        \n \
+          \       if is_accumulation_mode:\n            if not first_parse_data:\n\
+          \                merged_data = current_data\n                merge_history\
+          \ = [{\n                    \"round\": 1,\n                    \"timestamp\"\
+          : datetime.now().strftime(\"%Y-%m-%d %H:%M:%S\"),\n                    \"\
+          fields_added\": count_valid_fields(current_data),\n                    \"\
+          action\": \"首次解析\"\n                }]\n                last_merge_failed\
+          \ = False\n            else:\n                first_data = json.loads(first_parse_data)\n\
+          \                \n                # \U0001F525 调试日志 2: 合并前的数据统计\n     \
+          \           first_count = count_valid_fields(first_data)\n             \
+          \   new_count = count_valid_fields(current_data)\n                print(f\"\
+          \U0001F4CA 合并前: 缓存数据 {first_count} 个字段, 新数据 {new_count} 个字段\")\n       \
+          \         \n                merged_data, merge_info = smart_merge(first_data,\
+          \ current_data)\n                \n                # \U0001F525 调试日志 3:\
+          \ 合并后的结果\n                merged_count = count_valid_fields(merged_data)\n\
+          \                print(f\"\U0001F4CA 合并后: {merged_count} 个字段\")\n      \
+          \          print(f\"\U0001F4CA 新增: {merge_info['new_fields_count']}, 更新:\
+          \ {merge_info['updated_fields_count']}\")\n                \n          \
+          \      # 更新合并历史\n                history = first_data.get(\"_merge_history\"\
+          , [])\n                history.append({\n                    \"round\":\
+          \ len(history) + 1,\n                    \"timestamp\": datetime.now().strftime(\"\
+          %Y-%m-%d %H:%M:%S\"),\n                    \"fields_added\": merge_info[\"\
+          new_fields_count\"],\n                    \"fields_updated\": merge_info.get(\"\
+          updated_fields_count\", 0),\n                    \"action\": \"增量补齐\" if\
+          \ not merge_info.get(\"merge_failed\") else \"合并失败\",\n                \
+          \    \"failure_reason\": merge_info.get(\"failure_reason\", \"\")\n    \
+          \            })\n                merged_data[\"_merge_history\"] = history\n\
+          \                merge_history = history\n                last_merge_failed\
+          \ = merge_info.get(\"merge_failed\", False)\n        else:\n           \
+          \ # 新任务\n            merged_data = current_data\n            merge_history\
+          \ = [{\n                \"round\": 1,\n                \"timestamp\": datetime.now().strftime(\"\
+          %Y-%m-%d %H:%M:%S\"),\n                \"fields_added\": count_valid_fields(current_data),\n\
+          \                \"action\": \"新任务开始\"\n            }]\n            last_merge_failed\
+          \ = False\n        \n        # 验证\n        validation_result = enhanced_validation_v2(merged_data)\n\
+          \        \n        # \U0001F525 调试日志 4: 验证结果\n        print(f\"✅ 验证结果: 完成率\
+          \ {validation_result['summary']['completion_rate']}%\")\n        print(f\"\
+          ✅ 提供字段: {validation_result['summary']['provided']}/{validation_result['summary']['total_required']}\"\
+          )\n        \n        if not isinstance(current_data, dict):\n          \
+          \  raise ValueError(f\"agent3_output 类型错误: {type(current_data)}\")\n   \
+          \     \n        # 提取当前数据\n        symbol = extract_symbol(current_data)\n\
+          \        current_status = current_data.get(\"status\", \"missing_data\"\
+          )\n        \n        # === 核心优化 1: 智能判断是否累积模式 ===\n        is_accumulation_mode,\
+          \ judgment = judge_accumulation_mode(\n            current_data=current_data,\n\
+          \            cached_first_data=first_parse_data,\n            cached_symbol=current_symbol,\n\
+          \            cached_status=data_status\n        )\n        \n        if\
+          \ is_accumulation_mode:\n            # === 核心优化 2: 增量合并 ===\n          \
+          \  if not first_parse_data:\n                # 第一次上传\n                merged_data\
+          \ = current_data\n                merge_history = [{\n                 \
+          \   \"round\": 1,\n                    \"timestamp\": datetime.now().strftime(\"\
+          %Y-%m-%d %H:%M:%S\"),\n                    \"fields_added\": count_valid_fields(current_data),\n\
+          \                    \"action\": \"首次解析\"\n                }]\n        \
+          \    else:\n                # 第 N 次上传 - 执行增量合并\n                first_data\
+          \ = json.loads(first_parse_data)\n                merged_data, merge_info\
+          \ = smart_merge(first_data, current_data)\n                \n          \
+          \      # 更新合并历史\n                history = first_data.get(\"_merge_history\"\
+          , [])\n                history.append({\n                    \"round\":\
+          \ len(history) + 1,\n                    \"timestamp\": datetime.now().strftime(\"\
+          %Y-%m-%d %H:%M:%S\"),\n                    \"fields_added\": merge_info[\"\
+          new_fields_count\"],\n                    \"fields_updated\": merge_info[\"\
+          updated_fields_count\"],\n                    \"action\": \"增量补齐\"\n   \
+          \             })\n                merged_data[\"_merge_history\"] = history\n\
+          \                merge_history = history\n        else:\n            # 新任务（Symbol\
+          \ 变化）\n            merged_data = current_data\n            merge_history\
+          \ = [{\n                \"round\": 1,\n                \"timestamp\": datetime.now().strftime(\"\
+          %Y-%m-%d %H:%M:%S\"),\n                \"fields_added\": count_valid_fields(current_data),\n\
+          \                \"action\": \"新任务开始\"\n            }]\n        \n     \
+          \   # === 核心优化 3: 三级验证（基于合并后的数据）===\n        validation_result = enhanced_validation_v2(merged_data)\n\
+          \        \n        # 更新状态\n        if validation_result[\"is_complete\"\
+          ]:\n            final_status = \"ready\"\n            merged_data[\"status\"\
+          ] = \"data_ready\"\n        else:\n            final_status = \"awaiting_data\"\
+          \n            merged_data[\"status\"] = \"missing_data\"\n        \n   \
+          \     # 生成补齐指引（基于实际缺失字段）\n        missing_fields = validation_result[\"\
+          missing_fields\"]\n        补齐指引 = generate_smart_guide(\n            missing_fields=missing_fields,\n\
+          \            merge_history=merge_history,\n            total_fields=22\n\
+          \        )\n        \n        # === 核心优化 4: 返回结构化的输出 ===\n        result_data\
+          \ = {\n            **merged_data,\n            \"validation_summary\": validation_result[\"\
+          summary\"],\n            \"判断依据\": judgment,\n            \"_merge_history\"\
+          : merge_history\n        }\n        \n        return {\n            \"result\"\
+          : json.dumps(result_data, ensure_ascii=False, indent=2),\n            \n\
+          \            # 会话变量\n            \"first_parse_data\": json.dumps(merged_data,\
+          \ ensure_ascii=False) if final_status == \"awaiting_data\" else \"\",\n\
+          \            \"current_symbol\": symbol,\n            \"data_status\": final_status,\n\
+          \            \"missing_count\": len(missing_fields),\n            \n   \
+          \         # 补齐指引（扁平化输出）\n            \"user_guide_summary\": 补齐指引.get(\"\
+          summary\", \"\"),\n            \"user_guide_commands\": 补齐指引.get(\"commands_text\"\
+          , \"\"),\n            \"user_guide_progress\": 补齐指引.get(\"progress\", \"\
+          \"),\n            \"user_guide_priority_critical\": 补齐指引.get(\"critical_text\"\
+          , \"\"),\n            \"user_guide_priority_high\": 补齐指引.get(\"high_text\"\
+          , \"\"),\n            \"user_guide_priority_medium\": 补齐指引.get(\"medium_text\"\
+          , \"\"),\n            \"user_guide_next_action\": 补齐指引.get(\"next_action\"\
+          , \"\"),\n            \"user_guide_merge_log\": 补齐指引.get(\"merge_log\",\
+          \ \"\")\n        }\n    \n    except Exception as e:\n        import traceback\n\
+          \        return {\n            \"result\": json.dumps({\n              \
+          \  \"error\": True,\n                \"error_message\": str(e),\n      \
+          \          \"error_traceback\": traceback.format_exc()\n            }, ensure_ascii=False,\
+          \ indent=2),\n            \"first_parse_data\": first_parse_data,\n    \
+          \        \"current_symbol\": current_symbol,\n            \"data_status\"\
+          : \"error\",\n            \"missing_count\": 0,\n            \"user_guide_summary\"\
+          : f\"⚠️ 系统错误: {str(e)}\",\n            \"user_guide_commands\": \"\",\n\
+          \            \"user_guide_progress\": \"\",\n            \"user_guide_priority_critical\"\
+          : \"\",\n            \"user_guide_priority_high\": \"\",\n            \"\
+          user_guide_priority_medium\": \"\",\n            \"user_guide_next_action\"\
+          : \"请检查数据后重试\",\n            \"user_guide_merge_log\": \"\"\n        }\n\
+          \n\n# ============= 核心函数 1: 智能判断累积模式 =============\n\ndef judge_accumulation_mode(current_data:\
+          \ dict,\n                            cached_first_data: str,\n         \
+          \                   cached_symbol: str,\n                            cached_status:\
+          \ str) -> Tuple[bool, str]:\n    \"\"\"\n    判断是否进入累积模式（增量补齐）\n    \n  \
+          \  Returns:\n        (is_accumulation, reason)\n    \"\"\"\n    # 情况 1:\
+          \ 无缓存 → 首次解析\n    if not cached_first_data or cached_status == \"initial\"\
+          :\n        return True, \"首次上传,开始解析\"\n    \n    # 情况 2: Symbol 变化 → 新任务\n\
+          \    current_symbol = extract_symbol(current_data)\n    if current_symbol\
+          \ != cached_symbol:\n        return False, f\"Symbol 变化({cached_symbol}→{current_symbol}),开始新任务\"\
+          \n    \n    # 情况 3: 缓存状态为 ready → 已完成,不再累积\n    if cached_status == \"ready\"\
+          :\n        return False, \"数据已完整,开始新任务\"\n    \n    # 情况 4: 缓存等待补齐 → 累积模式\n\
+          \    if cached_status == \"awaiting_data\":\n        return True, \"检测到历史缓存,进入增量补齐模式\"\
+          \n    \n    # 默认: 累积模式\n    return True, \"进入累积模式\"\n\n\n# =============\
+          \ 核心函数 2: 智能合并算法 =============\n\ndef smart_merge(first_data: dict, new_data:\
+          \ dict) -> Tuple[dict, dict]:\n    \"\"\"\n    智能增量合并（增强版）\n    \n    新增特性:\n\
+          \    1. 检测新数据是否为空\n    2. 如果新数据为空，直接返回旧数据（不合并）\n    3. 记录合并失败的原因\n    \"\
+          \"\"\n    merged = first_data.copy()\n    \n    # 提取 targets\n    first_targets\
+          \ = get_target_dict(first_data)\n    new_targets = get_target_dict(new_data)\n\
+          \    \n    # \U0001F525 核心修复：检测新数据是否为空\n    new_valid_count = count_valid_fields_in_dict(new_targets)\n\
+          \    \n    if new_valid_count == 0:\n        # 新数据为空，不执行合并\n        print(\"\
+          ⚠️ 警告: 新数据无有效字段，跳过合并\")\n        merge_info = {\n            \"new_fields_count\"\
+          : 0,\n            \"updated_fields_count\": 0,\n            \"merge_failed\"\
+          : True,\n            \"failure_reason\": \"新数据无有效字段（可能解析失败）\"\n        }\n\
+          \        return merged, merge_info  # 返回原数据\n    \n    # 统计信息\n    new_fields_count\
+          \ = 0\n    updated_fields_count = 0\n    \n    # 合并各个 section\n    for section\
+          \ in [\"gamma_metrics\", \"directional_metrics\", \"atm_iv\", \"walls\"\
+          ]:\n        if section not in first_targets:\n            first_targets[section]\
+          \ = {}\n        \n        if section in new_targets:\n            for key,\
+          \ new_value in new_targets[section].items():\n                old_value\
+          \ = first_targets[section].get(key)\n                \n                if\
+          \ is_valid_value(new_value):\n                    if not is_valid_value(old_value):\n\
+          \                        first_targets[section][key] = new_value\n     \
+          \                   new_fields_count += 1\n                    elif old_value\
+          \ != new_value:\n                        first_targets[section][key] = new_value\n\
+          \                        updated_fields_count += 1\n    \n    # 合并顶层字段\n\
+          \    for key in [\"spot_price\", \"em1_dollar\", \"symbol\"]:\n        old_value\
+          \ = first_targets.get(key)\n        new_value = new_targets.get(key)\n \
+          \       \n        if is_valid_value(new_value):\n            if not is_valid_value(old_value):\n\
+          \                first_targets[key] = new_value\n                new_fields_count\
+          \ += 1\n            elif old_value != new_value:\n                first_targets[key]\
+          \ = new_value\n                updated_fields_count += 1\n    \n    # \U0001F525\
+          \ 修复：如果没有任何新增或更新，标记为失败\n    if new_fields_count == 0 and updated_fields_count\
+          \ == 0:\n        print(\"⚠️ 警告: 合并未产生任何变化，可能数据重复或解析失败\")\n        merge_info\
+          \ = {\n            \"new_fields_count\": 0,\n            \"updated_fields_count\"\
+          : 0,\n            \"merge_failed\": True,\n            \"failure_reason\"\
+          : \"无新增或更新字段\"\n        }\n        return merged, merge_info\n    \n   \
+          \ # 合并 indices\n    if \"indices\" not in merged:\n        merged[\"indices\"\
+          ] = {}\n    \n    if \"indices\" in new_data:\n        for index_name in\
+          \ [\"spx\", \"qqq\"]:\n            if index_name in new_data[\"indices\"\
+          ]:\n                if index_name not in merged[\"indices\"]:\n        \
+          \            merged[\"indices\"][index_name] = {}\n                \n  \
+          \              for key, new_value in new_data[\"indices\"][index_name].items():\n\
+          \                    old_value = merged[\"indices\"][index_name].get(key)\n\
+          \                    if is_valid_value(new_value) and not is_valid_value(old_value):\n\
+          \                        merged[\"indices\"][index_name][key] = new_value\n\
+          \    \n    # 合并技术面数据\n    if \"technical_analysis\" in new_data:\n     \
+          \   ta = new_data[\"technical_analysis\"]\n        if ta and ta.get(\"ta_score\"\
+          , 0) > 0:\n            merged[\"technical_analysis\"] = ta\n    \n    #\
+          \ 更新 targets\n    merged[\"targets\"] = first_targets\n    \n    merge_info\
+          \ = {\n        \"new_fields_count\": new_fields_count,\n        \"updated_fields_count\"\
+          : updated_fields_count,\n        \"merge_failed\": False\n    }\n    \n\
+          \    return merged, merge_info\n\n\ndef count_valid_fields_in_dict(target_dict:\
+          \ dict) -> int:\n    \"\"\"统计字典中的有效字段数量\"\"\"\n    count = 0\n    \n   \
+          \ for section in [\"gamma_metrics\", \"directional_metrics\", \"atm_iv\"\
+          , \"walls\"]:\n        if section in target_dict and isinstance(target_dict[section],\
+          \ dict):\n            for value in target_dict[section].values():\n    \
+          \            if is_valid_value(value):\n                    count += 1\n\
+          \    \n    for key in [\"spot_price\", \"em1_dollar\"]:\n        if is_valid_value(target_dict.get(key)):\n\
+          \            count += 1\n    \n    return count\n\n\ndef is_valid_value(value:\
+          \ Any) -> bool:\n    \"\"\"判断值是否有效（非缺失）\"\"\"\n    if value is None:\n \
+          \       return False\n    if value == -999:\n        return False\n    if\
+          \ value in [\"N/A\", \"数据不足\", \"\", \"unknown\"]:\n        return False\n\
+          \    return True\n\n\ndef get_target_dict(data: dict) -> dict:\n    \"\"\
+          \"\n    提取 targets 字典（增强防御性）\n    \n    返回优先级:\n    1. 如果 targets 是非空字典\
+          \ → 直接返回\n    2. 如果 targets 是非空列表 → 返回第一个元素\n    3. 如果 targets 为空或缺失 → 返回空字典（但会在日志中警告）\n\
+          \    \"\"\"\n    targets = data.get(\"targets\")\n    \n    # 情况 1: None\
+          \ 或缺失\n    if targets is None:\n        print(\"⚠️ 警告: targets 字段缺失\")\n\
+          \        return {}\n    \n    # 情况 2: 空列表\n    if isinstance(targets, list):\n\
+          \        if not targets:  # 空列表\n            print(\"⚠️ 警告: targets 是空列表\"\
+          )\n            return {}\n        return targets[0]\n    \n    # 情况 3: 字典\n\
+          \    if isinstance(targets, dict):\n        if not targets:  # 空字典\n   \
+          \         print(\"⚠️ 警告: targets 是空字典\")\n        return targets\n    \n\
+          \    # 情况 4: 其他类型（异常）\n    print(f\"❌ 错误: targets 类型异常 - {type(targets)}\"\
+          )\n    return {}\n\n\n# ============= 核心函数 3: 增强验证 v2 =============\n\n\
+          def enhanced_validation_v2(data: dict) -> dict:\n    \"\"\"\n    三级验证增强版（基于合并后的数据）\n\
+          \    \n    Returns:\n        {\n            \"is_complete\": bool,\n   \
+          \         \"missing_fields\": list,\n            \"summary\": dict\n   \
+          \     }\n    \"\"\"\n    target = get_target_dict(data)\n    \n    # 22\
+          \ 个必需字段\n    required_fields = {\n        # 顶层字段\n        \"spot_price\"\
+          : (target, \"spot_price\"),\n        \"em1_dollar\": (target, \"em1_dollar\"\
+          ),\n        \n        # walls\n        \"walls.call_wall\": (target.get(\"\
+          walls\", {}), \"call_wall\"),\n        \"walls.put_wall\": (target.get(\"\
+          walls\", {}), \"put_wall\"),\n        \"walls.major_wall\": (target.get(\"\
+          walls\", {}), \"major_wall\"),\n        \"walls.major_wall_type\": (target.get(\"\
+          walls\", {}), \"major_wall_type\"),\n        \n        # gamma_metrics\n\
+          \        \"gamma_metrics.gap_distance_dollar\": (target.get(\"gamma_metrics\"\
+          , {}), \"gap_distance_dollar\"),\n        \"gamma_metrics.gap_distance_em1_multiple\"\
+          : (target.get(\"gamma_metrics\", {}), \"gap_distance_em1_multiple\"),\n\
+          \        \"gamma_metrics.cluster_strength_ratio\": (target.get(\"gamma_metrics\"\
+          , {}), \"cluster_strength_ratio\"),\n        \"gamma_metrics.net_gex\":\
+          \ (target.get(\"gamma_metrics\", {}), \"net_gex\"),\n        \"gamma_metrics.net_gex_sign\"\
+          : (target.get(\"gamma_metrics\", {}), \"net_gex_sign\"),\n        \"gamma_metrics.vol_trigger\"\
+          : (target.get(\"gamma_metrics\", {}), \"vol_trigger\"),\n        \"gamma_metrics.spot_vs_trigger\"\
+          : (target.get(\"gamma_metrics\", {}), \"spot_vs_trigger\"),\n        \"\
+          gamma_metrics.monthly_cluster_override\": (target.get(\"gamma_metrics\"\
+          , {}), \"monthly_cluster_override\"),\n        \n        # directional_metrics\n\
+          \        \"directional_metrics.dex_same_dir_pct\": (target.get(\"directional_metrics\"\
+          , {}), \"dex_same_dir_pct\"),\n        \"directional_metrics.vanna_dir\"\
+          : (target.get(\"directional_metrics\", {}), \"vanna_dir\"),\n        \"\
+          directional_metrics.vanna_confidence\": (target.get(\"directional_metrics\"\
+          , {}), \"vanna_confidence\"),\n        \"directional_metrics.iv_path\":\
+          \ (target.get(\"directional_metrics\", {}), \"iv_path\"),\n        \"directional_metrics.iv_path_confidence\"\
+          : (target.get(\"directional_metrics\", {}), \"iv_path_confidence\"),\n \
+          \       \n        # atm_iv\n        \"atm_iv.iv_7d\": (target.get(\"atm_iv\"\
+          , {}), \"iv_7d\"),\n        \"atm_iv.iv_14d\": (target.get(\"atm_iv\", {}),\
+          \ \"iv_14d\"),\n        \"atm_iv.iv_source\": (target.get(\"atm_iv\", {}),\
+          \ \"iv_source\"),\n    }\n    \n    # 检查缺失字段\n    missing_fields = []\n\
+          \    for field_path, (parent_dict, key) in required_fields.items():\n  \
+          \      value = parent_dict.get(key) if isinstance(parent_dict, dict) else\
+          \ None\n        if not is_valid_value(value):\n            missing_fields.append({\n\
+          \                \"field\": field_path,\n                \"current_value\"\
+          : value\n            })\n    \n    total_required = len(required_fields)\n\
+          \    provided = total_required - len(missing_fields)\n    completion_rate\
+          \ = int((provided / total_required) * 100)\n    \n    is_complete = len(missing_fields)\
+          \ == 0\n    \n    return {\n        \"is_complete\": is_complete,\n    \
+          \    \"missing_fields\": missing_fields,\n        \"summary\": {\n     \
+          \       \"total_required\": total_required,\n            \"provided\": provided,\n\
+          \            \"missing_count\": len(missing_fields),\n            \"completion_rate\"\
+          : completion_rate\n        }\n    }\n\n\n# ============= 核心函数 4: 智能指引生成\
+          \ =============\n\ndef generate_smart_guide(missing_fields: list,\n    \
+          \                     merge_history: list,\n                         total_fields:\
+          \ int,\n                         last_merge_failed: bool = False) -> dict:\n\
+          \    \"\"\"\n    生成智能补齐指引\n    \n    新增特性:\n    1. 显示累积进度\n    2. 显示合并历史\n\
+          \    3. 优先级动态调整\n    \"\"\"\n    if not missing_fields:\n        return\
+          \ {\n            \"summary\": \"✅ 数据完整,无需补齐\",\n            \"commands_text\"\
+          : \"无\",\n            \"progress\": f\"100% ({total_fields}/{total_fields})\"\
+          ,\n            \"critical_text\": \"无\",\n            \"high_text\": \"\
+          无\",\n            \"medium_text\": \"无\",\n            \"next_action\":\
+          \ \"进入分析流程\",\n            \"merge_log\": format_merge_history(merge_history)\n\
+          \        }\n    \n    provided_count = total_fields - len(missing_fields)\n\
+          \    progress = f\"{int((provided_count/total_fields)*100)}% ({provided_count}/{total_fields})\"\
+          \n\n    warning = \"\"\n    if last_merge_failed:\n        warning = \"\\\
+          n\\n⚠️ **警告**: 上次上传的数据未能成功识别，请确保：\\n\" \\\n                  \"1. 图片清晰完整\\\
+          n\" \\\n                  \"2. 包含目标股票的期权数据\\n\" \\\n                  \"\
+          3. 命令执行结果完整显示\"\n    \n    # 根据字段路径生成命令建议\n    commands = []\n    priority_groups\
+          \ = {\"critical\": [], \"high\": [], \"medium\": []}\n    \n    for item\
+          \ in missing_fields:\n        field_path = item[\"field\"]\n        cmd_info\
+          \ = suggest_command(field_path)\n        \n        priority = cmd_info[\"\
+          priority\"]\n        priority_groups[priority].append({\n            \"\
+          字段\": field_path,\n            \"命令\": cmd_info[\"command\"],\n        \
+          \    \"说明\": cmd_info[\"description\"]\n        })\n        \n        if\
+          \ cmd_info[\"command\"] not in commands:\n            commands.append(cmd_info[\"\
+          command\"])\n    \n    # 格式化输出\n    return {\n        \"summary\": f\"❌\
+          \ 当前进度 {progress}, 还需补齐 {len(missing_fields)} 个字段{warning}\",\n        \"\
+          commands_text\": \"\\n\".join(commands[:5]),  # 最多显示 5 条\n        \"progress\"\
+          : progress,\n        \"critical_text\": format_priority_items(priority_groups[\"\
+          critical\"]),\n        \"high_text\": format_priority_items(priority_groups[\"\
+          high\"]),\n        \"medium_text\": format_priority_items(priority_groups[\"\
+          medium\"]),\n        \"next_action\": f\"\U0001F4CB 请继续上传图表补齐剩余 {len(missing_fields)}\
+          \ 个字段（支持多次上传累积）\",\n        \"merge_log\": format_merge_history(merge_history)\n\
+          \    }\n\n\ndef suggest_command(field_path: str) -> dict:\n    \"\"\"根据字段路径建议命令\"\
+          \"\"\n    command_map = {\n        \"gamma_metrics.vol_trigger\": {\n  \
+          \          \"command\": \"!trigger SYMBOL 60\",\n            \"description\"\
+          : \"Gamma 触发线\",\n            \"priority\": \"critical\"\n        },\n \
+          \       \"gamma_metrics.net_gex\": {\n            \"command\": \"!gexn SYMBOL\
+          \ 60 98\",\n            \"description\": \"净 Gamma 敞口\",\n            \"\
+          priority\": \"critical\"\n        },\n        \"walls.call_wall\": {\n \
+          \           \"command\": \"!gexr SYMBOL 25 7w\",\n            \"description\"\
+          : \"Call 墙位\",\n            \"priority\": \"high\"\n        },\n       \
+          \ \"atm_iv.iv_7d\": {\n            \"command\": \"!skew SYMBOL ivmid atm\
+          \ 7\",\n            \"description\": \"7日 ATM 波动率\",\n            \"priority\"\
+          : \"high\"\n        },\n        \"directional_metrics.dex_same_dir_pct\"\
+          : {\n            \"command\": \"!dexn SYMBOL 25 14w\",\n            \"description\"\
+          : \"DEX 方向一致性\",\n            \"priority\": \"medium\"\n        },\n   \
+          \     # ... 更多映射\n    }\n    \n    return command_map.get(field_path, {\n\
+          \        \"command\": f\"!gexr SYMBOL 25 7w\",  # 默认命令\n        \"description\"\
+          : field_path,\n        \"priority\": \"medium\"\n    })\n\n\ndef format_priority_items(items:\
+          \ list) -> str:\n    \"\"\"格式化优先级列表\"\"\"\n    if not items:\n        return\
+          \ \"无\"\n    \n    result = []\n    for i, item in enumerate(items, 1):\n\
+          \        result.append(\n            f\"{i}. **{item['字段']}**\\n\"\n   \
+          \         f\"   - 命令: `{item['命令']}`\\n\"\n            f\"   - 说明: {item['说明']}\"\
+          \n        )\n    return \"\\n\\n\".join(result)\n\n\ndef format_merge_history(history:\
+          \ list) -> str:\n    \"\"\"格式化合并历史\"\"\"\n    if not history:\n        return\
+          \ \"无历史记录\"\n    \n    lines = []\n    for record in history:\n        lines.append(\n\
+          \            f\"第{record['round']}轮 ({record['timestamp']}): \"\n      \
+          \      f\"{record['action']}, \"\n            f\"新增 {record.get('fields_added',\
+          \ 0)} 个字段\"\n        )\n    return \"\\n\".join(lines)\n\n\n# =============\
+          \ 辅助函数 =============\n\ndef extract_symbol(data: dict) -> str:\n    \"\"\
+          \"提取股票代码\"\"\"\n    target = get_target_dict(data)\n    return target.get(\"\
+          symbol\", data.get(\"symbol\", \"UNKNOWN\"))\n\n\ndef count_valid_fields(data:\
+          \ dict) -> int:\n    \"\"\"统计有效字段数量\"\"\"\n    target = get_target_dict(data)\n\
+          \    count = 0\n    \n    for section in [\"gamma_metrics\", \"directional_metrics\"\
+          , \"atm_iv\", \"walls\"]:\n        if section in target and isinstance(target[section],\
+          \ dict):\n            for value in target[section].values():\n         \
+          \       if is_valid_value(value):\n                    count += 1\n    \n\
+          \    for key in [\"spot_price\", \"em1_dollar\"]:\n        if is_valid_value(target.get(key)):\n\
+          \            count += 1\n    \n    return count"
+        code_language: python3
+        desc: '#1009 集成会话变量更新'
+        outputs:
+          current_symbol:
+            children: null
+            type: string
+          data_status:
+            children: null
+            type: string
+          first_parse_data:
+            children: null
+            type: string
+          missing_count:
+            children: null
+            type: number
+          result:
+            children: null
+            type: string
+          user_guide_commands:
+            children: null
+            type: string
+          user_guide_merge_log:
+            children: null
+            type: string
+          user_guide_next_action:
+            children: null
+            type: string
+          user_guide_priority_critical:
+            children: null
+            type: string
+          user_guide_priority_high:
+            children: null
+            type: string
+          user_guide_priority_medium:
+            children: null
+            type: string
+          user_guide_progress:
+            children: null
+            type: string
+          user_guide_summary:
+            children: null
+            type: string
+        selected: false
+        title: CODE_AGGREGATOR
+        type: code
+        variables:
+        - value_selector:
+          - '3001'
+          - structured_output
+          value_type: object
+          variable: agent3_output
+        - value_selector:
+          - conversation
+          - first_parse_data
+          value_type: string
+          variable: first_parse_data
+        - value_selector:
+          - conversation
+          - current_symbol
+          value_type: string
+          variable: current_symbol
+        - value_selector:
+          - conversation
+          - data_status
+          value_type: string
+          variable: data_status
+        - value_selector:
+          - conversation
+          - missing_count
+          value_type: number
+          variable: missing_count
+      height: 80
+      id: '1009'
+      position:
+        x: 1111.0783319055154
+        y: 517.35302117182
+      positionAbsolute:
+        x: 1111.0783319055154
+        y: 517.35302117182
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        answer: '{{#1009.result#}}'
+        selected: false
+        title: 直接回复 4
+        type: answer
+        variables: []
+      height: 103
+      id: '1763130136495'
+      position:
+        x: 1893.076894256682
+        y: 667.9553875882742
+      positionAbsolute:
+        x: 1893.076894256682
+        y: 667.9553875882742
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
     viewport:
-      x: -1468.8441189946616
-      y: 102.21419984100959
-      zoom: 0.5350584375669217
+      x: -1339.347342719586
+      y: 93.15286215750052
+      zoom: 0.9176398815152124
   rag_pipeline_variables: []
