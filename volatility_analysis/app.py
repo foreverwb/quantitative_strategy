@@ -43,8 +43,10 @@ DEFAULT_CFG = {
     "penalty_vol_pct_thresh": 0.40
 }
 
+INDEX_TICKERS = ["SPY", "QQQ", "IWM", "DIA"]
+
 # =========================
-# 数据清洗函数(来自app.py,更实用)
+# 数据清洗函数
 # =========================
 def clean_percent_string(s: Any) -> Optional[float]:
     """清洗百分比字符串: "+2.7%" -> 2.7"""
@@ -91,13 +93,14 @@ def clean_notional_string(s: Any) -> Optional[float]:
 def clean_record(rec: Dict[str, Any]) -> Dict[str, Any]:
     """清洗单条记录"""
     cleaned = dict(rec)
+    # [关键修复] 加入 IV30ChgPct 确保能被正确转换为 float
     percent_fields = ['PriceChgPct', 'IV30ChgPct', 'IVR', 'IV_52W_P', 'OI_PctRank',
                       'PutPct', 'SingleLegPct', 'MultiLegPct', 'ContingentPct']
     for field in percent_fields:
         if field in cleaned:
             cleaned[field] = clean_percent_string(cleaned[field])
     
-    number_fields = ['IV30', 'HV20', 'HV1Y', 'Volume', 'RelVolTo90D', 
+    number_fields = ['IV30', 'IV90', 'HV20', 'HV1Y', 'Volume', 'RelVolTo90D', 
                      'CallVolume', 'PutVolume', 'RelNotionalTo90D']
     for field in number_fields:
         if field in cleaned:
@@ -111,7 +114,7 @@ def clean_record(rec: Dict[str, Any]) -> Dict[str, Any]:
     return cleaned
 
 # =========================
-# 数据归一化(来自iv.py,更严谨)
+# 数据归一化
 # =========================
 def median(values: List[float]) -> float:
     vals = [v for v in values if v is not None and not math.isnan(v)]
@@ -225,13 +228,68 @@ def days_until(d: Optional[date], as_of: Optional[date] = None) -> Optional[int]
     return (d - as_of).days
 
 # =========================
-# 核心评分算法(来自iv.py,更符合概要设计)
+# 高级量化逻辑
+# =========================
+def get_dynamic_thresholds(symbol: str, base_cfg: Dict[str, Any]) -> Dict[str, Any]:
+    """根据标的类型(指数/个股)动态调整阈值"""
+    cfg = base_cfg.copy()
+    if symbol in INDEX_TICKERS:
+        # 指数通常 Put 更多，所以提高“看空”的门槛
+        cfg["putpct_bear"] = 65.0  
+        cfg["putpct_bull"] = 50.0  
+        cfg["callput_ratio_bull"] = 1.0 
+    return cfg
+
+def compute_spot_vol_correlation_score(rec: Dict[str, Any]) -> float:
+    """计算价-波相关性分数"""
+    price_chg = rec.get("PriceChgPct", 0.0) or 0.0
+    iv_chg = rec.get("IV30ChgPct", 0.0) or 0.0
+    
+    # 确保是浮点数
+    try:
+        price_chg = float(price_chg)
+        iv_chg = float(iv_chg)
+    except:
+        return 0.0
+
+    # 场景 A: 逼空/动量 (价升波升) -> 强看多
+    if price_chg > 0.5 and iv_chg > 2.0:
+        return 0.4 
+    # 场景 B: 恐慌抛售 (价跌波升) -> 强看空
+    elif price_chg < -0.5 and iv_chg > 2.0:
+        return -0.5
+    # 场景 C: 磨涨 (价升波降) -> 稳健看多
+    elif price_chg > 0 and iv_chg < -2.0:
+        return 0.2
+    return 0.0
+
+def detect_squeeze_potential(rec: Dict[str, Any], cfg: Dict[str, Any]) -> bool:
+    """检测 Gamma Squeeze 潜力"""
+    iv_ratio = compute_iv_ratio(rec)
+    oi_rank = rec.get("OI_PctRank", 0.0) or 0.0
+    price_chg = rec.get("PriceChgPct", 0.0) or 0.0
+    rel_vol = rec.get("RelVolTo90D", 0.0) or 0.0
+    
+    try:
+        price_chg = float(price_chg)
+        rel_vol = float(rel_vol)
+        oi_rank = float(oi_rank)
+    except:
+        return False
+    
+    # 条件：期权便宜 + 仓位拥挤 + 价格上涨 + 交易放量
+    if (iv_ratio < 0.95 and 
+        oi_rank > 70.0 and 
+        price_chg > 1.5 and 
+        rel_vol > 1.2):
+        return True
+    return False
+
+# =========================
+# 核心评分算法
 # =========================
 def compute_direction_score(rec: Dict[str, Any], cfg: Dict[str, Any]) -> float:
-    """
-    方向分数(越高越偏多,越低越偏空)
-    改进:采用tanh平滑价格项,保留iv.py的结构权重
-    """
+    """方向分数计算"""
     price_chg_pct = rec.get("PriceChgPct", 0.0) or 0.0
     rel_vol = rec.get("RelVolTo90D", 1.0) or 1.0
     vol_bias = compute_volume_bias(rec)
@@ -275,7 +333,10 @@ def compute_direction_score(rec: Dict[str, Any], cfg: Dict[str, Any]) -> float:
     
     score = price_term + notional_term + vol_bias_term + relvol_term + cpr_term + put_term
     
-    # 结构加权(iv.py特色)
+    # [新增] 加入价-波相关性得分
+    score += compute_spot_vol_correlation_score(rec)
+    
+    # 结构加权
     amp = 1.0
     if isinstance(single_leg, (int, float)) and single_leg >= cfg["singleleg_high"]:
         amp *= 1.10
@@ -288,10 +349,7 @@ def compute_direction_score(rec: Dict[str, Any], cfg: Dict[str, Any]) -> float:
 
 def compute_vol_score(rec: Dict[str, Any], cfg: Dict[str, Any], 
                      ignore_earnings: bool = False) -> float:
-    """
-    波动分数(负值->卖波,正值->买波)
-    保留iv.py的恐慌环境识别和长便宜/短昂贵判断
-    """
+    """波动分数计算"""
     ivr = rec.get("IVR", None)
     ivrv = compute_ivrv(rec)
     iv_ratio = compute_iv_ratio(rec)
@@ -317,7 +375,7 @@ def compute_vol_score(rec: Dict[str, Any], cfg: Dict[str, Any],
     if isinstance(hv20, (int, float)) and isinstance(iv30, (int, float)) and hv20 > 0:
         discount_term = max(0.0, (float(hv20) - float(iv30)) / float(hv20))
     
-    # 长便宜/短昂贵(iv.py特色)
+    # 长便宜/短昂贵
     longcheap = ((isinstance(ivr, (int, float)) and ivr <= cfg["iv_longcheap_rank"]) or 
                  (iv_ratio <= cfg["iv_longcheap_ratio"]))
     shortrich = ((isinstance(ivr, (int, float)) and ivr >= cfg["iv_shortrich_rank"]) or 
@@ -338,7 +396,7 @@ def compute_vol_score(rec: Dict[str, Any], cfg: Dict[str, Any],
             elif dte <= cfg["earnings_window_days"]:
                 earn_boost = 0.2
     
-    # 恐慌环境卖波倾向(iv.py特色)
+    # 恐慌环境卖波倾向
     fear_sell = 0.0
     if (isinstance(ivr, (int, float)) and 
         ivr >= cfg["fear_ivrank_min"] and 
@@ -359,7 +417,7 @@ def compute_vol_score(rec: Dict[str, Any], cfg: Dict[str, Any],
     return float(buy_side - sell_side)
 
 # =========================
-# 流动性与置信度(来自iv.py,更全面)
+# 流动性与置信度
 # =========================
 def map_liquidity(rec: Dict[str, Any], cfg: Dict[str, Any]) -> str:
     call_v = rec.get("CallVolume", 0) or 0
@@ -389,7 +447,7 @@ def map_liquidity(rec: Dict[str, Any], cfg: Dict[str, Any]) -> str:
 
 def map_confidence(dir_score: float, vol_score: float, liquidity: str,
                    rec: Dict[str, Any], cfg: Dict[str, Any]) -> str:
-    """置信度计算(iv.py的多因子逻辑)"""
+    """置信度计算"""
     strength = 0.0
     
     # 分数强度
@@ -442,7 +500,7 @@ def penalize_extreme_move_low_vol(rec: Dict[str, Any], cfg: Dict[str, Any]) -> b
     return bool(cond_price and (cond_vol or cond_iv))
 
 # =========================
-# 偏好映射
+# 偏好映射与策略
 # =========================
 def map_direction_pref(score: float) -> str:
     return "偏多" if score >= 1.0 else "偏空" if score <= -1.0 else "中性"
@@ -456,10 +514,7 @@ def combine_quadrant(dir_pref: str, vol_pref: str) -> str:
         return "中性/待观察"
     return f"{dir_pref}—{vol_pref}"
 
-# =========================
-# 策略建议
-# =========================
-def get_strategy_info(quadrant: str, liquidity: str) -> Dict[str, str]:
+def get_strategy_info(quadrant: str, liquidity: str, is_squeeze: bool = False) -> Dict[str, str]:
     strategy_map = {
         "偏多—买波": {
             "策略": "看涨期权或看涨借记价差;临近事件做看涨日历/对角;IV低位或事件前可小仓位跨式",
@@ -483,6 +538,12 @@ def get_strategy_info(quadrant: str, liquidity: str) -> Dict[str, str]:
         }
     }
     info = strategy_map.get(quadrant, strategy_map["中性/待观察"]).copy()
+    
+    if is_squeeze:
+        prefix = "🔥 【Gamma Squeeze 预警】强烈建议买入看涨期权 (Long Call) 利用爆发。 "
+        info["策略"] = prefix + info["策略"]
+        info["风险"] += "; 注意：挤压行情可能快速反转，需设移动止盈"
+    
     if liquidity == "低":
         info["风险"] += ";⚠️ 流动性低,用少腿、靠近ATM、限价单与缩小仓位"
     return info
@@ -494,47 +555,67 @@ def calculate_analysis(data: Dict[str, Any], cfg: Dict[str, Any] = None, ignore_
     if cfg is None:
         cfg = DEFAULT_CFG
     
-    # 数据清洗与归一化
+    # 1. 数据清洗与归一化
     cleaned = clean_record(data)
     normed = normalize_dataset([cleaned])[0]
-    
     symbol = normed.get('symbol', 'N/A')
     
-    # 计算评分
-    dir_score = compute_direction_score(normed, cfg)
-    vol_score = compute_vol_score(normed, cfg, ignore_earnings=ignore_earnings)
+    # 2. 获取生效配置 (Index vs Stock)
+    effective_cfg = get_dynamic_thresholds(symbol, cfg)
     
-    # 偏好映射
+    # 3. 计算高级指标
+    spot_vol_score = compute_spot_vol_correlation_score(normed)
+    is_squeeze = detect_squeeze_potential(normed, effective_cfg)
+    
+    # 计算期限结构
+    iv30 = normed.get("IV30")
+    iv90 = normed.get("IV90")
+    term_structure_val = None
+    term_structure_str = "N/A"
+    if isinstance(iv30, (int, float)) and isinstance(iv90, (int, float)) and iv90 > 0:
+        term_structure_val = iv30 / iv90
+        term_structure_str = f"{term_structure_val:.2f}"
+        if term_structure_val > 1.1:
+            term_structure_str += " (倒挂/恐慌)"
+        elif term_structure_val < 0.9:
+            term_structure_str += " (陡峭/正常)"
+
+    # 4. 计算基础评分 (注意：dir_score 内已包含 spot_vol_score)
+    dir_score = compute_direction_score(normed, effective_cfg)
+    vol_score = compute_vol_score(normed, effective_cfg, ignore_earnings=ignore_earnings)
+    
+    # 5. 偏好映射
     dir_pref = map_direction_pref(dir_score)
-    vol_pref = map_vol_pref(vol_score, cfg)
+    vol_pref = map_vol_pref(vol_score, effective_cfg)
     quadrant = combine_quadrant(dir_pref, vol_pref)
     
-    # 流动性与置信度
-    liquidity = map_liquidity(normed, cfg)
-    confidence = map_confidence(dir_score, vol_score, liquidity, normed, cfg)
+    # 6. 流动性与置信度
+    liquidity = map_liquidity(normed, effective_cfg)
+    confidence = map_confidence(dir_score, vol_score, liquidity, normed, effective_cfg)
     
-    # 风险标记
-    penal_flag = penalize_extreme_move_low_vol(normed, cfg)
+    # 7. 风险标记
+    penal_flag = penalize_extreme_move_low_vol(normed, effective_cfg)
     
-    # 策略建议
-    strategy_info = get_strategy_info(quadrant, liquidity)
+    # 8. 策略建议
+    strategy_info = get_strategy_info(quadrant, liquidity, is_squeeze=is_squeeze)
     
-    # 派生指标
-    iv30 = normed.get("IV30", 0)
+    # 9. 派生指标计算
     hv20 = normed.get("HV20", 1)
     hv1y = normed.get("HV1Y", 1)
-    ivrv_ratio = iv30 / hv20 if hv20 > 0 else 1.0
-    ivrv_diff = iv30 - hv20
+    ivrv_ratio = (iv30 / hv20) if (isinstance(iv30, (int, float)) and isinstance(hv20, (int, float)) and hv20 > 0) else 1.0
+    ivrv_diff = (iv30 - hv20) if (isinstance(iv30, (int, float)) and isinstance(hv20, (int, float))) else 0.0
     ivrv_log = compute_ivrv(normed)
-    regime_ratio = hv20 / hv1y if hv1y > 0 else 1.0
+    regime_ratio = (hv20 / hv1y) if (isinstance(hv20, (int, float)) and isinstance(hv1y, (int, float)) and hv1y > 0) else 1.0
     vol_bias = compute_volume_bias(normed)
     notional_bias = compute_notional_bias(normed)
     cp_ratio = compute_callput_ratio(normed)
     days_to_earnings = days_until(parse_earnings_date(normed.get("Earnings")))
     
-    # 因素分解
+    # 10. 生成驱动因素列表 (修复缺失部分)
     direction_factors = []
     price_chg = normed.get("PriceChgPct", 0) or 0
+    
+    # 价格因素
     if price_chg >= 1.0:
         direction_factors.append(f"涨幅 {price_chg:.1f}%")
     elif price_chg <= -1.0:
@@ -542,11 +623,20 @@ def calculate_analysis(data: Dict[str, Any], cfg: Dict[str, Any] = None, ignore_
     else:
         direction_factors.append(f"涨跌幅 {price_chg:.1f}% (中性)")
     
+    # 供需偏度因素
     direction_factors.append(f"量偏度 {vol_bias:.2f}")
     direction_factors.append(f"名义偏度 {notional_bias:.2f}")
     direction_factors.append(f"Call/Put比率 {cp_ratio:.2f}")
     direction_factors.append(f"相对量 {normed.get('RelVolTo90D', 1.0):.2f}x")
     
+    # 价-波相关性说明
+    if spot_vol_score >= 0.4:
+         direction_factors.append("🔥 逼空/动量 (价升波升)")
+    elif spot_vol_score <= -0.5:
+         direction_factors.append("⚠️ 恐慌抛售 (价跌波升)")
+    elif spot_vol_score >= 0.2:
+         direction_factors.append("📈 磨涨 (价升波降)")
+
     vol_factors = []
     ivr = normed.get("IVR", 50)
     vol_factors.append(f"IVR {ivr:.1f}%")
@@ -554,10 +644,18 @@ def calculate_analysis(data: Dict[str, Any], cfg: Dict[str, Any] = None, ignore_
     vol_factors.append(f"IVRV比率 {ivrv_ratio:.2f}")
     vol_factors.append(f"IV变动 {normed.get('IV30ChgPct', 0):.1f}%")
     vol_factors.append(f"Regime {regime_ratio:.2f}")
-    if days_to_earnings is not None and 0 < days_to_earnings <= 14:
-        vol_factors.append(f"财报 {days_to_earnings}天内")
     
-    # 返回结果
+    if days_to_earnings is not None and 0 < days_to_earnings <= 14:
+        vol_factors.append(f"📅 财报 {days_to_earnings}天内")
+        
+    # 期限结构说明
+    if term_structure_val:
+        if term_structure_val > 1.1:
+            vol_factors.append("📉 期限倒挂 (恐慌)")
+        elif term_structure_val < 0.9:
+            vol_factors.append("📈 期限陡峭 (正常)")
+    
+    # 11. 构建返回结果
     result = {
         'symbol': symbol,
         'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -565,6 +663,14 @@ def calculate_analysis(data: Dict[str, Any], cfg: Dict[str, Any] = None, ignore_
         'confidence': confidence,
         'liquidity': liquidity,
         'penalized_extreme_move_low_vol': penal_flag,
+        
+        # === 新增字段 ===
+        'is_squeeze': is_squeeze,
+        'is_index': symbol in INDEX_TICKERS,
+        'spot_vol_corr_score': round(spot_vol_score, 2),
+        'term_structure_ratio': term_structure_str,
+        # ===============
+        
         'direction_score': round(dir_score, 3),
         'vol_score': round(vol_score, 3),
         'direction_bias': dir_pref,
@@ -612,7 +718,6 @@ def index():
 @app.route('/api/analyze', methods=['POST'])
 def analyze():
     try:
-        # 获取ignore_earnings参数
         ignore_earnings = request.args.get('ignore_earnings', 'false').lower() == 'true'
         records = request.json.get('records', [])
         
@@ -634,34 +739,26 @@ def analyze():
                 errors.append(error_msg)
                 print(f"错误: {error_msg}")
         
-        # Bug Fix 3: 去重逻辑 - 同一天同一symbol只保留最新的
         if results:
             all_data = load_data()
-            
-            # 提取本次分析的日期和symbol
-            new_records_map = {}  # key: (date, symbol), value: record
+            new_records_map = {}
             for r in results:
                 date = r['timestamp'].split(' ')[0]
                 symbol = r['symbol']
                 key = (date, symbol)
                 new_records_map[key] = r
             
-            # 过滤掉旧数据中与本次分析日期+symbol重复的记录
             filtered_old_data = []
             for old_record in all_data:
                 date = old_record.get('timestamp', '').split(' ')[0]
                 symbol = old_record.get('symbol', '')
                 key = (date, symbol)
-                
-                # 如果不在本次分析中,保留
                 if key not in new_records_map:
                     filtered_old_data.append(old_record)
             
-            # 合并:旧数据(去重后) + 新数据
             all_data = filtered_old_data + results
             save_data(all_data)
         
-        # 返回结果
         message = f'成功分析 {len(results)} 个标的'
         if errors:
             message += f',{len(errors)} 个失败'
@@ -682,12 +779,9 @@ def analyze():
 def get_records():
     try:
         data = load_data()
-        
         if not isinstance(data, list):
-            print(f"警告: 数据文件不是列表格式,返回空数组")
             return jsonify([])
         
-        # 支持筛选
         date_filter = request.args.get('date')
         quadrant_filter = request.args.get('quadrant')
         confidence_filter = request.args.get('confidence')
@@ -706,7 +800,6 @@ def get_records():
         return jsonify(filtered_data)
     
     except Exception as e:
-        print(f"错误: 获取记录失败 - {e}")
         return jsonify([])
 
 @app.route('/api/records/<timestamp>/<symbol>', methods=['DELETE'])
@@ -715,33 +808,24 @@ def delete_record(timestamp, symbol):
         data = load_data()
         original_length = len(data)
         data = [d for d in data if not (d['timestamp'] == timestamp and d['symbol'] == symbol)]
-        
         if len(data) == original_length:
             return jsonify({'error': '未找到该记录'}), 404
-        
         save_data(data)
         return jsonify({'message': '删除成功'}), 200
-    
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/records/date/<date>', methods=['DELETE'])
 def delete_records_by_date(date):
-    """删除指定日期的所有记录"""
     try:
         data = load_data()
         original_length = len(data)
-        # 过滤掉指定日期的记录
         data = [d for d in data if not d.get('timestamp', '').startswith(date)]
-        
         deleted_count = original_length - len(data)
-        
         if deleted_count == 0:
             return jsonify({'error': '未找到该日期的记录'}), 404
-        
         save_data(data)
         return jsonify({'message': f'成功删除 {deleted_count} 条记录'}), 200
-    
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -764,12 +848,10 @@ def get_dates():
 
 @app.route('/api/config', methods=['GET'])
 def get_config():
-    """返回当前配置"""
     return jsonify(DEFAULT_CFG)
 
 @app.route('/api/config', methods=['POST'])
 def update_config():
-    """更新配置(可选功能)"""
     try:
         new_cfg = request.json
         DEFAULT_CFG.update(new_cfg)
@@ -779,20 +861,6 @@ def update_config():
 
 if __name__ == '__main__':
     print("\n" + "=" * 60)
-    print("期权策略分析系统 - 整合优化版 v2.0")
+    print("期权策略分析系统 - 整合优化版 v2.1")
     print("=" * 60)
-    print("\n核心特性:")
-    print("  ✓ 智能数据清洗(支持%、逗号、K/M/B单位)")
-    print("  ✓ 自动数据归一化(识别百分表/小数)")
-    print("  ✓ tanh平滑价格评分")
-    print("  ✓ 结构权重调整(单腿/多腿/Contingent)")
-    print("  ✓ 恐慌环境识别")
-    print("  ✓ 长便宜/短昂贵判断")
-    print("  ✓ 多维度流动性评估")
-    print("  ✓ 多因子置信度计算")
-    print("  ✓ 极端风险识别")
-    print("  ✓ 配置化阈值管理")
-    print("\n启动地址: http://localhost:8668")
-    print("=" * 60 + "\n")
-    
     app.run(debug=True, host='0.0.0.0', port=8668)

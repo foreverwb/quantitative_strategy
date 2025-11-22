@@ -262,6 +262,7 @@ function getBadgeClass(confidence) {
     return 'badge-low';
 }
 
+// Gemini 增加对 is_squeeze 和 is_index 的判断
 function renderRecordsList() {
     var container = document.getElementById('recordsList');
     
@@ -273,37 +274,27 @@ function renderRecordsList() {
     var groupedByDate = {};
     allRecords.forEach(function(record) {
         var date = record.timestamp.split(' ')[0];
-        
-        if (currentFilter && date !== currentFilter) {
-            return;
-        }
-        
-        if (!groupedByDate[date]) {
-            groupedByDate[date] = [];
-        }
+        if (currentFilter && date !== currentFilter) return;
+        if (!groupedByDate[date]) groupedByDate[date] = [];
         groupedByDate[date].push(record);
     });
     
+    // ... (中间的筛选逻辑保持不变) ...
     if (!selectedQuadrants.includes('全部')) {
         for (var date in groupedByDate) {
             groupedByDate[date] = groupedByDate[date].filter(function(record) {
                 var quadrant = record.quadrant || '';
-                if (selectedQuadrants.includes(quadrant)) {
-                    return true;
-                }
+                if (selectedQuadrants.includes(quadrant)) return true;
                 var normalizedQuadrant = quadrant.replace(/—/g, '--');
-                var matchFound = selectedQuadrants.some(function(selected) {
+                return selectedQuadrants.some(function(selected) {
                     var normalizedSelected = selected.replace(/—/g, '--');
                     return normalizedQuadrant === normalizedSelected;
                 });
-                return matchFound;
             });
-            if (groupedByDate[date].length === 0) {
-                delete groupedByDate[date];
-            }
+            if (groupedByDate[date].length === 0) delete groupedByDate[date];
         }
     }
-    
+
     var sortedDates = Object.keys(groupedByDate).sort().reverse();
     
     if (sortedDates.length === 0) {
@@ -317,6 +308,7 @@ function renderRecordsList() {
         var count = records.length;
         var isExpanded = expandedDates.has(date);
         
+        // ... (日期头部的 HTML 生成保持不变) ...
         html += '<div class="date-group" data-date="' + date + '">';
         html += '<div class="date-header sticky" data-date="' + date + '">';
         html += '<div class="date-title">';
@@ -328,16 +320,11 @@ function renderRecordsList() {
         html += '<label class="switch">';
         var isChecked = earningsToggles[date] ? 'checked' : '';
         html += '<input type="checkbox" class="earnings-checkbox" data-date="' + date + '" ' + isChecked + '>';
-        html += '<span class="slider">';
-        html += '<span class="slider-text open">E-ON</span>';
-        html += '<span class="slider-text close">E-OFF</span>';
-        html += '</span>';
-        html += '</label>';
-        html += '</div>';
-        html += '<button class="icon-btn" data-date="' + date + '" data-action="redraw" title="重绘"><svg t="1761983191932" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="10970" width="300" height="300"><path d="M242.27 421.75v131.84c0 12.1 8.41 23.29 20.56 25.21a24.541 24.541 0 0 0 28.82-23.89v-71.86c0-7.72 6.38-13.97 14.23-13.97 7.88 0 14.26 6.25 14.26 13.97v42.32c0 12.1 8.38 23.27 20.53 25.21 7.11 1.26 14.4-0.67 19.96-5.27 5.55-4.6 8.81-11.41 8.89-18.62v-43.63c0-7.72 6.37-13.97 14.21-13.97 7.88 0 14.26 6.25 14.26 13.97v19.82c0 7.98 6.59 14.47 14.71 14.47 8.12 0 14.71-6.49 14.71-14.47v-15.1c0-10.32 8.53-18.69 19.03-18.69h10.35c10.49 0 19.02 8.36 19.02 18.69 0 13.39 11.05 24.25 24.7 24.25 13.64 0 24.68-10.86 24.68-24.25v-18.69h177.29v-71.88H242.27v24.54z m0 0" fill="#FFB74D" p-id="10971"></path><path d="M744.88 271.25h-17.81v50.82h17.81c14.28 0 25.88 11.43 25.88 25.42v137.3c0 14.02-11.59 25.42-25.88 25.42H607.15c-42.82 0-77.64 34.19-77.64 76.24v24.56h51.76v-24.56c0-14.02 11.6-25.45 25.88-25.45h137.73c42.79 0 77.63-34.17 77.63-76.22V347.5c0-42.06-34.84-76.25-77.63-76.25z m0 0" fill="#607D8B" p-id="10972"></path><path d="M522.26 611a8.09 8.09 0 0 0-8.17 8.03c0 4.45 3.67 8.02 8.17 8.02h66.25a8.09 8.09 0 0 0 8.17-8.02 8.09 8.09 0 0 0-8.17-8.03h-66.25z m0 0" fill="#E2543F" p-id="10973"></path><path d="M503.61 757.16c-5.2 31.29 19.45 59.73 51.75 59.73s56.93-28.46 51.71-59.73l-21.56-130.11H525.2l-21.59 130.11z m0 0" fill="#EB6C57" p-id="10974"></path><path d="M245.79 386.24c-1.25 0-2.33-0.55-3.52-0.72v11.64h460.29v-11.64c-1.22 0.14-2.3 0.72-3.55 0.72H245.79z m0 0" fill="#FB8C00" p-id="10975"></path><path d="M727.07 235.19c0-15.5-12.55-28.08-28.08-28.08h-453.2c-15.5 0-28.08 12.58-28.08 28.08v122.97c0 14.25 10.78 25.57 24.54 27.39 1.2 0.17 2.28 0.72 3.52 0.72h453.2c1.27 0 2.35-0.55 3.55-0.72 13.91-1.65 24.42-13.38 24.51-27.39V235.19h0.04z m0 0" fill="#FFB74D" p-id="10976"></path><path d="M201.49 275.02h16.22v43.32h-16.22z" fill="#FB8C00" p-id="10977"></path></svg></button>';
-        html += '<button class="icon-btn delete-all" data-date="' + date + '" data-action="delete" title="全部删除"><svg t="1761998227002" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15528" width="256" height="256"><path d="M512 311.893333m-178.773333 0a178.773333 178.773333 0 1 0 357.546666 0 178.773333 178.773333 0 1 0-357.546666 0Z" fill="#FF354A" p-id="15529"></path><path d="M746.666667 890.88H277.333333c-47.146667 0-85.333333-38.186667-85.333333-85.333333v-384c0-47.146667 38.186667-85.333333 85.333333-85.333334h469.333334c47.146667 0 85.333333 38.186667 85.333333 85.333334v384c0 47.146667-38.186667 85.333333-85.333333 85.333333z" fill="#2953FF" p-id="15530"></path><path d="M345.386667 708.48v-149.333333a53.333333 53.333333 0 0 1 106.666666 0v149.333333a53.333333 53.333333 0 0 1-106.666666 0zM571.946667 708.48v-149.333333a53.333333 53.333333 0 0 1 106.666666 0v149.333333a53.333333 53.333333 0 0 1-106.666666 0z" fill="#93A8FF" p-id="15531"></path><path d="M857.813333 397.226667H166.186667C133.333333 397.226667 106.666667 370.56 106.666667 337.706667v-8.746667c0-32.853333 26.666667-59.52 59.52-59.52H857.6c32.853333 0 59.52 26.666667 59.52 59.52v8.746667a59.221333 59.221333 0 0 1-59.306667 59.52z" fill="#FCCA1E" p-id="15532"></path></svg></button>';
-        html += '</div>';
-        html += '</div>';
+        html += '<span class="slider"><span class="slider-text open">E-ON</span><span class="slider-text close">E-OFF</span></span></label></div>';
+        // ... (SVG 按钮部分保持不变) ...
+        html += '<button class="icon-btn" data-date="' + date + '" data-action="redraw" title="重绘"><svg class="icon" viewBox="0 0 1024 1024" width="16" height="16"><path d="M242.27 421.75v131.84c0 12.1 8.41 23.29 20.56 25.21a24.541 24.541 0 0 0 28.82-23.89v-71.86c0-7.72 6.38-13.97 14.23-13.97 7.88 0 14.26 6.25 14.26 13.97v42.32c0 12.1 8.38 23.27 20.53 25.21 7.11 1.26 14.4-0.67 19.96-5.27 5.55-4.6 8.81-11.41 8.89-18.62v-43.63c0-7.72 6.37-13.97 14.21-13.97 7.88 0 14.26 6.25 14.26 13.97v19.82c0 7.98 6.59 14.47 14.71 14.47 8.12 0 14.71-6.49 14.71-14.47v-15.1c0-10.32 8.53-18.69 19.03-18.69h10.35c10.49 0 19.02 8.36 19.02 18.69 0 13.39 11.05 24.25 24.7 24.25 13.64 0 24.68-10.86 24.68-24.25v-18.69h177.29v-71.88H242.27v24.54z m0 0" fill="#FFB74D"></path><path d="M744.88 271.25h-17.81v50.82h17.81c14.28 0 25.88 11.43 25.88 25.42v137.3c0 14.02-11.59 25.42-25.88 25.42H607.15c-42.82 0-77.64 34.19-77.64 76.24v24.56h51.76v-24.56c0-14.02 11.6-25.45 25.88-25.45h137.73c42.79 0 77.63-34.17 77.63-76.22V347.5c0-42.06-34.84-76.25-77.63-76.25z m0 0" fill="#607D8B"></path><path d="M522.26 611a8.09 8.09 0 0 0-8.17 8.03c0 4.45 3.67 8.02 8.17 8.02h66.25a8.09 8.09 0 0 0 8.17-8.02 8.09 8.09 0 0 0-8.17-8.03h-66.25z m0 0" fill="#E2543F"></path><path d="M503.61 757.16c-5.2 31.29 19.45 59.73 51.75 59.73s56.93-28.46 51.71-59.73l-21.56-130.11H525.2l-21.59 130.11z m0 0" fill="#EB6C57"></path><path d="M245.79 386.24c-1.25 0-2.33-0.55-3.52-0.72v11.64h460.29v-11.64c-1.22 0.14-2.3 0.72-3.55 0.72H245.79z m0 0" fill="#FB8C00"></path><path d="M727.07 235.19c0-15.5-12.55-28.08-28.08-28.08h-453.2c-15.5 0-28.08 12.58-28.08 28.08v122.97c0 14.25 10.78 25.57 24.54 27.39 1.2 0.17 2.28 0.72 3.52 0.72h453.2c1.27 0 2.35-0.55 3.55-0.72 13.91-1.65 24.42-13.38 24.51-27.39V235.19h0.04z m0 0" fill="#FFB74D"></path><path d="M201.49 275.02h16.22v43.32h-16.22z" fill="#FB8C00"></path></svg></button>';
+        html += '<button class="icon-btn delete-all" data-date="' + date + '" data-action="delete" title="全部删除"><svg class="icon" viewBox="0 0 1024 1024" width="16" height="16"><path d="M512 311.893333m-178.773333 0a178.773333 178.773333 0 1 0 357.546666 0 178.773333 178.773333 0 1 0-357.546666 0Z" fill="#FF354A"></path><path d="M746.666667 890.88H277.333333c-47.146667 0-85.333333-38.186667-85.333333-85.333333v-384c0-47.146667 38.186667-85.333333 85.333333-85.333334h469.333334c47.146667 0 85.333333 38.186667 85.333333 85.333334v384c0 47.146667-38.186667 85.333333-85.333333 85.333333z" fill="#2953FF"></path><path d="M345.386667 708.48v-149.333333a53.333333 53.333333 0 0 1 106.666666 0v149.333333a53.333333 53.333333 0 0 1-106.666666 0zM571.946667 708.48v-149.333333a53.333333 53.333333 0 0 1 106.666666 0v149.333333a53.333333 53.333333 0 0 1-106.666666 0z" fill="#93A8FF"></path><path d="M857.813333 397.226667H166.186667C133.333333 397.226667 106.666667 370.56 106.666667 337.706667v-8.746667c0-32.853333 26.666667-59.52 59.52-59.52H857.6c32.853333 0 59.52 26.666667 59.52 59.52v8.746667a59.221333 59.221333 0 0 1-59.306667 59.52z" fill="#FCCA1E"></path></svg></button>';
+        html += '</div></div>';
         html += '<div class="date-content ' + (isExpanded ? 'expanded' : '') + '" id="content-' + date + '">';
         
         records.forEach(function(record) {
@@ -346,21 +333,27 @@ function renderRecordsList() {
             var showEarnings = daysToEarnings !== null && daysToEarnings > 0;
             var eventBadge = record.earnings_event_enabled ? '<span class="earnings-badge">E</span>' : '';
             
+            // --- 新增逻辑：判断挤压和指数标记 (防御性获取，防止字段不存在) ---
+            var isSqueeze = record.is_squeeze || false;
+            var isIndex = record.is_index || false;
+            var squeezeBadge = isSqueeze ? '<span class="badge-squeeze">🚀 Squeeze</span>' : '';
+            var typeBadge = isIndex ? '<span class="badge-type">Index</span>' : '';
+            // --------------------------------------------------------
+
             var dirScore = record.direction_score;
             var volScore = record.vol_score;
             var dirColor = dirScore > 0 ? '#00C853' : (dirScore < 0 ? '#FF3B30' : '#9E9E9E');
             var volColor = volScore > 0 ? '#00C853' : (volScore < 0 ? '#FF3B30' : '#9E9E9E');
             
-            // [更新] 获取流动性CSS类
             var confidenceBadge = getBadgeClass(record.confidence);
             var liquidityClass = getLiquidityClass(record.liquidity);
 
             html += '<div class="record-item" data-timestamp="' + record.timestamp + '" data-symbol="' + record.symbol + '">';
             html += '<div class="record-info">';
-            html += '<div class="record-symbol">' + record.symbol + eventBadge + '</div>';
+            // 在 Symbol 旁添加徽章
+            html += '<div class="record-symbol">' + record.symbol + eventBadge + typeBadge + squeezeBadge + '</div>';
             html += '<div class="record-meta">';
             html += '<span class="record-quadrant ' + quadrantClass + '">' + record.quadrant + '</span>';
-            // [更新] 应用流动性CSS类
             html += '<span class="record-confidence">置信度: <span class="badge ' + confidenceBadge + '">' + record.confidence + '</span></span>';
             html += '<span class="record-liquidity ' + liquidityClass + '">流动性: ' + record.liquidity + '</span>';
             
@@ -635,6 +628,7 @@ async function handleEarningsToggle(checkbox) {
     }
 }
 
+// Gemini 展示“Gamma 挤压”状态和“价-波相关性”
 function showDrawer(timestamp, symbol) {
     var record = allRecords.find(function(r) {
         return r.timestamp === timestamp && r.symbol === symbol;
@@ -643,61 +637,71 @@ function showDrawer(timestamp, symbol) {
     if (!record) return;
     
     var eventBadge = record.earnings_event_enabled ? ' <span class="earnings-badge">E</span>' : '';
-    document.getElementById('detailDrawerTitle').innerHTML = record.symbol + eventBadge + ' - 详细分析';
+    // 新增：Title 中的 Index 标记
+    var typeBadge = record.is_index ? ' <span class="badge-type">ETF</span>' : '';
+    document.getElementById('detailDrawerTitle').innerHTML = record.symbol + eventBadge + typeBadge + ' - 详细分析';
     
     var confidenceBadge = getBadgeClass(record.confidence);
     var quadrantClass = getQuadrantClass(record.quadrant);
     var daysToEarnings = record.derived_metrics.days_to_earnings;
     var showEarnings = daysToEarnings !== null && daysToEarnings > 0;
     
+    // 新增：高级指标数据 (假设后端提供了这些字段，若无则使用默认值)
+    var spotVolCorr = record.spot_vol_corr_score || 0;
+    var isSqueeze = record.is_squeeze || false;
+    var termStructure = record.term_structure_ratio || 'N/A';
+    
     var dirScore = record.direction_score;
     var volScore = record.vol_score;
     var dirColor = dirScore > 0 ? '#00C853' : (dirScore < 0 ? '#FF3B30' : '#9E9E9E');
     var volColor = volScore > 0 ? '#00C853' : (volScore < 0 ? '#FF3B30' : '#9E9E9E');
-
-    // [更新] 获取流动性CSS类
     var liquidityClass = getLiquidityClass(record.liquidity);
 
     var html = '<p class="timestamp">' + record.timestamp + '</p>';
     html += '<div class="detail-section"><h3>核心结论</h3>';
     html += '<div class="detail-row"><div class="detail-label">四象限定位:</div><div class="detail-value"><strong><span class="record-quadrant ' + quadrantClass + '">' + record.quadrant + '</span></strong></div></div>';
+    
+    // 新增：Gamma 挤压行
+    if (isSqueeze) {
+        html += '<div class="detail-row"><div class="detail-label">特殊状态:</div><div class="detail-value"><span class="badge-squeeze">🚀 GAMMA SQUEEZE DETECTED</span></div></div>';
+    }
+    
     html += '<div class="detail-row"><div class="detail-label">置信度:</div><div class="detail-value"><span class="badge ' + confidenceBadge + ' detail-value-highlight">' + record.confidence + '</span></div></div>';
-    // [更新] 应用流动性CSS类
     html += '<div class="detail-row"><div class="detail-label">流动性:</div><div class="detail-value"><span class="detail-value-liquidity ' + liquidityClass + '">' + record.liquidity + '</span></div></div>';
+    
     if (showEarnings) {
         html += '<div class="detail-row"><div class="detail-label">距离财报:</div><div class="detail-value">' + daysToEarnings + ' 天</div></div>';
-    }
-    if (record.earnings_event_enabled) {
-        html += '<div class="detail-row"><div class="detail-label">财报事件:</div><div class="detail-value">✅ 已开启</div></div>';
     }
     
     html += '<div class="detail-row"><div class="detail-label">方向评分:</div><div class="detail-value" style="color: ' + dirColor + '; font-weight: bold;">' + record.direction_score + ' (' + record.direction_bias + ')</div></div>';
     html += '<div class="detail-row"><div class="detail-label">波动评分:</div><div class="detail-value" style="color: ' + volColor + '; font-weight: bold;">' + record.vol_score + ' (' + record.vol_bias + ')</div></div></div>';
     
+    // 新增：高级量化指标 Section
+    html += '<div class="detail-section"><h3>高级量化指标</h3>';
+    html += '<div class="detail-row"><div class="detail-label">价-波相关性:</div><div class="detail-value">' + spotVolCorr.toFixed(2) + '</div></div>';
+    html += '</div>';
+
     html += '<div class="detail-section"><h3>衍生指标</h3>';
     html += '<div class="detail-row"><div class="detail-label">IVRV 比值:</div><div class="detail-value">' + record.derived_metrics.ivrv_ratio + '</div></div>';
     html += '<div class="detail-row"><div class="detail-label">IVRV 差值:</div><div class="detail-value">' + record.derived_metrics.ivrv_diff + '</div></div>';
-    html += '<div class="detail-row"><div class="detail-label">Regime 比值:</div><div class="detail-value">' + record.derived_metrics.regime_ratio + '</div></div>';
     html += '<div class="detail-row"><div class="detail-label">Call/Put 比值:</div><div class="detail-value">' + record.derived_metrics.cp_ratio + '</div></div>';
-    if (showEarnings) {
-        html += '<div class="detail-row"><div class="detail-label">距离财报天数:</div><div class="detail-value">' + daysToEarnings + ' 天</div></div>';
-    }
     html += '</div>';
     
     html += '<div class="detail-section"><h3>方向驱动因素</h3><ul class="factor-list">';
-    record.direction_factors.forEach(function(f) {
-        html += '<li>' + f + '</li>';
-    });
+    record.direction_factors.forEach(function(f) { html += '<li>' + f + '</li>'; });
     html += '</ul></div>';
     
     html += '<div class="detail-section"><h3>波动驱动因素</h3><ul class="factor-list">';
-    record.vol_factors.forEach(function(f) {
-        html += '<li>' + f + '</li>';
-    });
+    record.vol_factors.forEach(function(f) { html += '<li>' + f + '</li>'; });
     html += '</ul></div>';
     
     html += '<div class="detail-section"><h3>策略建议</h3>';
-    html += '<div class="detail-row"><div class="detail-value">' + record.strategy + '</div></div></div>';
+    var strategyText = record.strategy;
+    // 如果触发挤压，强化建议
+    if (isSqueeze) {
+        strategyText = "🔥 <strong>强烈建议：</strong>买入看涨期权 (Long Call) 利用 Gamma 爆发。<br>" + strategyText;
+    }
+    html += '<div class="detail-row"><div class="detail-value">' + strategyText + '</div></div></div>';
     
     html += '<div class="detail-section"><h3>风险提示</h3>';
     html += '<div class="detail-row"><div class="detail-value risk-text">' + record.risk + '</div></div></div>';
@@ -901,16 +905,29 @@ function drawQuadrant() {
         var color;
         var quadrant = record.quadrant || '';
         
-        if (quadrant.includes('偏多') && quadrant.includes('买波')) {
-            color = '#00C853'; // 偏多—买波
-        } else if (quadrant.includes('偏多') && quadrant.includes('卖波')) {
-            color = '#FF9500'; // 偏多—卖波
-        } else if (quadrant.includes('偏空') && quadrant.includes('买波')) {
-            color = '#34C759'; // 偏空—买波
-        } else if (quadrant.includes('偏空') && quadrant.includes('卖波')) {
-            color = '#007AFF'; // 偏空—卖波
+        if (quadrant.includes('偏多') && quadrant.includes('买波')) color = '#00C853';
+        else if (quadrant.includes('偏多') && quadrant.includes('卖波')) color = '#FF9500';
+        else if (quadrant.includes('偏空') && quadrant.includes('买波')) color = '#34C759';
+        else if (quadrant.includes('偏空') && quadrant.includes('卖波')) color = '#007AFF';
+        else color = '#9C27B0';
+
+        // --- 新增：Gamma 挤压的高亮绘制 ---
+        if (record.is_squeeze) {
+            // 绘制发光光晕
+            ctx.beginPath();
+            ctx.arc(x, y, symbolFontSize + 10, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(255, 59, 48, 0.2)'; // 红色半透明
+            ctx.fill();
+            
+            // 绘制红色边框
+            ctx.strokeStyle = '#FF3B30';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 文字颜色改为红色以示警示
+            ctx.fillStyle = '#D32F2F';
         } else {
-            color = '#9C27B0'; // 中性/待观察
+            ctx.fillStyle = color;
         }
         
         ctx.fillStyle = color;

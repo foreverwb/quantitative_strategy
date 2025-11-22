@@ -759,24 +759,55 @@ input:checked + .slider .slider-text.close {
 
 .record-quadrant {
     font-weight: 600;
-    min-width: 90px;
-    display: inline-block;
+    min-width: 96px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.5;
+    border: 1px solid transparent; /* 预留边框位置 */
 }
 
+/* 1. 偏多—买波 (Bull-Buy): 强劲上涨 */
+/* 语义：绿色，代表生长、动量 */
 .record-quadrant.quad-bull-buy {
-    color: #00C853; /* 偏多—买波 */
+    background-color: #f6ffed;
+    color: #52c41a;
+    border-color: #b7eb8f;
 }
+/* 2. 偏多—卖波 (Bull-Sell): 震荡上行/收租 */
+/* 语义：橙色，代表丰收、稳健、警示 */
 .record-quadrant.quad-bull-sell {
-    color: #FF9500; /* 偏多—卖波 */
+    background-color: #fff7e6;
+    color: #fa8c16;
+    border-color: #ffd591;
 }
+
+/* 3. 偏空—买波 (Bear-Buy): 恐慌下跌/崩盘 */
+/* 语义：红色，代表危险、高波动下行 */
+/* [重要修正] 原代码此处为绿色，现改为红色以符合直觉 */
 .record-quadrant.quad-bear-buy {
-    color: #34C759; /* 偏空—买波 */
+    background-color: #fff1f0;
+    color: #f5222d;
+    border-color: #ffa39e;
 }
+
+/* 4. 偏空—卖波 (Bear-Sell): 阴跌/冷却 */
+/* 语义：蓝色，代表冷静、缓慢下行 */
 .record-quadrant.quad-bear-sell {
-    color: #007AFF; /* 偏空—卖波 */
+    background-color: #e6f7ff;
+    color: #1890ff;
+    border-color: #91d5ff;
 }
+
+/* 5. 中性/待观察 */
+/* 语义：紫色或灰色，代表不确定 */
 .record-quadrant.quad-neutral {
-    color: #9C27B0; /* 中性/待观察 */
+    background-color: #f9f0ff;
+    color: #722ed1;
+    border-color: #d3adf7;
 }
 
 
@@ -1172,4 +1203,50 @@ textarea:focus {
 .drawer::-webkit-scrollbar-thumb:hover,
 .detail-drawer::-webkit-scrollbar-thumb:hover {
     background: #8c8c8c;
+}
+
+.badge-squeeze {
+    display: inline-flex;
+    align-items: center;
+    background-color: #ff4d4f; /* 鲜艳红 */
+    color: white;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin-left: 6px;
+    font-weight: 700;
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.7);
+    animation: pulse-red 2s infinite;
+    vertical-align: middle;
+    border: 1px solid #ff7875;
+}
+
+/* Index/ETF 类型标签 */
+.badge-type {
+    display: inline-flex;
+    align-items: center;
+    background-color: #13c2c2; /* 青色 */
+    color: white;
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 6px;
+    font-weight: 600;
+    vertical-align: middle;
+}
+
+/* 挤压动画关键帧 */
+@keyframes pulse-red {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 4px rgba(255, 77, 79, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 77, 79, 0);
+    }
 }
