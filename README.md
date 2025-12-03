@@ -14,16 +14,7 @@ quantitative_strategy
 ├─ swing_quant
 │  ├─ swing.md
 │  └─ swing_quant_workflow.yaml
-├─ volatility_analysis
-│  ├─ app.py
-│  ├─ requirements.txt
-│  ├─ static
-│  │  ├─ app.js
-│  │  ├─ favicon.ico
-│  │  └─ styles.css
-│  ├─ summary.md
-│  └─ templates
-│     └─ index.html
+├─ [volatility_analysis](https://github.com/foreverwb/volatility_analysis)
 └─ volatility_quant
    ├─ vol.md
    └─ vol_quant_workflow.yml
